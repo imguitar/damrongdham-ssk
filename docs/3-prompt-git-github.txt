@@ -1,0 +1,132 @@
+================================================================================
+  🚀 PROMPT สำหรับสร้าง Git Repo + Push ขึ้น GitHub
+================================================================================
+
+คำแนะนำ: คัดลอก Prompt ด้านล่างไปใช้ แล้วแก้ไขส่วนที่อยู่ใน [วงเล็บ]
+ให้ตรงกับโปรเจกต์ของคุณ
+
+================================================================================
+
+
+"ช่วยสร้าง Git repository และ push ขึ้น GitHub ให้หน่อย โดยมีรายละเอียดดังนี้:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ข้อมูลโปรเจกต์:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+- ชื่อ Repo: [ชื่อ-repo เช่น damrongdham-ssk]
+- Visibility: [Public หรือ Private]
+- คำอธิบาย Repo: [คำอธิบายสั้นๆ เช่น 'ระบบเว็บไซต์โรงเรียนดำรงธรรม ศรีสะเกษ']
+- โฟลเดอร์โปรเจกต์: [เช่น /Users/username/Documents/project/my-project]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+สิ่งที่ต้องการให้ทำ:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. ตรวจสอบว่ามี .gitignore ที่ครอบคลุมแล้ว (ต้องมี .env, node_modules, dist)
+
+2. สร้างไฟล์ README.md ที่สมบูรณ์ ประกอบด้วย:
+   - ชื่อโปรเจกต์ + คำอธิบาย
+   - Tech Stack ที่ใช้
+   - วิธีติดตั้ง (Prerequisites + ขั้นตอน clone + docker compose up)
+   - ตาราง Port Mapping / URL ที่เข้าถึงได้
+   - คำสั่ง Docker ที่ใช้บ่อย
+   - โครงสร้างโฟลเดอร์
+   - ข้อมูลผู้พัฒนา/ลิขสิทธิ์
+
+3. Init Git repo (ถ้ายังไม่ได้ init)
+
+4. สร้าง initial commit ที่มี commit message อธิบายชัดเจน
+
+5. ติดตั้ง GitHub CLI (gh) ถ้ายังไม่มี และ login
+
+6. สร้าง GitHub repo แบบ [Public/Private] ผ่าน gh CLI
+
+7. Push code ขึ้น GitHub
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ ข้อกำหนดสำคัญ:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+- ต้องตรวจสอบว่า .env ไม่ถูก commit (มี sensitive data)
+- README.md ต้องเขียนเป็นภาษาไทย (หรือ bilingual)
+- commit message ใช้ Conventional Commits หรือ Emoji format
+- ถ้า gh CLI ต้อง login จะมี browser popup ให้ authorize"
+
+
+================================================================================
+  📌 ตัวอย่าง Prompt ที่กรอกข้อมูลแล้ว (Damrongdham SSK)
+================================================================================
+
+"ช่วยสร้าง Git repo + push ขึ้น GitHub ให้โปรเจกต์ Damrongdham SSK:
+
+ข้อมูล:
+- ชื่อ Repo: damrongdham-ssk
+- Visibility: Public
+- คำอธิบาย: ระบบเว็บไซต์โรงเรียนดำรงธรรม ศรีสะเกษ (React + Express + MySQL)
+- โฟลเดอร์: /Users/supachai/Documents/project/damrongdham-ssk
+
+สิ่งที่ต้องทำ:
+1. ตรวจสอบ .gitignore
+2. สร้าง README.md ภาษาไทย
+3. Init git + commit
+4. ติดตั้ง gh CLI + login
+5. สร้าง public repo บน GitHub
+6. Push ขึ้น GitHub"
+
+
+================================================================================
+  📖 คำสั่งที่ใช้ (สำหรับทำเอง)
+================================================================================
+
+# ขั้นตอนที่ 1: เตรียม Git
+cd /path/to/your/project
+git init
+git add -A
+git status                    # ตรวจสอบว่า .env ไม่อยู่ในรายการ
+git commit -m "🎉 Initial commit: project description"
+
+# ขั้นตอนที่ 2: ติดตั้ง GitHub CLI (ถ้ายังไม่มี)
+brew install gh               # macOS
+# sudo apt install gh         # Ubuntu/Debian
+# winget install GitHub.cli   # Windows
+
+# ขั้นตอนที่ 3: Login GitHub CLI
+gh auth login                  # เลือก GitHub.com → HTTPS → Login with browser
+
+# ขั้นตอนที่ 4: สร้าง Repo บน GitHub + Push
+gh repo create [ชื่อ-repo] --public --source=. --remote=origin --push
+#                              --private  ← ถ้าต้องการเป็น private
+
+# หลังจากนี้ ทุกครั้งที่ต้องการ push:
+git add -A
+git commit -m "✨ feat: คำอธิบายการเปลี่ยนแปลง"
+git push origin main
+
+
+================================================================================
+  💡 เคล็ดลับเพิ่มเติม
+================================================================================
+
+1. ตรวจสอบว่า .env ไม่ถูก track ก่อน commit เสมอ:
+   git status | grep .env     # ถ้าไม่มีขึ้นมา = ปลอดภัย
+
+2. ถ้า push ไม่ได้ เพราะ Git ไม่รู้จัก user:
+   git config --global user.name "ชื่อ"
+   git config --global user.email "email@example.com"
+
+3. ถ้าต้องการเพิ่มคนอื่นเข้า repo:
+   gh repo edit --add-collaborator <username>
+
+4. Commit message ที่ดี ใช้ Emoji prefix:
+   🎉 = Initial commit
+   ✨ = New feature
+   🐛 = Bug fix
+   📝 = Documentation
+   🐳 = Docker related
+   🔧 = Configuration
+
+5. สร้าง .github/ directory สำหรับ:
+   - ISSUE_TEMPLATE/ = template สำหรับ bug report
+   - PULL_REQUEST_TEMPLATE.md = template สำหรับ PR
+   - workflows/ = GitHub Actions CI/CD (ในอนาคต)

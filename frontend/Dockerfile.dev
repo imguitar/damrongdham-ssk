@@ -1,0 +1,21 @@
+# Frontend Development Dockerfile
+# ใช้ Vite + React สำหรับการพัฒนาแบบ local พร้อม Hot Reloading
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+# คัดลอก package files ก่อนเพื่อใช้ Docker cache
+COPY package*.json ./
+
+# ติดตั้ง dependencies
+RUN npm install
+
+# คัดลอกโค้ดทั้งหมด (จะถูก override ด้วย bind mount ใน docker-compose)
+COPY . .
+
+# เปิดพอร์ต 5173 (Vite default)
+EXPOSE 5173
+
+# เริ่ม Vite dev server โดยเปิด host เพื่อให้เข้าถึงจากนอก container ได้
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

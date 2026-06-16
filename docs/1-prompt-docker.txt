@@ -1,0 +1,119 @@
+================================================================================
+  🐳 PROMPT สำหรับสร้าง Docker Development Environment
+================================================================================
+
+คำแนะนำ: คัดลอก Prompt ด้านล่างไปวางใน AI Chat ได้เลย
+ปรับแก้ส่วนที่อยู่ใน [วงเล็บ] ให้ตรงกับโปรเจกต์ของคุณ
+
+================================================================================
+
+
+"ช่วยสร้างไฟล์ตั้งค่า Docker สำหรับโปรเจกต์ Web App (Development Environment)
+ให้หน่อย โดยมี Tech Stack และเงื่อนไขดังนี้:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Service ที่ต้องการ:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Frontend: React + Vite (Port 5173, เปิดใช้งาน Hot Reload ด้วย polling)
+
+2. Backend: Node.js + Express (Port 5001, เปิดใช้งาน Hot Reload ด้วย nodemon,
+   ตั้งค่าให้เชื่อมต่อ MySQL)
+   ⚠️ หมายเหตุ: หลีกเลี่ยง Port 5000 เพราะ macOS ใช้สำหรับ AirPlay Receiver
+
+3. Database: MySQL 8.0 (Map port เครื่อง Host เป็น 3307:3306, สร้าง Persistent
+   Volume เก็บข้อมูล, ตั้งค่า healthcheck เพื่อให้ service อื่นรอจนพร้อม)
+
+4. DB Admin: phpMyAdmin (Map port เครื่อง Host เป็น 8081:80,
+   เชื่อมต่อกับ MySQL อัตโนมัติ)
+   ⚠️ หมายเหตุ: ถ้าเครื่องเป็น Apple Silicon (M1/M2/M3/M4) ต้องระบุ
+   platform: linux/amd64 ให้กับ phpMyAdmin ด้วย
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+เงื่อนไขเพิ่มเติม:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+- ให้ทุก Service อยู่ใน custom Docker bridge network เดียวกัน
+  (Backend และ phpMyAdmin คุยกับ DB ผ่านชื่อ service 'db' และพอร์ตภายใน 3306)
+
+- ใช้ Bind Mounts สำหรับ Frontend และ Backend เพื่อให้แก้โค้ดที่เครื่อง Local
+  แล้วอัปเดตทันที
+
+- ใช้ anonymous volume สำหรับ node_modules เพื่อป้องกัน host overwrite
+
+- กำหนด Environment Variables ไว้ในไฟล์ .env แยกต่างหาก
+  และอ้างอิงใน docker-compose.yml ด้วย ${VARIABLE:-default}
+
+- ไม่ต้องใส่ version: "3.8" ในไฟล์ docker-compose.yml
+  (Docker Compose เวอร์ชันใหม่ไม่ใช้แล้ว)
+
+- ตั้งค่า depends_on พร้อม condition: service_healthy สำหรับ service
+  ที่ต้องรอ MySQL พร้อมก่อน
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+สิ่งที่ต้องการให้สร้าง:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. โครงสร้างโฟลเดอร์ของโปรเจกต์ (Directory Structure)
+2. ไฟล์ .env สำหรับ environment variables
+3. ไฟล์ .gitignore (ต้องมี .env อยู่ในนี้)
+4. โค้ด docker-compose.yml
+5. โค้ด frontend/Dockerfile.dev
+6. โค้ด backend/Dockerfile.dev
+7. โค้ด Boilerplate เริ่มต้น:
+   - Frontend: React app ที่แสดง health check dashboard
+   - Backend: Express server พร้อม /api/health endpoint ที่ตรวจสอบ DB connection
+8. โค้ด db/init/01-init.sql สำหรับสร้างตารางเริ่มต้น (ใช้ utf8mb4)
+9. คำสั่ง Docker Compose ที่ใช้ Start, Stop, Rebuild และ Troubleshoot"
+
+
+================================================================================
+  📌 ตัวอย่าง Prompt ที่กรอกข้อมูลแล้ว (สำหรับโปรเจกต์ Damrongdham SSK)
+================================================================================
+
+"ช่วยสร้างไฟล์ตั้งค่า Docker สำหรับโปรเจกต์ Damrongdham SSK Web App
+(Development Environment) โดยมี Tech Stack ดังนี้:
+
+Service:
+1. Frontend: React + Vite (Port 5173)
+2. Backend: Node.js + Express (Port 5001)
+3. Database: MySQL 8.0 (Host 3307 → Container 3306)
+4. DB Admin: phpMyAdmin (Host 8081 → Container 80, platform: linux/amd64)
+
+เงื่อนไข:
+- ทุก service อยู่ใน network 'damrongdham-network'
+- ใช้ bind mounts + anonymous volume สำหรับ node_modules
+- Environment variables แยกไว้ในไฟล์ .env
+- MySQL ต้องมี healthcheck, service อื่นรอด้วย depends_on + condition
+- ไม่ใส่ version ใน docker-compose.yml
+
+สร้างให้ครบ: directory structure, .env, .gitignore, docker-compose.yml,
+Dockerfile.dev x2, boilerplate code, SQL init script, คำสั่ง Docker"
+
+
+================================================================================
+  ⚠️ บทเรียนจากปัญหาที่เจอจริง (Lessons Learned)
+================================================================================
+
+1. Port 5000 ชนกับ macOS AirPlay Receiver
+   - อาการ: "bind: address already in use" เมื่อ docker compose up
+   - แก้ไข: เปลี่ยนเป็น port 5001 (หรือ port อื่นที่ไม่ชน)
+   - ต้องแก้ทั้ง: docker-compose.yml, Dockerfile.dev, server.js, vite.config.js
+
+2. phpMyAdmin ไม่รองรับ Apple Silicon (ARM) โดยตรง
+   - อาการ: "platform does not match" warning, container อาจไม่ทำงาน
+   - แก้ไข: เพิ่ม platform: linux/amd64 ให้กับ phpMyAdmin service
+   - Docker Desktop จะใช้ Rosetta 2 emulation อัตโนมัติ
+
+3. version: "3.8" ล้าสมัย
+   - อาการ: "the attribute 'version' is obsolete" warning
+   - แก้ไข: ลบ version ออกจาก docker-compose.yml
+
+4. node_modules ใน Docker ต้องจัดการด้วย anonymous volume
+   - อาการ: npm packages หายหรือ architecture ไม่ตรง
+   - แก้ไข: ใช้ /app/node_modules เป็น anonymous volume ใน docker-compose.yml
+   - สำคัญ: เมื่อเพิ่ม npm package ใหม่ ต้อง rebuild container
+
+5. MySQL ต้องมี healthcheck + depends_on condition
+   - อาการ: Backend/phpMyAdmin เริ่มก่อน MySQL พร้อม → connection refused
+   - แก้ไข: ตั้ง healthcheck ด้วย mysqladmin ping + depends_on condition: service_healthy

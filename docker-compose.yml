@@ -1,0 +1,113 @@
+services:
+  # ============================================
+  # Frontend - React (Vite)
+  # ============================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: damrongdham-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules     # ป้องกัน node_modules ถูก overwrite จาก host
+    environment:
+      - CHOKIDAR_USEPOLLING=true   # รองรับ Hot Reload บน Docker
+      - WATCHPACK_POLLING=true
+    depends_on:
+      - backend
+    networks:
+      - damrongdham-network
+    restart: unless-stopped
+
+  # ============================================
+  # Backend - Node.js + Express
+  # ============================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: damrongdham-backend
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules     # ป้องกัน node_modules ถูก overwrite จาก host
+    environment:
+      - NODE_ENV=development
+      - PORT=5001
+      - DB_HOST=db               # ใช้ชื่อ service เป็น hostname
+      - DB_PORT=3306             # พอร์ตภายใน container (ไม่ใช่ 3307)
+      - DB_USER=${MYSQL_USER:-damrongdham_user}
+      - DB_PASSWORD=${MYSQL_PASSWORD:-damrongdham_pass}
+      - DB_NAME=${MYSQL_DATABASE:-damrongdham_db}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - damrongdham-network
+    restart: unless-stopped
+
+  # ============================================
+  # Database - MySQL 8.0
+  # ============================================
+  db:
+    image: mysql:8.0
+    container_name: damrongdham-db
+    ports:
+      - "3307:3306"              # map เป็น 3307 เพื่อหลีกเลี่ยงชนกับ MySQL บน host
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpassword123}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-damrongdham_db}
+      - MYSQL_USER=${MYSQL_USER:-damrongdham_user}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-damrongdham_pass}
+    volumes:
+      - mysql_data:/var/lib/mysql           # persistent volume
+      - ./db/init:/docker-entrypoint-initdb.d  # SQL scripts ที่รันตอน init
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword123}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - damrongdham-network
+    restart: unless-stopped
+
+  # ============================================
+  # Database Admin - phpMyAdmin
+  # ============================================
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    platform: linux/amd64
+    container_name: damrongdham-phpmyadmin
+    ports:
+      - "8081:80"                # map เป็น 8081 แทน 80
+    environment:
+      - PMA_HOST=db              # เชื่อมต่อกับ MySQL ผ่านชื่อ service
+      - PMA_PORT=3306            # ใช้พอร์ตภายใน container
+      - PMA_USER=root
+      - PMA_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpassword123}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - damrongdham-network
+    restart: unless-stopped
+
+# ============================================
+# Custom Bridge Network
+# ============================================
+networks:
+  damrongdham-network:
+    driver: bridge
+    name: damrongdham-network
+
+# ============================================
+# Persistent Volume สำหรับ MySQL
+# ============================================
+volumes:
+  mysql_data:
+    driver: local

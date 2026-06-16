@@ -1,0 +1,21 @@
+# Backend Development Dockerfile
+# ใช้ Node.js + Express พร้อม nodemon สำหรับ Hot Reloading
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+# คัดลอก package files ก่อนเพื่อใช้ Docker cache
+COPY package*.json ./
+
+# ติดตั้ง dependencies
+RUN npm install
+
+# คัดลอกโค้ดทั้งหมด (จะถูก override ด้วย bind mount ใน docker-compose)
+COPY . .
+
+# เปิดพอร์ต 5001
+EXPOSE 5001
+
+# ใช้ nodemon สำหรับ Hot Reloading ขณะพัฒนา
+CMD ["npx", "nodemon", "src/server.js"]

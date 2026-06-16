@@ -3,7 +3,7 @@
 -- ไฟล์นี้จะถูกรันอัตโนมัติเมื่อสร้าง MySQL container ครั้งแรก
 -- ============================================
 
-USE damrongdham_db;
+
 
 -- ตาราง users ตัวอย่าง
 CREATE TABLE IF NOT EXISTS users (

@@ -63,6 +63,13 @@ app.get('/api', (req, res) => {
   });
 });
 
+// Serve frontend static files (production)
+const path = require('path');
+app.use(express.static(path.join(__dirname, '../public')));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
 // ============================================
 // Start Server
 // ============================================

@@ -15,6 +15,9 @@ const complaintRouter = require('./routes/complaintRoutes');
 const masterDataRouter = require('./routes/masterDataRoutes');
 const publicRouter = require('./routes/publicRoutes');
 const citizenRouter = require('./routes/citizenRoutes');
+const assignmentRouter = require('./routes/assignmentRoutes');
+const agencyRouter = require('./routes/agencyRoutes');
+const userRouter = require('./routes/userRoutes');
 
 const app = express();
 
@@ -35,6 +38,9 @@ app.use('/api/complaints', complaintRouter);
 app.use('/api/master-data', masterDataRouter);
 app.use('/api/public', publicRouter);
 app.use('/api/citizen', citizenRouter);
+app.use('/api/assignments', assignmentRouter);
+app.use('/api/agencies', agencyRouter);
+app.use('/api/users', userRouter);
 
 // ============================================
 // Serve Frontend (Production)

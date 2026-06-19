@@ -2,6 +2,8 @@
 
 const complaintModel = require('../models/complaintModel');
 const anonymousRevealModel = require('../models/anonymousRevealModel');
+const agencyModel = require('../models/agencyModel');
+const { executeTransition, executeAssign } = require('../services/complaintService');
 const { writeAuditLog } = require('../middleware/auditLog');
 const { success, successList, error } = require('../utils/response');
 const { parsePagination, paginationMeta } = require('../utils/pagination');
@@ -189,4 +191,98 @@ const revealIdentity = async (req, res, next) => {
   }
 };
 
-module.exports = { list, getById, create, update, getTimeline, getUpdates, revealIdentity };
+// ── Status Workflow (T-01, T-03, T-09, T-10, T-11, T-12) ──────────────────────
+
+const handleServiceError = (err, res, next) => {
+  if (err.statusCode && err.statusCode < 500) {
+    return error(res, err.code || 'ERROR', err.message, err.statusCode);
+  }
+  return next(err);
+};
+
+// PATCH /:id/screen — T-01: NEW → SCREENING, T-12: RETURNED → SCREENING
+const screen = async (req, res, next) => {
+  try {
+    await executeTransition(req.params.id, 'screen', req.user.id, req.user.role);
+    writeAuditLog({ userId: req.user.id, action: 'SCREEN_COMPLAINT', resource: 'complaints', resourceId: req.params.id, ipAddress: req.ip, userAgent: req.get('user-agent') });
+    const complaint = await complaintModel.findById(req.params.id);
+    return success(res, { complaint });
+  } catch (err) {
+    return handleServiceError(err, res, next);
+  }
+};
+
+// PATCH /:id/reject — T-03: SCREENING → REJECTED
+const reject = async (req, res, next) => {
+  try {
+    const { rejection_reason } = req.body;
+    await executeTransition(req.params.id, 'reject', req.user.id, req.user.role, { rejectionReason: rejection_reason });
+    writeAuditLog({ userId: req.user.id, action: 'REJECT_COMPLAINT', resource: 'complaints', resourceId: req.params.id, details: { rejection_reason }, ipAddress: req.ip, userAgent: req.get('user-agent') });
+    const complaint = await complaintModel.findById(req.params.id);
+    return success(res, { complaint });
+  } catch (err) {
+    return handleServiceError(err, res, next);
+  }
+};
+
+// POST /:id/assign — T-02: SCREENING → ASSIGNED (creates assignment record)
+const assign = async (req, res, next) => {
+  try {
+    const { agency_id, note } = req.body;
+    if (!agency_id) return error(res, 'VALIDATION_ERROR', 'กรุณาระบุ agency_id', 400);
+
+    const agency = await agencyModel.findById(agency_id);
+    if (!agency || !agency.is_active) return error(res, 'VALIDATION_ERROR', 'ไม่พบหน่วยงาน หรือหน่วยงานไม่ active', 400);
+
+    const complaint = await complaintModel.findById(req.params.id);
+    if (!complaint) return error(res, 'NOT_FOUND', 'ไม่พบเรื่องร้องเรียน', 404);
+
+    const { to, dueDate, assignmentId } = await executeAssign(complaint, req.user.id, req.user.role, { agencyId: agency_id, note });
+
+    writeAuditLog({ userId: req.user.id, action: 'ASSIGN_COMPLAINT', resource: 'complaints', resourceId: complaint.id, details: { agency_id, due_date: dueDate, assignment_id: assignmentId }, ipAddress: req.ip, userAgent: req.get('user-agent') });
+
+    const updated = await complaintModel.findById(req.params.id);
+    return success(res, { complaint: updated, due_date: dueDate, assignment_id: assignmentId });
+  } catch (err) {
+    return handleServiceError(err, res, next);
+  }
+};
+
+// PATCH /:id/review — T-09: RESOLVED → REVIEWING
+const review = async (req, res, next) => {
+  try {
+    await executeTransition(req.params.id, 'review', req.user.id, req.user.role);
+    writeAuditLog({ userId: req.user.id, action: 'REVIEW_COMPLAINT', resource: 'complaints', resourceId: req.params.id, ipAddress: req.ip, userAgent: req.get('user-agent') });
+    const complaint = await complaintModel.findById(req.params.id);
+    return success(res, { complaint });
+  } catch (err) {
+    return handleServiceError(err, res, next);
+  }
+};
+
+// PATCH /:id/close — T-10: REVIEWING → CLOSED
+const close = async (req, res, next) => {
+  try {
+    const { closed_summary } = req.body;
+    await executeTransition(req.params.id, 'close', req.user.id, req.user.role, { closedSummary: closed_summary });
+    writeAuditLog({ userId: req.user.id, action: 'CLOSE_COMPLAINT', resource: 'complaints', resourceId: req.params.id, details: { closed_summary }, ipAddress: req.ip, userAgent: req.get('user-agent') });
+    const complaint = await complaintModel.findById(req.params.id);
+    return success(res, { complaint });
+  } catch (err) {
+    return handleServiceError(err, res, next);
+  }
+};
+
+// PATCH /:id/send-back — T-11: REVIEWING → IN_PROGRESS
+const sendBack = async (req, res, next) => {
+  try {
+    await executeTransition(req.params.id, 'sendBack', req.user.id, req.user.role);
+    writeAuditLog({ userId: req.user.id, action: 'SENDBACK_COMPLAINT', resource: 'complaints', resourceId: req.params.id, ipAddress: req.ip, userAgent: req.get('user-agent') });
+    const complaint = await complaintModel.findById(req.params.id);
+    return success(res, { complaint });
+  } catch (err) {
+    return handleServiceError(err, res, next);
+  }
+};
+
+module.exports = { list, getById, create, update, getTimeline, getUpdates, revealIdentity, screen, reject, assign, review, close, sendBack };

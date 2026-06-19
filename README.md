@@ -24,7 +24,7 @@
 
 ```bash
 # 1. Clone โปรเจกต์
-git clone https://github.com/<username>/damrongdham-ssk.git
+git clone https://github.com/imguitar/damrongdham-ssk.git
 cd damrongdham-ssk
 
 # 2. สร้างไฟล์ .env
@@ -132,6 +132,6 @@ damrongdham-ssk/
 |:-----:|------|:-----:|
 | 0 | Requirement & Architecture | ✅ |
 | 1 | Project Setup | ✅ |
-| 2 | Database Schema & Seed Data | ⏳ |
-| 3 | Backend Core & MySQL Connection | ⏳ |
+| 2 | Database Schema & Seed Data | ✅ |
+| 3 | Backend Core & MySQL Connection | ✅ |
 | 4–15 | ... | ⏳ |

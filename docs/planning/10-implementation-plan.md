@@ -280,11 +280,11 @@ feat: complete phase 2 database schema and seed data
 4. ตรวจ Error Handler: เข้า Route ที่ไม่มี → `{ "success": false, "error": { "code": "NOT_FOUND" } }`
 
 ### Acceptance Criteria
-- [ ] Backend เชื่อมต่อ MySQL ผ่าน Connection Pool
-- [ ] `/api/health` แสดงสถานะ Database
-- [ ] CORS อนุญาต Frontend origin
-- [ ] Error Handler จับ Error ได้ ไม่ crash
-- [ ] Standard Response format ถูกต้อง
+- [x] Backend เชื่อมต่อ MySQL ผ่าน Connection Pool
+- [x] `/api/health` แสดงสถานะ Database
+- [x] CORS อนุญาต Frontend origin
+- [x] Error Handler จับ Error ได้ ไม่ crash
+- [x] Standard Response format ถูกต้อง
 
 ### Git Commit
 ```

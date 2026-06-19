@@ -1,0 +1,47 @@
+
+# Prompt 0.5: กำหนด Git Workflow และ Commit Rules
+
+คุณคือ Senior Software Engineer และ Git Workflow Consultant
+
+ฉันต้องการกำหนด Git Workflow สำหรับโปรเจกต์ Web Application ที่พัฒนาด้วย AI
+
+ตอนนี้อยู่ในช่วงที่ 0: เตรียมกติกาและบริบท
+
+เป้าหมาย:
+ต้องการให้การทำงานกับ AI มีจุดย้อนกลับชัดเจน โดยเฉพาะหลังจบแต่ละ Planning Step และหลังจบแต่ละ Implementation Phase
+
+งานที่ต้องการ:
+ช่วยออกแบบ Git Workflow โดยมีหัวข้อ:
+
+1. Branch Strategy
+2. Commit Convention
+3. Commit Message Format
+4. When to Commit
+5. Commit per Planning Step
+6. Commit per Implementation Phase
+7. Commit after Bug Fix
+8. Rollback Strategy
+9. Files that Should Be Committed
+10. Files that Should Not Be Committed
+11. Suggested `.gitignore` Rules
+12. Example Commit Messages
+
+ตัวอย่าง commit message ที่ต้องการ:
+
+* `docs: add tech stack decision`
+* `docs: add AI working rules`
+* `docs: add system overview`
+* `docs: add project context`
+* `feat: complete phase 1 project setup`
+* `fix: resolve backend database connection`
+* `chore: update docker compose configuration`
+
+ให้จัดทำผลลัพธ์เป็น Markdown สำหรับบันทึกเป็นไฟล์:
+
+`docs/planning/00-git-workflow.md`
+
+เงื่อนไข:
+
+* ให้แสดงเฉพาะเนื้อหา Markdown
+* ห้ามเขียน Code Implementation
+* สามารถแนะนำตัวอย่าง `.gitignore` เบื้องต้นได้ แต่ไม่ต้องสร้างไฟล์จริง

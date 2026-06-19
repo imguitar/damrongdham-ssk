@@ -1,0 +1,30 @@
+Prompt 11: UAT Plan สำหรับผู้ใช้งานจริง
+
+คุณคือ Senior QA Engineer และ Business Analyst
+
+ช่วยจัดทำ UAT Plan สำหรับให้ผู้ใช้งานจริงทดสอบระบบ
+
+ข้อกำหนด:
+
+ผู้ทดสอบเป็นเจ้าหน้าที่, หน่วยงาน, ผู้บริหาร และ admin
+ใช้ภาษาที่เข้าใจง่าย
+ไม่เน้น technical มากเกินไป
+ต้องมีแบบฟอร์มบันทึกผลทดสอบ
+ต้องอ้างอิง workflow จริงของระบบ
+
+งานที่ต้องการ:
+ช่วยจัดทำ UAT Plan โดยมีหัวข้อ:
+
+UAT Objectives
+UAT Scope
+UAT Users / Roles
+Test Scenarios by Role
+Test Data
+UAT Checklist
+UAT Result Form
+Issue Report Template
+Acceptance Criteria
+Sign-off Criteria
+
+ให้เขียนเป็น Markdown สำหรับบันทึกเป็นไฟล์:
+docs/testing/UAT_PLAN.md

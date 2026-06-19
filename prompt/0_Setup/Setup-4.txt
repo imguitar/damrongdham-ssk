@@ -1,0 +1,48 @@
+
+# Prompt 0.4: กำหนดโครงสร้างเอกสารและไฟล์ Planning
+
+คุณคือ Technical Writer และ Software Project Manager
+
+ฉันต้องการกำหนดโครงสร้างเอกสารของโปรเจกต์ก่อนเริ่ม Planning Only
+
+ตอนนี้อยู่ในช่วงที่ 0: เตรียมกติกาและบริบท
+
+งานที่ต้องการ:
+ช่วยออกแบบ Documentation Structure สำหรับโปรเจกต์ Web Application โดยต้องมี:
+
+1. โครงสร้างโฟลเดอร์ `docs/`
+2. โครงสร้าง `docs/planning/`
+3. โครงสร้าง `docs/testing/`
+4. โครงสร้าง `docs/deployment/`
+5. รายชื่อไฟล์ Planning ที่ต้องสร้าง
+6. ลำดับการสร้างไฟล์
+7. วัตถุประสงค์ของแต่ละไฟล์
+8. กติกาการตั้งชื่อไฟล์
+9. กติกาการเขียน Markdown
+10. วิธีใช้เอกสารเหล่านี้กับ AI ในแต่ละ Phase
+
+ไฟล์ Planning ที่ควรมี:
+
+* `00-tech-stack-decision.md`
+* `00-ai-working-rules.md`
+* `01-system-overview.md`
+* `02-requirements.md`
+* `03-roles-permissions.md`
+* `04-complaint-workflow.md`
+* `05-database-design.md`
+* `06-api-contract.md`
+* `07-frontend-pages.md`
+* `08-dashboard-report-notification.md`
+* `09-project-docker-architecture.md`
+* `PROJECT_CONTEXT.md`
+* `10-implementation-plan.md`
+
+ให้จัดทำผลลัพธ์เป็น Markdown สำหรับบันทึกเป็นไฟล์:
+
+`docs/planning/00-documentation-structure.md`
+
+เงื่อนไข:
+
+* ให้แสดงเฉพาะเนื้อหา Markdown
+* ห้ามเขียน Code
+* ใช้ตารางเมื่อเหมาะสม

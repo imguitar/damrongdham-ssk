@@ -1,0 +1,48 @@
+
+อ้างอิงจากเอกสาร Planning ก่อนหน้า:
+
+1. System Overview
+   [docs/planning/01-system-overview.md]
+
+2. Requirements
+   [docs/planning/02-requirements.md]
+
+3. Complaint Workflow
+   [docs/planning/04-complaint-workflow.md]
+
+4. Database Design Overview
+   [docs/planning/05-database-design.md]
+
+5. API Contract Overview
+   [docs/planning/06-api-contract.md]
+
+6. Frontend Page Structure
+   [docs/planning/07-frontend-pages.md]
+
+ช่วยออกแบบ Dashboard, Report และ Notification สำหรับระบบร้องเรียนศูนย์ดำรงธรรม
+
+ยังไม่ต้องเขียน code
+
+Dashboard ต้องตอบคำถามผู้บริหาร เช่น:
+1. มีเรื่องร้องเรียนทั้งหมดกี่เรื่อง
+2. เรื่องใหม่วันนี้กี่เรื่อง
+3. เรื่องอยู่ระหว่างดำเนินการกี่เรื่อง
+4. เรื่องเกินกำหนดกี่เรื่อง
+5. หน่วยงานใดมีเรื่องค้างมากที่สุด
+6. ประเภทเรื่องใดพบมากที่สุด
+7. พื้นที่ใดมีเรื่องร้องเรียนมากที่สุด
+8. แนวโน้มรายเดือนเป็นอย่างไร
+
+ให้แสดงผลเป็น:
+- Dashboard Cards
+- Charts
+- Tables
+- Filters
+- Report Export
+- Notification Rules
+- SLA Alert Rules
+- ตัวอย่างข้อมูลที่ใช้คำนวณแต่ละตัวชี้วัด
+
+เมื่อวิเคราะห์เสร็จแล้ว ให้จัดทำผลลัพธ์เป็นเอกสาร Markdown สำหรับบันทึกเป็นไฟล์:
+
+`docs/planning/08-dashboard-report-notification.md`

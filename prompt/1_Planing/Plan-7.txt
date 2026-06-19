@@ -1,0 +1,48 @@
+จาก Requirement, Role, Workflow และ API Overview
+
+อ้างอิงจากเอกสาร Planning ก่อนหน้า:
+
+1. System Overview
+   [docs/planning/01-system-overview.md]
+
+2. Requirements
+   [docs/planning/02-requirements.md]
+
+3. Roles and Permissions
+   [docs/planning/03-roles-permissions.md]
+
+4. Complaint Workflow
+   [docs/planning/04-complaint-workflow.md]
+
+5. API Contract Overview
+   [docs/planning/06-api-contract.md]
+   
+ช่วยออกแบบ Frontend Page Structure สำหรับระบบร้องเรียนศูนย์ดำรงธรรม
+
+ใช้ Frontend:
+- React + Vite
+- MUI
+- React Router
+
+ยังไม่ต้องเขียน code
+
+ให้แสดงเป็น:
+1. รายชื่อหน้าจอทั้งหมด
+2. URL path ของแต่ละหน้า
+3. Role ที่เข้าถึงได้
+4. ข้อมูลที่แสดงในแต่ละหน้า
+5. ปุ่มหรือ action สำคัญ
+6. ตารางหรือฟอร์มที่ต้องมี
+7. ความเชื่อมโยงกับ API
+8. Layout หลัก เช่น Sidebar, Topbar, Dashboard Cards
+
+ให้แยกหน้าจอตามกลุ่มผู้ใช้:
+- เจ้าหน้าที่ศูนย์ดำรงธรรม
+- หน่วยงานที่รับผิดชอบ
+- ผู้บริหาร
+- Admin
+- ประชาชน
+
+เมื่อวิเคราะห์เสร็จแล้ว ให้จัดทำผลลัพธ์เป็นเอกสาร Markdown สำหรับบันทึกเป็นไฟล์:
+
+`docs/planning/07-frontend-pages.md`

@@ -1,0 +1,51 @@
+Prompt 2: สร้าง Testing Plan
+
+คุณคือ Senior QA Engineer
+
+ช่วยจัดทำ Testing Plan สำหรับ Web Application นี้
+
+ข้อกำหนด:
+
+ห้ามเขียน code
+ให้จัดทำแผนทดสอบก่อน
+ต้องครอบคลุม frontend, backend, database, API, docker และ user workflow
+ต้องอ้างอิงจาก Requirement และ Acceptance Criteria เดิม
+
+เอกสารอ้างอิง:
+
+docs/planning/02-requirements.md
+docs/planning/04-complaint-workflow.md
+docs/planning/06-api-contract.md
+docs/planning/07-frontend-pages.md
+docs/planning/10-implementation-plan.md
+
+งานที่ต้องการ:
+ช่วยสร้าง Testing Plan โดยมีหัวข้อ:
+
+Testing Objectives
+Scope of Testing
+Test Environment
+Test Data
+Functional Test Cases
+API Test Cases
+Authentication and Authorization Test Cases
+Role-based Access Test Cases
+Database Test Cases
+Frontend UI Test Cases
+Workflow Test Cases
+Dashboard and Report Test Cases
+Docker Integration Test Cases
+Security Test Cases เบื้องต้น
+Acceptance Criteria
+Test Result Template
+
+ให้แสดง Test Case เป็นตาราง:
+
+Test Case ID
+Module
+Scenario
+Preconditions
+Test Steps
+Expected Result
+Priority
+Status

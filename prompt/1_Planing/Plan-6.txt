@@ -1,0 +1,51 @@
+จาก Database Design Overview และ Workflow ของระบบ
+
+อ้างอิงจากเอกสาร Planning ก่อนหน้า:
+
+1. System Overview
+   [จาก docs/planning/01-system-overview.md]
+
+2. Requirements
+   [จาก docs/planning/02-requirements.md]
+
+3. Roles and Permissions
+   [จาก docs/planning/03-roles-permissions.md]
+
+4. Complaint Workflow
+   [จาก docs/planning/04-complaint-workflow.md]
+
+5. Database Design Overview
+   [จาก docs/planning/05-database-design.md]
+
+ช่วยออกแบบ REST API Contract เบื้องต้น สำหรับ Backend Node.js + Express
+
+ยังไม่ต้องเขียน code
+
+ให้แสดงเป็นตาราง:
+- Module
+- Method
+- Endpoint
+- Description
+- Request Body สรุป
+- Response สรุป
+- Authentication Required
+- Role ที่ใช้งานได้
+- หมายเหตุ
+
+Module ที่ต้องมี:
+1. Auth
+2. Users
+3. Agencies
+4. Complaint Categories
+5. Complaints
+6. Complaint Assignment
+7. Complaint Updates
+8. Attachments
+9. Notifications
+10. Dashboard
+11. Reports
+12. Audit Logs
+
+เมื่อวิเคราะห์เสร็จแล้ว ให้จัดทำผลลัพธ์เป็นเอกสาร Markdown สำหรับบันทึกเป็นไฟล์:
+
+`docs/planning/06-api-contract.md`

@@ -1,0 +1,60 @@
+Prompt 7: เตรียม Production Deployment Plan
+
+คุณคือ Senior DevOps Engineer และ Deployment Architect
+
+ช่วยจัดทำ Production Deployment Plan สำหรับระบบนี้
+
+ข้อกำหนด:
+
+ระบบรองรับ Deploy 2 targets โดยใช้ "image แอปเดียวกัน" จาก root Dockerfile
+(multi-stage: Stage 1 build frontend → dist/ ; Stage 2 backend node:20-alpine serve ./public + /api ที่ :5001):
+
+  Target A — Railway (Primary):
+    - build จาก Dockerfile + railway.toml (healthcheck = /api/health)
+    - MySQL = Railway plugin / external (เชื่อมผ่าน env vars)
+    - SSL/Domain = Railway จัดการอัตโนมัติ
+    - ⚠️ filesystem ephemeral → uploads/ ต้องใช้ Railway Volume หรือ Object Storage
+
+  Target B — On-premise / Ubuntu (Alternative):
+    - docker-compose.prod.yml รัน app (image เดียวกัน) + db (MySQL container) + nginx
+    - nginx/default.conf = SSL termination + reverse proxy → app:5001 (client_max_body_size 10M)
+    - SSL = ตั้งเอง (Let's Encrypt/Certbot, cert วางที่ nginx/ssl/)
+    - uploads/ = Docker volume app_uploads (ถาวรบนดิสก์เครื่อง)
+    - env จาก .env.production
+
+ทั้งสอง target ต้องมี: backup database, log monitoring เบื้องต้น, rollback plan
+
+ข้อมูลระบบ:
+
+Frontend: React 18 + Vite 5 (build เป็น static, serve โดย backend)
+Backend: Node.js 20 LTS + Express 4 (เป็นทั้ง API และ static server)
+Database: MySQL 8
+Core artifact: root Dockerfile (ใช้ทั้ง 2 target)
+
+งานที่ต้องการ:
+ช่วยจัดทำ Production Deployment Plan ที่ครอบคลุม "ทั้งสอง target" โดยแยกหัวข้อชัดเจน:
+
+ส่วนรวม (Shared):
+- Build artifact (Dockerfile multi-stage)
+- Environment Variables for Production (DB_*, JWT_SECRET, NODE_ENV ฯลฯ)
+- Database Init / Migration Plan (schema + seed บน prod DB)
+- Backup Plan (mysqldump)
+- Smoke Test After Deploy (/, /api/health, login, workflow)
+
+Target A — Railway:
+- Railway Project Setup (สร้าง project, เชื่อม GitHub repo)
+- MySQL Provisioning (plugin / external)
+- Persistent Storage (Railway Volume สำหรับ uploads/)
+- SSL / Custom Domain (ผ่าน Railway)
+- Deploy (push → auto-deploy), Log & Health (Railway), Rollback (previous deployment)
+
+Target B — On-premise / Ubuntu:
+- Server Requirements + Install Docker/Compose
+- docker-compose.prod.yml + nginx/default.conf (อธิบายแต่ละ service)
+- SSL Setup (Certbot/Let's Encrypt → nginx/ssl/)
+- Persistent Storage (volume app_uploads, mysql_data_prod)
+- Deploy/Update/Restart commands, Log Monitoring, Rollback
+
+แนะนำเลือก target หลักให้เหมาะกับข้อกำหนดหน่วยงาน (เช่น ถ้าราชการบังคับเก็บข้อมูลใน server เอง → On-premise)
+
+ให้ตอบเป็นขั้นตอนที่ทำตามได้จริง

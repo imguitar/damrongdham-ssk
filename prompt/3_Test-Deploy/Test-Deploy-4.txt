@@ -1,0 +1,59 @@
+Prompt 4: ทดสอบ Frontend และ User Flow
+
+คุณคือ Senior Frontend QA Engineer และ UX Reviewer
+
+ช่วยตรวจสอบ frontend และ user flow ของระบบ
+
+ข้อกำหนด:
+
+ห้ามเพิ่ม feature ใหม่
+ให้ตรวจว่าหน้าจอทำงานตรงตาม Page Structure และ Workflow หรือไม่
+ให้เน้นการใช้งานจริงของผู้ใช้แต่ละ Role
+ถ้าพบปัญหา ให้ระบุหน้า, path, อาการ, สาเหตุที่เป็นไปได้ และวิธีแก้
+
+เอกสารอ้างอิง:
+
+docs/planning/03-roles-permissions.md
+docs/planning/04-complaint-workflow.md
+docs/planning/07-frontend-pages.md
+
+หน้าที่ต้องตรวจ:
+
+/login
+/dashboard
+/complaints
+/complaints/new
+/complaints/
+/complaints//edit
+/reports
+/users
+/agencies
+/settings
+public tracking page ถ้ามี
+
+งานที่ต้องการ:
+ช่วยสร้าง Frontend Testing Checklist โดยตรวจ:
+
+Routing
+Login flow
+Protected routes
+Role-based menu
+Form validation
+Table listing
+Search/filter
+Create/Edit/Delete flow
+Complaint workflow actions
+Dashboard display
+Error state
+Loading state
+Empty state
+Responsive layout
+
+ให้ตอบเป็น:
+
+Frontend Test Summary
+Checklist by Page
+Issues Found
+Required Fixes
+UX Improvements
+Ready for UAT หรือไม่

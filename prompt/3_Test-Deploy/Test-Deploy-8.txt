@@ -1,0 +1,50 @@
+Prompt 8: สร้างคู่มือ Deploy
+
+คุณคือ Technical Writer และ DevOps Engineer
+
+ช่วยเขียนเอกสารคู่มือ Deploy สำหรับระบบนี้
+
+ข้อกำหนด:
+
+เขียนเป็น Markdown
+ใช้ path: docs/deployment/DEPLOYMENT.md
+ครอบคลุม "ทั้งสอง deployment targets" (ใช้ root Dockerfile/image เดียวกัน):
+  - Target A: Railway (PaaS) — Primary
+  - Target B: On-premise / Ubuntu Server (docker-compose.prod.yml + Nginx) — Alternative
+ใช้คำสั่ง/ขั้นตอนที่ชัดเจน
+ระบุจุดที่ต้องเปลี่ยนค่าเอง เช่น domain, password, database name, JWT_SECRET
+ห้ามใส่ secret จริง
+
+เนื้อหาที่ต้องมี:
+
+A. ส่วนรวม (Shared)
+- Overview (single-container model: backend serve frontend dist + /api; ใช้ได้ทั้ง 2 target)
+- Prerequisites (Git/GitHub; เลือก target)
+- Project Files (Dockerfile, railway.toml, docker-compose.prod.yml, nginx/default.conf, .env.production.example)
+- Environment Variables (DB_*, JWT_SECRET, NODE_ENV, ฯลฯ)
+- Database Init / Migration (schema + seed บน prod DB)
+- Smoke Test (/, /api/health, login, workflow หลัก)
+- Backup and Restore (mysqldump)
+
+B. Target A — Railway
+- Create Railway Project & Link GitHub Repo
+- Provision MySQL (plugin / external)
+- Set Env Vars (Railway Dashboard)
+- Deploy (push → auto-build), Persistent Volume สำหรับ uploads/
+- Custom Domain & SSL (Railway auto)
+- View Logs / Redeploy / Rollback (previous deployment)
+
+C. Target B — On-premise / Ubuntu
+- Server Requirements + Install Docker & Docker Compose
+- Clone Project + Configure .env.production
+- docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+- Setup Nginx (nginx/default.conf) + SSL (Certbot/Let's Encrypt → nginx/ssl/)
+- Verify Services, View Logs (docker compose logs), Restart, Update New Version, Rollback
+- Volumes: app_uploads (ไฟล์แนบ), mysql_data_prod (DB)
+
+D. Troubleshooting (ทั้งสอง target)
+
+ให้แสดงผลเป็น Markdown พร้อมบันทึกเป็นไฟล์:
+docs/deployment/DEPLOYMENT.md
+
+(หมายเหตุ: Dev ใช้ docker-compose.yml ตามปกติ)

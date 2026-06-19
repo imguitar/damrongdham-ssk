@@ -1,0 +1,8 @@
+1. ใช้ Prompt A เพื่อเริ่ม Phase
+2. เอา code ไปวางในโปรเจกต์
+3. รันระบบ
+4. ถ้ามี error ใช้ Prompt C
+5. เมื่อรันได้ ใช้ Prompt B ตรวจ Phase
+6. ถ้าผ่าน ใช้ Prompt D สรุป Phase
+7. Commit
+8. ใช้ Prompt E เพื่อเริ่ม Phase ถัดไป

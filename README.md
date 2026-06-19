@@ -1,25 +1,26 @@
-# 🏫 Damrongdham SSK
+# ระบบร้องเรียนศูนย์ดำรงธรรมจังหวัดศรีสะเกษ (DCMS)
 
-ระบบเว็บแอปพลิเคชันโรงเรียนดำรงธรรม ศรีสะเกษ — พัฒนาด้วย React + Express + MySQL บน Docker
+ระบบรับเรื่องร้องเรียน ติดตาม และรายงานผลของศูนย์ดำรงธรรมจังหวัดศรีสะเกษ
+พัฒนาด้วย React + Express + MySQL บน Docker
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-| Layer        | เทคโนโลยี                         |
-|--------------|------------------------------------|
-| Frontend     | React 18 + Vite 5                  |
-| Backend      | Node.js 20 + Express 4             |
-| Database     | MySQL 8.0                          |
-| DB Admin     | phpMyAdmin                         |
-| Container    | Docker Compose                     |
-| IDE          | Antigravity IDE (SKILL.md)         |
+| Layer | เทคโนโลยี |
+|-------|-----------|
+| Frontend | React 18 + Vite 5 + MUI 5 + React Router 6 |
+| Backend | Node.js 20 LTS + Express 4 |
+| Database | MySQL 8.0 (utf8mb4) |
+| DB Admin | phpMyAdmin |
+| Container | Docker Compose |
 
-## 📋 Prerequisites
+## Prerequisites
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (รวม Docker Compose)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (รวม Docker Compose v2)
 - [Git](https://git-scm.com/)
-- *(ไม่ต้องติดตั้ง Node.js หรือ MySQL บนเครื่อง — ทุกอย่างอยู่ใน Docker)*
 
-## 🚀 เริ่มต้นใช้งาน
+> ไม่ต้องติดตั้ง Node.js หรือ MySQL บนเครื่อง — ทุกอย่างอยู่ใน Docker
+
+## เริ่มต้นใช้งาน
 
 ```bash
 # 1. Clone โปรเจกต์
@@ -28,27 +29,26 @@ cd damrongdham-ssk
 
 # 2. สร้างไฟล์ .env
 cp .env.example .env
-# (แก้ไขค่า password ตามต้องการ)
+# แก้ไขค่า password ใน .env ตามต้องการ
 
-# 3. เริ่มทุก service
-docker compose up --build
+# 3. Build และเริ่ม services
+docker compose up -d --build
 
-# 4. เปิดเบราว์เซอร์
-# Frontend:  http://localhost:5173
-# Backend:   http://localhost:5001/api
-# phpMyAdmin: http://localhost:8081
+# 4. ตรวจสอบสถานะ
+docker compose ps
 ```
 
-## 🌐 Port Mapping
+## Port Mapping (Development)
 
-| Service       | URL                           | Host Port | Container Port |
-|---------------|-------------------------------|----------:|---------------:|
-| **Frontend**  | http://localhost:5173          |    `5173` |         `5173` |
-| **Backend**   | http://localhost:5001/api      |    `5001` |         `5001` |
-| **MySQL**     | `mysql -h 127.0.0.1 -P 3307`  |    `3307` |         `3306` |
-| **phpMyAdmin**| http://localhost:8081          |    `8081` |           `80` |
+| Service | URL | Host Port |
+|---------|-----|-----------|
+| Frontend (Vite) | http://localhost:5173 | 5173 |
+| Backend API | http://localhost:5001/api | 5001 |
+| Health Check | http://localhost:5001/api/health | 5001 |
+| MySQL | `mysql -h 127.0.0.1 -P 3307` | 3307 |
+| phpMyAdmin | http://localhost:8081 | 8081 |
 
-## 🐳 คำสั่ง Docker ที่ใช้บ่อย
+## คำสั่ง Docker ที่ใช้บ่อย
 
 ```bash
 # เริ่ม (background)
@@ -57,59 +57,81 @@ docker compose up -d --build
 # หยุด (เก็บข้อมูล)
 docker compose down
 
-# หยุด + ลบข้อมูล DB
+# หยุด + ลบ Volume (ข้อมูล DB หาย)
 docker compose down -v
 
 # ดู logs
 docker compose logs -f
 docker compose logs -f backend
+docker compose logs -f frontend
 
-# เข้า container
+# เข้า shell
 docker compose exec backend sh
 docker compose exec db mysql -u root -p
 
-# สถานะ
+# สถานะ services
 docker compose ps
 ```
 
-## 📂 โครงสร้างโฟลเดอร์
+## โครงสร้างโปรเจกต์
 
 ```
 damrongdham-ssk/
-├── docker-compose.yml
-├── .env                    # ⚠️ ไม่ถูก commit (อยู่ใน .gitignore)
-├── .env.example            # ตัวอย่าง environment variables
+├── frontend/               # React + Vite + MUI
+│   ├── src/
+│   │   ├── api/            # Axios instances + API functions
+│   │   ├── components/     # Shared UI components
+│   │   ├── contexts/       # React Context (Auth, Notification)
+│   │   ├── hooks/          # Custom React hooks
+│   │   ├── pages/          # Page components
+│   │   ├── routes/         # Route configuration
+│   │   ├── theme/          # MUI Theme
+│   │   └── utils/          # Constants, formatters
+│   └── Dockerfile.dev
 │
-├── frontend/               # ⚛️ React + Vite
-│   ├── Dockerfile.dev
-│   ├── package.json
-│   ├── vite.config.js
-│   └── src/
+├── backend/                # Node.js + Express
+│   ├── src/
+│   │   ├── app.js          # Express app setup
+│   │   ├── server.js       # Entry point
+│   │   ├── config/         # DB, CORS, Upload config
+│   │   ├── middleware/     # Auth, Validate, ErrorHandler
+│   │   ├── routes/         # Express routes
+│   │   ├── controllers/    # Request handlers
+│   │   ├── models/         # SQL query layer
+│   │   ├── services/       # Business logic
+│   │   ├── jobs/           # Scheduled jobs (cron)
+│   │   └── utils/          # Helper functions
+│   ├── uploads/            # File upload storage (gitignored)
+│   └── Dockerfile.dev
 │
-├── backend/                # 🟢 Node.js + Express
-│   ├── Dockerfile.dev
-│   ├── package.json
-│   └── src/
-│
-├── db/                     # 🐬 MySQL
+├── db/
 │   └── init/
-│       └── 01-init.sql
+│       └── 01-init.sql     # SQL schema + seed data (Phase 2)
 │
-├── docs/                   # 📝 Prompt templates
-│   ├── 1-prompt-docker.txt
-│   ├── 2-prompt-skill-template.txt
-│   └── 3-prompt-git-github.txt
-│
-└── .agents/                # 🤖 Antigravity IDE
-    └── skills/
-        └── damrongdham-dev/
-            └── SKILL.md
+├── nginx/                  # On-premise prod เท่านั้น
+├── Dockerfile              # Production multi-stage image
+├── docker-compose.yml      # Development environment
+├── docker-compose.prod.yml # On-premise production
+├── railway.toml            # Railway deployment config
+└── .env.example            # Environment variables template
 ```
 
-## 👨‍💻 ผู้พัฒนา
+## Environment Variables
 
-- **Supachai** — โรงเรียนดำรงธรรม ศรีสะเกษ
+ดู [`.env.example`](.env.example) สำหรับ root (Docker Compose)
+ดู [`backend/.env.example`](backend/.env.example) สำหรับ backend standalone
+ดู [`frontend/.env.example`](frontend/.env.example) สำหรับ frontend
 
-## 📄 License
+## Implementation Plan
 
-MIT License
+ดู [`docs/planning/10-implementation-plan.md`](docs/planning/10-implementation-plan.md) สำหรับแผนการพัฒนาทั้ง 16 Phases
+
+## สถานะการพัฒนา
+
+| Phase | ชื่อ | สถานะ |
+|:-----:|------|:-----:|
+| 0 | Requirement & Architecture | ✅ |
+| 1 | Project Setup | ✅ |
+| 2 | Database Schema & Seed Data | ⏳ |
+| 3 | Backend Core & MySQL Connection | ⏳ |
+| 4–15 | ... | ⏳ |

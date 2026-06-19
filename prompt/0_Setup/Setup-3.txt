@@ -1,0 +1,75 @@
+
+# Prompt 0.3: สร้าง SKILL.md
+
+คุณคือ Senior Full-stack Developer, AI Coding Assistant Designer และ Technical Lead
+
+ฉันต้องการสร้างไฟล์ `SKILL.md` สำหรับใช้เป็นคู่มือการทำงานของ AI ในโปรเจกต์ Web Application
+
+ตำแหน่งไฟล์:
+
+`.agents/skills/damrongdham-dev/SKILL.md` (repo นี้ใช้ Antigravity IDE — เก็บ SKILL.md ในโฟลเดอร์ .agents)
+
+วัตถุประสงค์ของไฟล์นี้:
+
+* บอก AI ว่าต้องทำงานอย่างไร
+* กำหนดมาตรฐานการเขียนโค้ด
+* กำหนดกติกาการทำงานเป็น Phase
+* กำหนดข้อห้าม
+* กำหนดรูปแบบคำตอบที่ AI ต้องส่งกลับ
+* ใช้ร่วมกับ `docs/planning/PROJECT_CONTEXT.md`
+* ใช้ร่วมกับ `docs/planning/10-implementation-plan.md`
+
+Tech Stack:
+
+* Frontend: React 18 + Vite 5 + MUI 5
+* Backend: Node.js 20 LTS + Express 4
+* Database: MySQL 8
+* Docker: Docker Compose (Dev)
+* Database Tool: phpMyAdmin (Dev)
+* Deploy: Railway (single-container จาก Dockerfile multi-stage — ไม่ใช้ Nginx แยก)
+
+งานที่ต้องการ:
+ช่วยสร้างเนื้อหา `SKILL.md` โดยมีหัวข้อ:
+
+1. Purpose
+2. Project Working Principles
+3. AI General Rules
+4. Planning Rules
+5. Implementation by Phase Rules
+6. Frontend Development Rules
+7. Backend Development Rules
+8. Database Development Rules
+9. API Development Rules
+10. Docker Development Rules
+11. Testing Rules
+12. Debugging Rules
+13. Documentation Rules
+14. Git Commit Rules
+15. Security Rules
+16. Forbidden Actions
+17. Required Response Format
+18. Phase Completion Report Format
+
+กติกาสำคัญที่ต้องมี:
+
+* AI ต้องอ่าน `SKILL.md` ก่อนเริ่มทำงานทุกครั้ง
+* AI ต้องอ่าน `docs/planning/PROJECT_CONTEXT.md` ก่อนเริ่ม Implementation
+* AI ต้องอ่าน `docs/planning/10-implementation-plan.md` ก่อนทำแต่ละ Phase
+* ทำเฉพาะ Phase ที่ได้รับมอบหมายเท่านั้น
+* ห้ามทำ Phase ถัดไปล่วงหน้า
+* ห้ามเพิ่ม Feature นอกเหนือจาก Planning
+* ห้ามเปลี่ยน Architecture ถ้าไม่จำเป็น
+* ถ้าต้องเปลี่ยน ต้องแจ้งเหตุผลก่อน
+* ทุกครั้งที่สร้างหรือแก้ไฟล์ ต้องระบุไฟล์ที่เกี่ยวข้อง
+* ทุก Phase ต้องมีวิธีรัน วิธีทดสอบ และ Acceptance Criteria Checklist
+* ทุก Phase ต้องมี Git Commit Message ที่แนะนำ
+
+ให้จัดทำผลลัพธ์เป็น Markdown สำหรับบันทึกเป็นไฟล์:
+
+`SKILL.md`
+
+เงื่อนไข:
+
+* ให้แสดงเฉพาะเนื้อหา Markdown ของไฟล์
+* ห้ามเขียน Code Implementation
+* ให้เขียนเป็นคู่มือที่ AI อ่านแล้วทำตามได้ทันที

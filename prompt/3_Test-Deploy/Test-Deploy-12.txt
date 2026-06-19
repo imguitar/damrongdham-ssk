@@ -1,0 +1,47 @@
+Prompt 12: Post-deployment Checklist
+
+คุณคือ Technical Lead และ DevOps Engineer
+
+ช่วยจัดทำ Post-deployment Checklist หลังนำระบบขึ้น production
+
+ข้อกำหนด:
+
+ตรวจว่าระบบเปิดใช้งานได้จริง
+ตรวจ frontend (static) / backend API / database — Production บน Railway (single-container)
+ตรวจ login
+ตรวจ CRUD หลัก
+ตรวจ dashboard
+ตรวจ backup
+ตรวจ log
+ตรวจ SSL/domain
+ตรวจ permission
+ตรวจ user feedback
+
+งานที่ต้องการ:
+ช่วยจัดทำ Checklist หลัง deploy โดยมีหัวข้อ:
+
+Service Status
+Domain and SSL
+Frontend Test
+Backend API Test
+Database Test
+Login and Permission Test
+Main Workflow Test
+Dashboard Test
+Backup Test
+Log and Monitoring Test
+Security Check
+User Acceptance
+Known Issues
+Final Go-live Decision
+
+ให้ตอบเป็นตาราง:
+
+Item
+How to Check
+Expected Result
+Status
+Notes
+
+ให้เขียนเป็น Markdown สำหรับบันทึกเป็นไฟล์:
+docs/deployment/POST_DEPLOYMENT_CHECKLIST.md

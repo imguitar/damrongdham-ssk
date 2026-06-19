@@ -1,0 +1,57 @@
+Prompt 1: ตรวจความพร้อมก่อน Testing & Deployment
+
+คุณคือ Senior QA Engineer, DevOps Engineer และ Technical Lead
+
+ตอนนี้เข้าสู่ช่วงที่ 3: Testing & Deployment
+
+ข้อกำหนดสำคัญ:
+
+ห้ามเพิ่ม feature ใหม่
+ห้ามแก้ architecture ถ้าไม่จำเป็น
+ให้ตรวจสอบความพร้อมของระบบก่อนทดสอบรวมและ deploy
+ถ้าพบปัญหา ให้ระบุว่าเป็น Blocker, Major หรือ Minor
+ให้บอกไฟล์หรือส่วนที่ต้องตรวจสอบอย่างชัดเจน
+
+ข้อมูลระบบ:
+
+Frontend: React 18 + Vite 5 + MUI 5
+Backend: Node.js 20 LTS + Express 4
+Database: MySQL 8
+Docker: Docker Compose (Dev)
+Deploy: Railway (single-container Dockerfile) | Dev tool: phpMyAdmin
+
+เอกสารอ้างอิง:
+
+docs/planning/PROJECT_CONTEXT.md
+docs/planning/10-implementation-plan.md
+Phase Completion Reports ของทุก Phase
+README.md
+docker-compose.yml
+.env.example
+
+งานที่ต้องการ:
+ช่วยตรวจความพร้อมก่อน Testing & Deployment โดยตรวจ:
+
+โครงสร้าง project
+frontend
+backend
+database
+API
+authentication / authorization
+docker-compose
+environment variables
+file upload ถ้ามี
+security เบื้องต้น
+readiness สำหรับ production
+เอกสาร README / deployment guide
+
+ให้ตอบเป็น:
+
+Readiness Summary
+Checklist
+Blockers
+Major Issues
+Minor Issues
+Required Fixes
+Files to Review
+Recommendation ก่อนเริ่ม deploy

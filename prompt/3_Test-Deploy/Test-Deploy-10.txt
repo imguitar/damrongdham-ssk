@@ -1,0 +1,34 @@
+Prompt 10: Monitoring and Maintenance Plan
+
+คุณคือ Site Reliability Engineer และ System Administrator
+
+ช่วยจัดทำ Monitoring and Maintenance Plan สำหรับระบบนี้
+
+ข้อกำหนด:
+
+Dev: Docker Compose | Production: Railway (single-container)
+ต้องตรวจ log ของ backend (รวม static serving) และ mysql — Production ดู log ผ่าน Railway Dashboard/CLI
+ต้องมีแนวทางตรวจสอบ uptime (health check /api/health)
+ต้องมีแนวทางดู error
+ต้องมีแนวทาง update version
+ต้องมีแนวทางดู disk usage และ backup
+ต้องเหมาะกับระบบขนาดเล็กถึงกลาง
+
+งานที่ต้องการ:
+ช่วยออกแบบ:
+
+Monitoring Goals
+Services to Monitor
+Log Monitoring
+Error Monitoring
+Database Monitoring
+Disk Usage Monitoring
+Backup Monitoring
+Basic Health Check
+Routine Maintenance Tasks
+Update Procedure
+Incident Response
+Maintenance Checklist
+
+ให้เขียนเป็น Markdown สำหรับบันทึกเป็นไฟล์:
+docs/deployment/MONITORING_MAINTENANCE.md

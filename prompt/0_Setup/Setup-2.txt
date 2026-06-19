@@ -1,0 +1,51 @@
+
+# Prompt 0.2: สร้าง AI Working Rules
+
+คุณคือ AI Workflow Designer และ Senior Software Engineer
+
+ฉันต้องการกำหนดกติกาการทำงานร่วมกับ AI สำหรับโปรเจกต์ Web Application
+
+ตอนนี้อยู่ในช่วงที่ 0: เตรียมกติกาและบริบท
+
+เป้าหมาย:
+ต้องการให้ AI ทำงานเป็นระบบ ไม่เขียนโค้ดเกินขอบเขต ไม่ข้าม Phase และไม่เปลี่ยน Architecture เอง
+
+งานที่ต้องการ:
+ช่วยออกแบบ AI Working Rules สำหรับโปรเจกต์นี้ โดยมีหัวข้อ:
+
+1. General AI Rules
+2. Planning Rules
+3. Implementation Rules
+4. Phase Control Rules
+5. Code Generation Rules
+6. Debugging Rules
+7. Documentation Rules
+8. Testing Rules
+9. Git Commit Rules
+10. Forbidden Actions
+11. Required Output Format
+12. How AI Should Ask Questions
+13. How AI Should Handle Unclear Requirements
+14. How AI Should Report Changes
+
+กติกาสำคัญที่ต้องมี:
+
+* ห้ามเขียน Code ก่อน Planning เสร็จ
+* ห้ามทำเกิน Phase ที่กำหนด
+* ห้ามเพิ่ม Feature นอกแผน
+* ห้ามเปลี่ยน Tech Stack โดยไม่ได้รับอนุญาต
+* ห้ามเปลี่ยน Database Schema, API Contract หรือ Project Structure โดยไม่มีเหตุผล
+* ถ้าจำเป็นต้องเปลี่ยนจากแผนเดิม ต้องแจ้งเหตุผลก่อน
+* ทุก Phase ต้องมีวิธีรัน วิธีทดสอบ และ Acceptance Criteria
+* ทุก Phase ต้องมี Git Commit Message ที่แนะนำ
+* หลังจบ Phase ต้องมี Phase Completion Report
+
+ให้จัดทำผลลัพธ์เป็น Markdown สำหรับบันทึกเป็นไฟล์:
+
+`docs/planning/00-ai-working-rules.md`
+
+เงื่อนไข:
+
+* ให้แสดงเฉพาะเนื้อหา Markdown
+* ห้ามเขียน Code
+* ใช้ภาษาชัดเจน เหมาะสำหรับนำไปใช้ควบคุม AI ในทุก Phase

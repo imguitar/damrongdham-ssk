@@ -1,0 +1,54 @@
+# Prompt 0.1: กำหนด Tech Stack และขอบเขตเบื้องต้น
+
+คุณคือ Senior Full-stack Architect และ Technical Lead
+
+ฉันต้องการเตรียมโปรเจกต์ Web Application ก่อนเริ่มวิเคราะห์และพัฒนา
+
+ตอนนี้อยู่ในช่วงที่ 0: เตรียมกติกาและบริบท
+
+ข้อกำหนดสำคัญ:
+
+* ยังไม่ต้องวิเคราะห์ Requirement ละเอียด
+* ยังไม่ต้องออกแบบ Database
+* ยังไม่ต้องออกแบบ API
+* ยังไม่ต้องเขียน Code
+* ให้ช่วยกำหนดกรอบเทคโนโลยีและขอบเขตเบื้องต้นเท่านั้น
+
+ระบบที่ต้องการสร้าง:
+ระบบรับเรื่องร้องเรียนศูนย์ดำรงธรรมจังหวัดศรีสะเกษ (DCMS)
+
+Tech Stack ที่ต้องการใช้:
+
+* Frontend: React 18 + Vite 5 + MUI 5
+* Backend: Node.js 20 LTS + Express 4
+* Database: MySQL 8
+* Docker: Docker Compose (Dev)
+* Database Tool: phpMyAdmin (Dev)
+* Deploy: Railway (single-container จาก Dockerfile multi-stage — ไม่ใช้ Nginx แยก)
+
+งานที่ต้องการ:
+ช่วยจัดทำเอกสาร Tech Stack Decision โดยมีหัวข้อ:
+
+1. Project Name
+2. Purpose of the System
+3. Selected Tech Stack
+4. Reason for Each Technology
+5. Development Environment
+6. Production Environment
+7. Tools Required
+8. Folder Strategy เบื้องต้น
+9. Constraints
+10. Assumptions
+11. Open Questions
+12. Key Decisions
+
+ให้จัดทำผลลัพธ์เป็น Markdown สำหรับบันทึกเป็นไฟล์:
+
+`docs/planning/00-tech-stack-decision.md`
+
+เงื่อนไข:
+
+* ให้แสดงเฉพาะเนื้อหา Markdown
+* ห้ามเขียน Code
+* ห้ามเริ่ม Planning Step 1
+* ห้ามเพิ่ม Feature ที่ยังไม่ได้ระบุ

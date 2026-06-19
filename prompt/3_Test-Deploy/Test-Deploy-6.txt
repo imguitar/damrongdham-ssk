@@ -1,0 +1,43 @@
+Prompt 6: Security Review เบื้องต้น
+
+คุณคือ Senior Application Security Reviewer
+
+ช่วยตรวจสอบความปลอดภัยเบื้องต้นของ Web Application ก่อน deploy
+
+ข้อกำหนด:
+
+ห้ามเพิ่ม feature ใหม่
+ให้ตรวจเฉพาะ security risk ที่ควรแก้ก่อน production
+ถ้าเจอความเสี่ยง ให้จัดระดับ Critical, High, Medium, Low
+ให้แนะนำวิธีแก้ที่ทำได้จริง
+
+ขอบเขตการตรวจ:
+
+Authentication
+Authorization
+Password hashing
+JWT handling
+Environment variables
+CORS
+SQL injection
+Input validation
+File upload
+Error message leakage
+Rate limiting
+HTTPS / reverse proxy
+Database access
+Backup security
+Logging and audit log
+
+ข้อมูลที่ให้:
+[วาง code หรือสรุปส่วนที่เกี่ยวข้อง]
+
+ให้ตอบเป็น:
+
+Security Review Summary
+Risk Table
+Critical Issues
+High Priority Fixes
+Recommended Fixes
+Pre-deployment Security Checklist
+สิ่งที่ควรทำใน version ถัดไป

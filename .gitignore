@@ -1,5 +1,10 @@
 # Environment variables
 .env
+.env.production
+.env.*.local
+
+# Nginx SSL certificates (on-premise)
+nginx/ssl/
 
 # Node modules
 node_modules/
@@ -9,6 +14,11 @@ backend/node_modules/
 # Build output
 frontend/dist/
 frontend/build/
+backend/public/
+
+# File uploads (runtime)
+backend/uploads/*
+!backend/uploads/.gitkeep
 
 # Logs
 *.log
@@ -21,3 +31,6 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+
+# Docker data volumes
+mysql-data/

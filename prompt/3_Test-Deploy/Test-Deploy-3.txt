@@ -1,0 +1,48 @@
+Prompt 3: ทดสอบ API
+
+คุณคือ Senior Backend QA Engineer
+
+ช่วยทดสอบและตรวจสอบ API ของระบบตาม API Contract
+
+ข้อกำหนด:
+
+ห้ามเพิ่ม endpoint ใหม่
+ห้ามเปลี่ยน API Contract ถ้าไม่จำเป็น
+ถ้าพบ API ที่ไม่ตรง contract ให้ระบุให้ชัดเจน
+ให้แนะนำวิธีทดสอบด้วย Postman, Thunder Client หรือ curl
+
+เอกสารอ้างอิง:
+
+docs/planning/06-api-contract.md
+source code backend ปัจจุบัน
+log การรัน backend
+.env ที่เกี่ยวข้อง โดยปิดบัง secret
+
+ข้อมูลที่ให้:
+[วาง API Contract หรือ endpoint ที่ต้องตรวจ]
+
+งานที่ต้องการ:
+ตรวจสอบ:
+
+Auth API
+User API
+Complaint API
+Assignment API
+Status Workflow API
+Dashboard API
+Report API
+Error Response
+Pagination
+Filtering
+Authorization by Role
+
+ให้ตอบเป็น:
+
+API Testing Summary
+API Test Checklist
+Endpoint ที่ผ่าน
+Endpoint ที่ไม่ผ่าน
+Error ที่พบ
+วิธีแก้
+curl ตัวอย่างสำหรับทดสอบ endpoint สำคัญ
+Recommendation ก่อน deploy

@@ -1,0 +1,51 @@
+Prompt 5: ทดสอบ Docker Integration
+
+คุณคือ Senior DevOps Engineer
+
+ช่วยตรวจสอบ Docker Integration ของระบบ
+
+ข้อกำหนด:
+
+ห้ามเปลี่ยน architecture ถ้าไม่จำเป็น
+ให้ตรวจว่า frontend, backend, mysql, phpMyAdmin (Dev) ทำงานร่วมกันได้หรือไม่
+และตรวจ Production ทั้ง 2 targets: (A) Railway image (single-container) build/รันได้ ; (B) On-premise: docker-compose.prod.yml (app + db + nginx) ทำงานร่วมกันได้
+ให้เน้นปัญหา network, volume, env, port, database connection และ CORS
+
+ไฟล์ที่เกี่ยวข้อง:
+
+docker-compose.yml            (Dev — 4 services)
+Dockerfile                    (Production multi-stage, Railway)
+railway.toml                  (build + health check /api/health)
+frontend/Dockerfile.dev
+backend/Dockerfile.dev
+.env
+.env.example
+
+ข้อมูลที่ให้:
+[วาง docker-compose.yml และ log ที่เกี่ยวข้อง]
+
+งานที่ต้องการ:
+ตรวจสอบ:
+
+Docker services
+Port mapping
+Container network
+MySQL volume
+Backend connection to MySQL
+Frontend API base URL
+CORS
+phpMyAdmin (Dev)
+Static serving (Production: Express serve ./public + SPA fallback)
+Nginx reverse proxy + client_max_body_size (เฉพาะ on-premise)
+Production readiness — Target A Railway (Dockerfile build + health check /api/health) และ Target B On-premise (compose.prod + nginx + volumes)
+
+ให้ตอบเป็น:
+
+Docker Integration Summary
+Problems Found
+Required Fixes
+Corrected configuration ถ้าจำเป็น
+คำสั่งสำหรับรัน
+คำสั่งสำหรับดู log
+คำสั่งสำหรับ rebuild
+Checklist ว่าพร้อม deploy หรือยัง

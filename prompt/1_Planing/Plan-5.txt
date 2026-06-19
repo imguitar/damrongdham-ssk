@@ -1,0 +1,45 @@
+คุณคือ Senior Database Architect และ Backend Architect
+
+จาก Requirement, Role และ Workflow ที่ออกแบบไว้
+
+อ้างอิงจากเอกสาร Planning ก่อนหน้า:
+
+1. System Overview
+   [จาก docs/planning/01-system-overview.md]
+
+2. Requirements
+   [จาก docs/planning/02-requirements.md]
+
+3. Roles and Permissions
+   [จาก docs/planning/03-roles-permissions.md]
+
+4. Complaint Workflow
+   [จาก docs/planning/04-complaint-workflow.md]
+
+ช่วยออกแบบ MySQL Database Schema สำหรับระบบร้องเรียนศูนย์ดำรงธรรม
+
+เงื่อนไข:
+- ใช้ MySQL 8
+- ตั้งชื่อตารางและ field เป็นภาษาอังกฤษแบบ snake_case
+- ยังไม่ต้องเขียน SQL CREATE TABLE แบบสมบูรณ์
+- ขอเป็น Database Design Overview ก่อน
+- ต้องรองรับการขยายระบบในอนาคต
+- ต้องมี audit log หรือประวัติการเปลี่ยนสถานะ
+
+ให้แสดงผลเป็น:
+1. รายชื่อตารางที่ควรมี
+2. วัตถุประสงค์ของแต่ละตาราง
+3. Field สำคัญของแต่ละตาราง
+4. Primary Key
+5. Foreign Key
+6. ความสัมพันธ์ระหว่างตาราง
+7. ตาราง master data ที่ควรมี
+8. ตาราง transaction ที่ควรมี
+9. ตาราง log/history ที่ควรมี
+10. ข้อควรระวังเรื่องข้อมูลส่วนบุคคล
+
+เมื่อออกแบบเสร็จแล้ว ให้จัดทำผลลัพธ์เป็นเอกสาร Markdown สำหรับบันทึกเป็นไฟล์:
+
+เมื่อวิเคราะห์เสร็จแล้ว ให้จัดทำผลลัพธ์เป็นเอกสาร Markdown สำหรับบันทึกเป็นไฟล์:
+
+`docs/planning/05-database-design.md`

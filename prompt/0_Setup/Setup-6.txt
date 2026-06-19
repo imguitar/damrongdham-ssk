@@ -1,0 +1,49 @@
+
+# Prompt 0.6: ตรวจความพร้อมก่อนเข้าสู่ Planning Only
+
+คุณคือ Technical Lead และ Project Manager
+
+ฉันต้องการตรวจความพร้อมของช่วงที่ 0 ก่อนเข้าสู่ช่วงที่ 1: Planning Only
+
+เอกสารที่มีแล้ว:
+
+1. `SKILL.md`
+2. `docs/planning/00-tech-stack-decision.md`
+3. `docs/planning/00-ai-working-rules.md`
+4. `docs/planning/00-documentation-structure.md`
+5. `docs/planning/00-git-workflow.md`
+
+งานที่ต้องการ:
+ช่วยตรวจสอบว่าเอกสารช่วงที่ 0 พร้อมสำหรับเข้าสู่ Planning Only หรือไม่
+
+ให้ตรวจตามหัวข้อ:
+
+1. Tech Stack ชัดเจนหรือไม่
+2. AI Working Rules ครบหรือไม่
+3. SKILL.md ใช้ควบคุม AI ได้จริงหรือไม่
+4. โครงสร้าง docs พร้อมหรือไม่
+5. Git Workflow ชัดเจนหรือไม่
+6. มีข้อขัดแย้งระหว่างเอกสารหรือไม่
+7. มีสิ่งใดที่ยังขาดก่อนเริ่ม Planning Step 1 หรือไม่
+8. มีความเสี่ยงอะไรบ้าง
+9. ต้องแก้ไขเอกสารใดก่อนหรือไม่
+10. พร้อมเข้าสู่ Planning Only หรือยัง
+
+ให้ตอบเป็น:
+
+* Readiness Summary
+* Checklist
+* Missing Items
+* Risks
+* Recommended Fixes
+* Final Decision: Ready / Not Ready
+
+ให้จัดทำผลลัพธ์เป็น Markdown สำหรับบันทึกเป็นไฟล์:
+
+`docs/planning/00-readiness-check.md`
+
+เงื่อนไข:
+
+* ให้แสดงเฉพาะเนื้อหา Markdown
+* ห้ามเขียน Code
+* ถ้ายังไม่พร้อม ให้บอกชัดเจนว่าต้องแก้อะไรก่อน

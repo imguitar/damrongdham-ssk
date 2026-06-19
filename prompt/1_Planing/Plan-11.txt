@@ -1,0 +1,24 @@
+ช่วยตรวจสอบ Planning Document ทั้งหมดของระบบร้องเรียนศูนย์ดำรงธรรม
+
+โดยอ้างอิงจาก 
+
+`docs/planning/10-implementation-plan.md
+
+ตรวจว่ามีข้อมูลครบพอสำหรับเริ่ม Implementation หรือยัง
+
+ให้ตรวจตามหัวข้อ:
+1. Requirement ครบหรือไม่
+2. Role and Permission ชัดหรือไม่
+3. Workflow ครอบคลุมหรือไม่
+4. Database Design พร้อมพัฒนาหรือไม่
+5. API Contract เพียงพอหรือไม่
+6. Frontend Pages ครบหรือไม่
+7. Dashboard and Report ชัดหรือไม่
+8. Docker Architecture พร้อมหรือไม่
+9. Phase Plan ทำจริงได้หรือไม่
+10. Acceptance Criteria ตรวจรับได้จริงหรือไม่
+11. มีจุดเสี่ยงหรือช่องว่างอะไรบ้าง
+12. ต้องถามผู้ใช้งานจริงเพิ่มเติมเรื่องใดก่อนเริ่ม Phase 1
+
+ห้ามเขียน code
+ให้ตอบเป็น Checklist พร้อมคำแนะนำในการปรับปรุง

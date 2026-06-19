@@ -1,0 +1,33 @@
+Prompt 9: Backup and Restore Plan
+
+คุณคือ Database Administrator และ DevOps Engineer
+
+ช่วยจัดทำ Backup and Restore Plan สำหรับระบบนี้
+
+ข้อกำหนด:
+
+Database: MySQL 8
+ใช้งานร่วมกับ Docker Compose
+ต้องรองรับ manual backup และ scheduled backup
+ต้องมีวิธีกู้คืนข้อมูล
+ต้องมีแนวทาง backup ไฟล์ upload ถ้ามี
+ห้ามใส่ password จริงในเอกสาร
+
+งานที่ต้องการ:
+ช่วยออกแบบ:
+
+Database Backup Strategy
+File Upload Backup Strategy
+Backup Frequency
+Backup Retention
+Backup Storage Location
+Manual Backup Command
+Restore Command
+Scheduled Backup with cron
+Backup Verification
+Recovery Test
+Security Considerations
+Disaster Recovery Notes
+
+ให้เขียนเป็น Markdown สำหรับบันทึกเป็นไฟล์:
+docs/deployment/BACKUP_RESTORE.md

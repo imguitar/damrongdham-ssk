@@ -1,0 +1,57 @@
+
+อ้างอิงจากเอกสาร Planning ก่อนหน้า:
+
+1. System Overview
+   [docs/planning/01-system-overview.md]
+
+2. Requirements
+   [docs/planning/02-requirements.md]
+
+3. Database Design Overview
+   [docs/planning/05-database-design.md]
+
+4. API Contract Overview
+   [docs/planning/06-api-contract.md]
+
+5. Frontend Page Structure
+   [docs/planning/07-frontend-pages.md]
+
+6. Dashboard, Report and Notification Design
+   [docs/planning/08-dashboard-report-notification.md]
+
+
+จากแผนระบบทั้งหมด
+
+ช่วยออกแบบ Project Structure และ Docker Architecture
+
+Tech Stack:
+- frontend: React 18 + Vite 5 + MUI 5
+- backend: Node.js 20 LTS + Express 4
+- database: MySQL 8
+- phpMyAdmin (Dev)
+- Docker Compose (Dev)
+- Production: Railway (single-container จาก Dockerfile multi-stage — backend serve frontend dist ที่ ./public + /api; ไม่ใช้ Nginx)
+
+ใช้ค่าจริงตามนี้ (ตรงกับ repo):
+- โฟลเดอร์ DB ชื่อ `db/init/` (ไม่ใช่ database/) — mount เข้า /docker-entrypoint-initdb.d
+- Backend entry: `backend/src/server.js`
+- Ports (Dev host): frontend 5173, backend 5001, MySQL 3307→3306, phpMyAdmin 8081→80
+- Prod รองรับ 2 targets (image เดียวกันจาก root `Dockerfile`): (A) Railway = `Dockerfile`+`railway.toml`; (B) On-premise = `docker-compose.prod.yml` + `nginx/default.conf`
+
+ยังไม่ต้องเขียน code
+
+ให้แสดง:
+1. Project folder structure
+2. คำอธิบายแต่ละ folder
+3. Docker services ที่ต้องมี
+4. Port ที่ใช้
+5. Network ระหว่าง containers
+6. Volume สำหรับ MySQL
+7. Environment variables ที่จำเป็น
+8. Dev environment
+9. Production environment
+10. ข้อควรระวังเรื่อง CORS, database connection และ file upload
+
+เมื่อวิเคราะห์เสร็จแล้ว ให้จัดทำผลลัพธ์เป็นเอกสาร Markdown สำหรับบันทึกเป็นไฟล์:
+
+`docs/planning/09-project-docker-architecture.md`

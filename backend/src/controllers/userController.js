@@ -29,11 +29,21 @@ const list = async (req, res, next) => {
   }
 };
 
+// GET /api/users/me — own profile (req.params.id is undefined for /me pattern)
+const getMe = async (req, res, next) => {
+  try {
+    const user = await userModel.findUserById(req.user.id);
+    if (!user) return error(res, 'NOT_FOUND', 'ไม่พบผู้ใช้', 404);
+    return success(res, { user });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // GET /api/users/:id
 const getById = async (req, res, next) => {
   try {
-    const userId = req.params.id === 'me' ? req.user.id : req.params.id;
-    const user = await userModel.findUserById(userId);
+    const user = await userModel.findUserById(req.params.id);
     if (!user) return error(res, 'NOT_FOUND', 'ไม่พบผู้ใช้', 404);
     return success(res, { user });
   } catch (err) {
@@ -138,4 +148,4 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
-module.exports = { list, getById, create, update, toggleStatus, resetPassword };
+module.exports = { list, getMe, getById, create, update, toggleStatus, resetPassword };

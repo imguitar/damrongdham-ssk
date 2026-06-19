@@ -3,10 +3,13 @@
 const agencyModel = require('../models/agencyModel');
 const { success, error } = require('../utils/response');
 
+const ADMIN_ROLES = ['super_admin', 'admin'];
+
 // GET /api/agencies
 const list = async (req, res, next) => {
   try {
-    const includeInactive = req.query.include_inactive === 'true';
+    const isAdmin = ADMIN_ROLES.includes(req.user.role);
+    const includeInactive = isAdmin && req.query.include_inactive === 'true';
     const agencies = await agencyModel.findAll(includeInactive);
     return success(res, { agencies });
   } catch (err) {

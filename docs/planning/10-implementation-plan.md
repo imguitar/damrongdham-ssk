@@ -232,12 +232,12 @@ feat: complete phase 1 project setup with docker compose
 5. ทดสอบ Foreign Key (INSERT ข้อมูลที่ FK ผิด → ต้อง Error)
 
 ### Acceptance Criteria
-- [ ] MySQL มีตาราง 22 ตาราง (รวม `citizens`, `anonymous_reveal_logs`, `provinces`, `service_types`, `complaint_natures`, `complainant_types`)
-- [ ] ตาราง Master Data มี Seed Data ครบ
-- [ ] Super Admin สร้างแล้ว (password เข้ารหัส bcrypt)
-- [ ] Foreign Key ทำงานถูกต้อง
-- [ ] Charset เป็น utf8mb4 ทุกตาราง
-- [ ] Re-create (down -v → up) ได้โดยไม่ Error
+- [x] MySQL มีตาราง 22 ตาราง (รวม `citizens`, `anonymous_reveal_logs`, `provinces`, `service_types`, `complaint_natures`, `complainant_types`)
+- [x] ตาราง Master Data มี Seed Data ครบ
+- [x] Super Admin สร้างแล้ว (password เข้ารหัส bcrypt)
+- [x] Foreign Key ทำงานถูกต้อง
+- [x] Charset เป็น utf8mb4 ทุกตาราง
+- [x] Re-create (down -v → up) ได้โดยไม่ Error
 
 ### ความเสี่ยง
 | ความเสี่ยง | วิธีรับมือ |

@@ -477,14 +477,14 @@ feat: complete phase 5 complaint crud and public api
 | CRUD | `/api/users` | จัดการผู้ใช้ |
 
 ### Acceptance Criteria
-- [ ] Workflow สถานะเปลี่ยนถูกต้องตาม Transition Table
-- [ ] Status Transition ที่ห้าม → Error 400
-- [ ] ส่งต่อหน่วยงาน → คำนวณ Due Date อัตโนมัติ
-- [ ] หน่วยงานรับ/ส่งคืนเรื่องได้
-- [ ] อัปเดตความคืบหน้าได้
-- [ ] ส่งผลดำเนินการ → ปิดเรื่องได้
-- [ ] Status Log บันทึกทุกครั้งที่เปลี่ยนสถานะ
-- [ ] CRUD Agency + User ทำงานถูกต้อง
+- [x] Workflow สถานะเปลี่ยนถูกต้องตาม Transition Table (T-01 to T-12 ทดสอบครบ)
+- [x] Status Transition ที่ห้าม → Error 400 `INVALID_TRANSITION`
+- [x] ส่งต่อหน่วยงาน → คำนวณ Due Date อัตโนมัติ (sla_days จาก category หรือ default 15 วัน)
+- [x] หน่วยงานรับ (T-04) / ส่งคืน (T-05/T-07) เรื่องได้
+- [x] อัปเดตความคืบหน้าได้ — `POST /api/complaints/:id/updates`
+- [x] ส่งผลดำเนินการ (T-08) → ตรวจผล (T-09) → ปิดเรื่อง (T-10) ได้
+- [x] Status Log บันทึกทุกครั้งที่เปลี่ยนสถานะ (timeline ครบ)
+- [x] CRUD Agency + User ทำงานถูกต้อง (รวม resetPassword, toggleStatus, guard self-deactivate)
 
 ### ความเสี่ยง
 | ความเสี่ยง | วิธีรับมือ |

@@ -136,4 +136,24 @@ damrongdham-ssk/
 | 3 | Backend Core & MySQL Connection | ✅ |
 | 4 | Authentication & Authorization | ✅ |
 | 5 | Complaint CRUD API | ✅ |
-| 6–15 | ... | ⏳ |
+| 6 | Assignment & Status Workflow API | ✅ |
+| 7–15 | ... | ⏳ |
+
+## API Endpoints (Phase 6 เพิ่ม)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| PATCH | `/api/complaints/:id/screen` | เริ่มคัดกรอง (T-01/T-12) |
+| PATCH | `/api/complaints/:id/reject` | ปฏิเสธเรื่อง (T-03) |
+| POST | `/api/complaints/:id/assign` | ส่งต่อหน่วยงาน (T-02) |
+| PATCH | `/api/complaints/:id/review` | เริ่มตรวจผล (T-09) |
+| PATCH | `/api/complaints/:id/close` | ปิดเรื่อง (T-10) |
+| PATCH | `/api/complaints/:id/send-back` | ส่งกลับแก้ไข (T-11) |
+| GET | `/api/complaints/:id/assignments` | ดูรายการมอบหมาย |
+| POST | `/api/complaints/:id/updates` | อัปเดตความคืบหน้า |
+| PATCH | `/api/assignments/:id/accept` | หน่วยงานรับเรื่อง (T-04) |
+| PATCH | `/api/assignments/:id/return` | หน่วยงานส่งคืน (T-05/T-07) |
+| PATCH | `/api/assignments/:id/start` | เริ่มดำเนินการ (T-06) |
+| PATCH | `/api/assignments/:id/resolve` | ส่งผลดำเนินการ (T-08) |
+| CRUD | `/api/agencies` | จัดการหน่วยงาน |
+| CRUD | `/api/users` | จัดการผู้ใช้ |

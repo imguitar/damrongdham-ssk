@@ -33,7 +33,10 @@ const fileFilter = (_req, file, cb) => {
   if (ALLOWED_EXTS.includes(ext) && ALLOWED_MIMES.includes(file.mimetype)) {
     return cb(null, true);
   }
-  cb(new Error('ประเภทไฟล์ไม่รองรับ: อนุญาต jpg, jpeg, png, pdf, doc, docx'), false);
+  const err = new Error('ประเภทไฟล์ไม่รองรับ: อนุญาต jpg, jpeg, png, pdf, doc, docx');
+  err.statusCode = 400;
+  err.code = 'FILE_TYPE_ERROR';
+  cb(err, false);
 };
 
 const upload = multer({

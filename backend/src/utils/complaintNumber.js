@@ -7,14 +7,14 @@ const generateComplaintNumber = async (conn) => {
   const yearMonth = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`;
 
   await conn.query(
-    `INSERT INTO complaint_sequences (year_month, last_number, updated_at)
+    `INSERT INTO complaint_sequences (\`year_month\`, last_number, updated_at)
      VALUES (?, 1, NOW())
      ON DUPLICATE KEY UPDATE last_number = last_number + 1, updated_at = NOW()`,
     [yearMonth]
   );
 
   const [[row]] = await conn.query(
-    'SELECT last_number FROM complaint_sequences WHERE year_month = ?',
+    'SELECT last_number FROM complaint_sequences WHERE `year_month` = ?',
     [yearMonth]
   );
 

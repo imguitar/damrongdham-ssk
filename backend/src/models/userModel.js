@@ -4,7 +4,7 @@ const pool = require('../config/database');
 
 const findByUsername = async (username) => {
   const [rows] = await pool.query(
-    `SELECT u.*, r.name AS role_name
+    `SELECT u.*, r.code AS role_name
      FROM users u
      JOIN roles r ON u.role_id = r.id
      WHERE u.username = ? AND u.is_active = 1`,
@@ -17,7 +17,7 @@ const findById = async (id) => {
   const [rows] = await pool.query(
     `SELECT u.id, u.username, u.full_name, u.email, u.phone,
             u.role_id, u.agency_id, u.is_active, u.last_login_at, u.created_at,
-            r.name AS role_name
+            r.code AS role_name
      FROM users u
      JOIN roles r ON u.role_id = r.id
      WHERE u.id = ? AND u.is_active = 1`,

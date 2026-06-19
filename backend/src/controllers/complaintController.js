@@ -107,7 +107,7 @@ const update = async (req, res, next) => {
     const complaint = await complaintModel.findById(req.params.id);
     if (!complaint) return error(res, 'NOT_FOUND', 'ไม่พบเรื่องร้องเรียน', 404);
     if (complaint.status === 'CLOSED') {
-      return error(res, 'FORBIDDEN', 'ไม่สามารถแก้ไขเรื่องที่ปิดแล้ว', 400);
+      return error(res, 'BAD_REQUEST', 'ไม่สามารถแก้ไขเรื่องที่ปิดแล้ว', 400);
     }
 
     await complaintModel.update(req.params.id, req.body);

@@ -15,22 +15,22 @@ const ADMIN_ROLES = ['super_admin', 'admin'];
 router.use(authenticate);
 
 // Complaint CRUD
-router.get('/', authorize(STAFF_ROLES), complaintController.list);
-router.post('/', authorize(STAFF_ROLES), validateComplaint, complaintController.create);
-router.get('/:id', authorize(STAFF_ROLES), complaintController.getById);
-router.put('/:id', authorize(STAFF_ROLES), complaintController.update);
+router.get('/', authorize(...STAFF_ROLES), complaintController.list);
+router.post('/', authorize(...STAFF_ROLES), validateComplaint, complaintController.create);
+router.get('/:id', authorize(...STAFF_ROLES), complaintController.getById);
+router.put('/:id', authorize(...STAFF_ROLES), complaintController.update);
 
 // Timeline & Updates
-router.get('/:id/timeline', authorize(STAFF_ROLES), complaintController.getTimeline);
-router.get('/:id/updates', authorize(STAFF_ROLES), complaintController.getUpdates);
+router.get('/:id/timeline', authorize(...STAFF_ROLES), complaintController.getTimeline);
+router.get('/:id/updates', authorize(...STAFF_ROLES), complaintController.getUpdates);
 
 // Reveal identity — super_admin only
-router.post('/:id/reveal-identity', authorize(['super_admin']), complaintController.revealIdentity);
+router.post('/:id/reveal-identity', authorize('super_admin'), complaintController.revealIdentity);
 
 // Attachments
-router.get('/:id/attachments', authorize(STAFF_ROLES), attachmentController.list);
-router.post('/:id/attachments', authorize(STAFF_ROLES), upload.single('file'), attachmentController.upload);
-router.get('/attachments/:id/download', authorize(STAFF_ROLES), attachmentController.download);
-router.delete('/attachments/:id', authorize(ADMIN_ROLES), attachmentController.remove);
+router.get('/:id/attachments', authorize(...STAFF_ROLES), attachmentController.list);
+router.post('/:id/attachments', authorize(...STAFF_ROLES), upload.single('file'), attachmentController.upload);
+router.get('/attachments/:id/download', authorize(...STAFF_ROLES), attachmentController.download);
+router.delete('/attachments/:id', authorize(...ADMIN_ROLES), attachmentController.remove);
 
 module.exports = router;

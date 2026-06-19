@@ -134,7 +134,7 @@ const listDistricts = async (req, res, next) => {
 
 const listDistrictsByProvince = async (req, res, next) => {
   try {
-    const rows = await masterDataModel.findAllDistricts(req.params.id);
+    const rows = await masterDataModel.findAllDistricts(req.params.province_id);
     return success(res, { districts: rows });
   } catch (err) { next(err); }
 };
@@ -163,7 +163,7 @@ const updateDistrict = async (req, res, next) => {
 
 const listSubdistrictsByDistrict = async (req, res, next) => {
   try {
-    const rows = await masterDataModel.findSubdistrictsByDistrictId(req.params.id);
+    const rows = await masterDataModel.findSubdistrictsByDistrictId(req.params.district_id);
     return success(res, { subdistricts: rows });
   } catch (err) { next(err); }
 };

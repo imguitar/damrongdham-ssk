@@ -536,12 +536,12 @@ feat: complete phase 6 assignment and status workflow api
 | GET | `/api/audit-logs` | ดู Audit Log |
 
 ### Acceptance Criteria
-- [ ] Dashboard Summary แสดงตัวเลขถูกต้อง
-- [ ] Dashboard Charts ส่ง Data ถูกต้อง
-- [ ] Report Monthly แสดงข้อมูลถูกต้อง
-- [ ] Export Excel ดาวน์โหลดได้ เปิดไฟล์ได้
-- [ ] Agency Officer เห็นเฉพาะข้อมูลหน่วยงานตน
-- [ ] Audit Log แสดงรายการถูกต้อง
+- [x] Dashboard Summary แสดงตัวเลขถูกต้อง
+- [x] Dashboard Charts ส่ง Data ถูกต้อง
+- [x] Report Monthly แสดงข้อมูลถูกต้อง
+- [x] Export Excel ดาวน์โหลดได้ เปิดไฟล์ได้
+- [x] Agency Officer เห็นเฉพาะข้อมูลหน่วยงานตน
+- [x] Audit Log แสดงรายการถูกต้อง
 
 ### Git Commit
 ```

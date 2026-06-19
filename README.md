@@ -137,7 +137,28 @@ damrongdham-ssk/
 | 4 | Authentication & Authorization | ✅ |
 | 5 | Complaint CRUD API | ✅ |
 | 6 | Assignment & Status Workflow API | ✅ |
-| 7–15 | ... | ⏳ |
+| 7 | Dashboard and Report API | ✅ |
+| 8–15 | ... | ⏳ |
+
+## API Endpoints (Phase 7 เพิ่ม)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/dashboard/summary` | Summary Cards (total, status counts, overdue) |
+| GET | `/api/dashboard/by-status` | สถิติตามสถานะสำหรับ Chart |
+| GET | `/api/dashboard/by-category` | สถิติตามประเภทเรื่อง |
+| GET | `/api/dashboard/by-agency` | สถิติตามหน่วยงาน |
+| GET | `/api/dashboard/by-district` | สถิติตามอำเภอ |
+| GET | `/api/dashboard/trend` | แนวโน้มรายเดือน (12 เดือน) |
+| GET | `/api/dashboard/overdue` | รายการเรื่องเกินกำหนด |
+| GET | `/api/dashboard/near-due` | รายการเรื่องใกล้ครบกำหนด (3 วัน) |
+| GET | `/api/reports/monthly` | รายงานสรุปรายเดือน |
+| GET | `/api/reports/by-category` | รายงานตามประเภทเรื่อง |
+| GET | `/api/reports/by-agency` | รายงานตามหน่วยงาน |
+| GET | `/api/reports/overdue` | รายงานเรื่องเกินกำหนด (paginated) |
+| GET | `/api/reports/export/excel` | Export Excel (`?type=monthly\|by-category\|by-agency\|overdue`) |
+| GET | `/api/audit-logs` | ดู Audit Log (admin เท่านั้น) |
+| GET | `/api/audit-logs/:id` | ดูรายละเอียด Audit Log |
 
 ## API Endpoints (Phase 6 เพิ่ม)
 

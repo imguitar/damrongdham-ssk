@@ -18,6 +18,9 @@ const citizenRouter = require('./routes/citizenRoutes');
 const assignmentRouter = require('./routes/assignmentRoutes');
 const agencyRouter = require('./routes/agencyRoutes');
 const userRouter = require('./routes/userRoutes');
+const dashboardRouter = require('./routes/dashboardRoutes');
+const reportRouter = require('./routes/reportRoutes');
+const auditLogRouter = require('./routes/auditLogRoutes');
 
 const app = express();
 
@@ -41,6 +44,9 @@ app.use('/api/citizen', citizenRouter);
 app.use('/api/assignments', assignmentRouter);
 app.use('/api/agencies', agencyRouter);
 app.use('/api/users', userRouter);
+app.use('/api/dashboard', dashboardRouter);
+app.use('/api/reports', reportRouter);
+app.use('/api/audit-logs', auditLogRouter);
 
 // ============================================
 // Serve Frontend (Production)

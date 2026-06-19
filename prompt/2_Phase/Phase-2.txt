@@ -16,7 +16,7 @@ Environment variables ครบหรือไม่
 วิธีรันถูกต้องหรือไม่
 วิธีทดสอบเพียงพอหรือไม่
 ผ่าน Acceptance Criteria หรือไม่ พร้อมอัพเดทผลการทดสอบตาม Acceptance Criteria ในไฟล์ 10-implementation-plan.md ของ phase นี้ด้วย
-
+อัพเดทสถานะการพัฒนา และอื่นๆ ในไฟล์ README.md ด้วย หากมีการเปลี่ยนแปลง
 ให้ตอบเป็น:
 
 Phase Review Summary

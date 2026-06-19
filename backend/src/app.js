@@ -9,6 +9,8 @@ require('dotenv').config();
 const corsOptions = require('./config/cors');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 const indexRouter = require('./routes/index');
+const authRouter = require('./routes/authRoutes');
+const citizenAuthRouter = require('./routes/citizenAuthRoutes');
 
 const app = express();
 
@@ -23,6 +25,8 @@ app.use(express.urlencoded({ extended: true }));
 // API Routes
 // ============================================
 app.use('/api', indexRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/citizen/auth', citizenAuthRouter);
 
 // ============================================
 // Serve Frontend (Production)

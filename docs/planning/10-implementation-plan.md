@@ -341,15 +341,15 @@ curl http://localhost:5001/api/auth/me
 ```
 
 ### Acceptance Criteria
-- [ ] Login สำเร็จ → ได้ JWT Token
-- [ ] Login ผิด → 401 Error
-- [ ] `/api/auth/me` + Token → ได้ข้อมูลผู้ใช้ + Role
-- [ ] API ที่ต้อง Login → ไม่มี Token = 401
-- [ ] API ที่จำกัด Role → Role ผิด = 403
-- [ ] เปลี่ยนรหัสผ่านสำเร็จ
-- [ ] Audit Log บันทึก Login
-- [ ] ⭐ Citizen สมัคร/Login ได้ + ได้ citizen JWT
-- [ ] ⭐ Citizen JWT เรียก endpoint staff = 403 และ staff JWT เรียก `/api/citizen/*` = 403
+- [x] Login สำเร็จ → ได้ JWT Token
+- [x] Login ผิด → 401 Error
+- [x] `/api/auth/me` + Token → ได้ข้อมูลผู้ใช้ + Role
+- [x] API ที่ต้อง Login → ไม่มี Token = 401
+- [x] API ที่จำกัด Role → Role ผิด = 403
+- [x] เปลี่ยนรหัสผ่านสำเร็จ
+- [x] Audit Log บันทึก Login
+- [x] ⭐ Citizen สมัคร/Login ได้ + ได้ citizen JWT
+- [x] ⭐ Citizen JWT เรียก endpoint staff = 403 และ staff JWT เรียก `/api/citizen/*` = 403
 
 ### ความเสี่ยง
 | ความเสี่ยง | วิธีรับมือ |

@@ -134,4 +134,5 @@ damrongdham-ssk/
 | 1 | Project Setup | ✅ |
 | 2 | Database Schema & Seed Data | ✅ |
 | 3 | Backend Core & MySQL Connection | ✅ |
-| 4–15 | ... | ⏳ |
+| 4 | Authentication & Authorization | ✅ |
+| 5–15 | ... | ⏳ |

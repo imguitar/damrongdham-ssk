@@ -1,5 +1,3 @@
-Prompt C: แก้ Bug เฉพาะ Phase ปัจจุบัน
-
 คุณคือ Senior Debugging Engineer
 
 ตอนนี้กำลังแก้ปัญหาใน Phase ปัจจุบันเท่านั้น

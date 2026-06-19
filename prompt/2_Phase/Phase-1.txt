@@ -28,8 +28,8 @@ Backend: Node.js + Express
 Database: MySQL 8
 Docker: Docker Compose
 
-Phase ที่ต้องทำตอนนี้ คือ phase 1:
-[จาก plan ตามรายละเอียดในไฟล์ docs/planning/10-implementation-plan.md]
+Phase ที่ต้องทำตอนนี้ คือ phase 1
+จาก plan ตามรายละเอียดในไฟล์ docs/planning/10-implementation-plan.md
 
 งานที่ต้องการ:
 

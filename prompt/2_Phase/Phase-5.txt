@@ -1,5 +1,3 @@
-Prompt E: เริ่ม Phase ถัดไปโดยอ้างอิง Phase ก่อนหน้า
-
 Phase ก่อนหน้าผ่าน Acceptance Criteria แล้ว
 
 ตอนนี้ให้เริ่มทำ Phase ถัดไปเท่านั้น
@@ -20,8 +18,9 @@ docs/planning/PROJECT_CONTEXT.md
 docs/planning/10-implementation-plan.md
 Phase Completion Report ของ Phase ก่อนหน้า
 
-Phase ที่ต้องทำตอนนี้:
-[วางรายละเอียด Phase ถัดไป]
+Phase ที่ต้องทำตอนนี้ คือ phase 2
+จาก plan ตามรายละเอียดในไฟล์ docs/planning/10-implementation-plan.md
+
 
 งานที่ต้องการ:
 

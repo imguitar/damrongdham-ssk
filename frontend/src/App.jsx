@@ -10,10 +10,11 @@ function App() {
     const checkHealth = async () => {
       try {
         const res = await axios.get('/api/health');
+        const health = res.data.data || res.data;
         setBackendStatus('connected');
-        setMessage(res.data.message || 'เชื่อมต่อ Backend สำเร็จ');
+        setMessage('เชื่อมต่อ Backend สำเร็จ');
 
-        if (res.data.database === 'connected') {
+        if (health.database === 'connected') {
           setDbStatus('connected');
         } else {
           setDbStatus('disconnected');

@@ -45,4 +45,12 @@ const updateLastLogin = async (id) => {
   await pool.query('UPDATE citizens SET last_login_at = NOW() WHERE id = ?', [id]);
 };
 
-module.exports = { findByEmail, findById, create, getPasswordHash, updatePassword, updateLastLogin };
+const updateProfile = async (id, { full_name, phone, id_card, address }) => {
+  await pool.query(
+    `UPDATE citizens SET full_name = ?, phone = ?, id_card = ?, address = ?, updated_at = NOW()
+     WHERE id = ?`,
+    [full_name, phone || null, id_card || null, address || null, id]
+  );
+};
+
+module.exports = { findByEmail, findById, create, getPasswordHash, updatePassword, updateLastLogin, updateProfile };

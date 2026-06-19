@@ -11,6 +11,10 @@ const { notFound, errorHandler } = require('./middleware/errorHandler');
 const indexRouter = require('./routes/index');
 const authRouter = require('./routes/authRoutes');
 const citizenAuthRouter = require('./routes/citizenAuthRoutes');
+const complaintRouter = require('./routes/complaintRoutes');
+const masterDataRouter = require('./routes/masterDataRoutes');
+const publicRouter = require('./routes/publicRoutes');
+const citizenRouter = require('./routes/citizenRoutes');
 
 const app = express();
 
@@ -27,6 +31,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api', indexRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/citizen/auth', citizenAuthRouter);
+app.use('/api/complaints', complaintRouter);
+app.use('/api/master-data', masterDataRouter);
+app.use('/api/public', publicRouter);
+app.use('/api/citizen', citizenRouter);
 
 // ============================================
 // Serve Frontend (Production)

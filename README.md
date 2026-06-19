@@ -135,4 +135,5 @@ damrongdham-ssk/
 | 2 | Database Schema & Seed Data | ✅ |
 | 3 | Backend Core & MySQL Connection | ✅ |
 | 4 | Authentication & Authorization | ✅ |
-| 5–15 | ... | ⏳ |
+| 5 | Complaint CRUD API | ✅ |
+| 6–15 | ... | ⏳ |

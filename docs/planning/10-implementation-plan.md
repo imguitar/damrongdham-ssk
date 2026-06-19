@@ -410,19 +410,19 @@ feat: complete phase 4 authentication and authorization
 | GET | `/api/districts` | รายการอำเภอ |
 
 ### Acceptance Criteria
-- [ ] สร้างเรื่องร้องเรียนใหม่ → ได้เลขที่เรื่อง DC-YYYYMM-XXXX
-- [ ] ดูรายการ + Filter + Pagination ทำงานถูกต้อง
-- [ ] ดูรายละเอียดเรื่อง → แสดงข้อมูลครบ
-- [ ] แก้ไขเรื่องสำเร็จ
-- [ ] อัปโหลดไฟล์แนบสำเร็จ
-- [ ] Public API ยื่นเรื่องได้ (Guest)
-- [ ] Public API ติดตามสถานะได้
-- [ ] Role ที่ไม่มีสิทธิ์ → 403
-- [ ] Agency Officer เห็นเฉพาะเรื่องของหน่วยงานตน
-- [ ] Master Data APIs ทำงาน (Categories, Channels, Districts)
-- [ ] ⭐ เรื่อง `is_anonymous` ถูก mask ข้อมูลผู้ร้อง + citizen_id จาก staff ทุก Role (list/detail/timeline)
-- [ ] ⭐ สมาชิกยื่นเรื่อง (ผูก citizen_id) + ดู "เรื่องของฉัน" ได้
-- [ ] ⭐ super_admin เปิดเผยตัวตน → ได้ข้อมูล + บันทึก `anonymous_reveal_logs` + audit
+- [x] สร้างเรื่องร้องเรียนใหม่ → ได้เลขที่เรื่อง DC-YYYYMM-XXXX
+- [x] ดูรายการ + Filter + Pagination ทำงานถูกต้อง
+- [x] ดูรายละเอียดเรื่อง → แสดงข้อมูลครบ
+- [x] แก้ไขเรื่องสำเร็จ
+- [x] อัปโหลดไฟล์แนบสำเร็จ
+- [x] Public API ยื่นเรื่องได้ (Guest)
+- [x] Public API ติดตามสถานะได้
+- [x] Role ที่ไม่มีสิทธิ์ → 403
+- [x] Agency Officer เห็นเฉพาะเรื่องของหน่วยงานตน
+- [x] Master Data APIs ทำงาน (Categories, Channels, Districts, Service Types, Complaint Natures, Complainant Types)
+- [x] ⭐ เรื่อง `is_anonymous` ถูก mask ข้อมูลผู้ร้อง + citizen_id จาก staff ทุก Role (list/detail/timeline)
+- [x] ⭐ สมาชิกยื่นเรื่อง (ผูก citizen_id) + ดู "เรื่องของฉัน" ได้
+- [x] ⭐ super_admin เปิดเผยตัวตน → ได้ข้อมูล + บันทึก `anonymous_reveal_logs` + audit
 
 ### ความเสี่ยง
 | ความเสี่ยง | วิธีรับมือ |

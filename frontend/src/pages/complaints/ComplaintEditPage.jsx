@@ -75,16 +75,19 @@ const ComplaintEditPage = () => {
     setSaving(true);
     setErrorMsg('');
     try {
+      const toNum = (v) => (v !== '' && v != null ? Number(v) || undefined : undefined);
       const payload = {
         ...form,
-        service_type_id: Number(form.service_type_id) || undefined,
-        complaint_nature_id: Number(form.complaint_nature_id) || undefined,
-        complainant_type_id: Number(form.complainant_type_id) || undefined,
-        channel_id: Number(form.channel_id) || undefined,
-        category_id: Number(form.category_id) || undefined,
-        province_id: Number(form.province_id) || undefined,
-        district_id: Number(form.district_id) || undefined,
-        subdistrict_id: Number(form.subdistrict_id) || undefined,
+        service_type_id: toNum(form.service_type_id),
+        complaint_nature_id: toNum(form.complaint_nature_id),
+        complainant_type_id: toNum(form.complainant_type_id),
+        channel_id: toNum(form.channel_id),
+        category_id: toNum(form.category_id),
+        province_id: toNum(form.province_id),
+        district_id: toNum(form.district_id),
+        subdistrict_id: toNum(form.subdistrict_id),
+        latitude: form.latitude !== '' && form.latitude != null ? Number(form.latitude) : undefined,
+        longitude: form.longitude !== '' && form.longitude != null ? Number(form.longitude) : undefined,
       };
       await complaintApi.update(id, payload);
       navigate(`/complaints/${id}`);

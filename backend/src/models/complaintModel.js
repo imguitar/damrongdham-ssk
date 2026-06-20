@@ -247,11 +247,12 @@ const update = async (id, fields) => {
   const sets = [];
   const params = [];
 
+  const DECIMAL_COLS = ['latitude', 'longitude'];
   for (const [key, val] of Object.entries(fields)) {
-    if (allowed.includes(key) && val !== undefined) {
-      sets.push(`${key} = ?`);
-      params.push(val);
-    }
+    if (!allowed.includes(key) || val === undefined) continue;
+    const sanitized = DECIMAL_COLS.includes(key) && val === '' ? null : val;
+    sets.push(`${key} = ?`);
+    params.push(sanitized);
   }
 
   if (sets.length === 0) return false;

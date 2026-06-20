@@ -907,11 +907,25 @@ fix: complete phase 14 testing and bug fixes
 | 15.7 | อัปเดต README.md (Final) | `README.md` |
 
 ### Acceptance Criteria
-- [ ] เอกสาร Deployment ครบถ้วน ทำตามได้จริง
-- [ ] Backup & Restore ทดสอบได้
-- [ ] Post-deployment Checklist ครบ
-- [ ] UAT Plan พร้อมให้ผู้ใช้ทดสอบ
-- [ ] README.md สมบูรณ์
+- [x] เอกสาร Deployment ครบถ้วน ทำตามได้จริง
+- [x] Backup & Restore ทดสอบได้
+- [x] Post-deployment Checklist ครบ
+- [x] UAT Plan พร้อมให้ผู้ใช้ทดสอบ
+- [x] README.md สมบูรณ์
+
+### Phase 15 Review (2026-06-20)
+
+**สถานะ: ✅ PASSED — ทุก AC ผ่าน**
+
+| งาน | ไฟล์ | สถานะ |
+|-----|------|-------|
+| 15.1 Deployment Guide | `docs/deployment/DEPLOYMENT.md` | ✅ |
+| 15.2 Backup & Restore | `docs/deployment/BACKUP_RESTORE.md` | ✅ |
+| 15.3 Monitoring & Maintenance | `docs/deployment/MONITORING_MAINTENANCE.md` | ✅ |
+| 15.4 Post-deployment Checklist | `docs/deployment/POST_DEPLOYMENT_CHECKLIST.md` | ✅ |
+| 15.5 UAT Plan | `docs/testing/UAT_PLAN.md` | ✅ |
+| 15.6 .env.production.example | `.env.production.example` (เพิ่ม NODE_ENV, PORT, DB_*) | ✅ |
+| 15.7 README.md | Phase 15 → ✅ | ✅ |
 
 ### Git Commit
 ```

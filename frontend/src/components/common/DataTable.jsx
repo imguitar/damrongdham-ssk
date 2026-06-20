@@ -12,9 +12,10 @@ import LoadingSpinner from './LoadingSpinner';
 import EmptyState from './EmptyState';
 
 /**
- * columns: [{ id, label, minWidth, align, render }]
+ * columns: [{ id|key, label, minWidth|width, align, render(row) }]
  * rows: array of data objects
  * pagination props: total, page (0-based), rowsPerPage, onPageChange, onRowsPerPageChange
+ * onRowClick(row): optional row click handler
  */
 const DataTable = ({
   columns = [],
@@ -25,9 +26,11 @@ const DataTable = ({
   rowsPerPage = DEFAULT_PAGE_SIZE,
   onPageChange,
   onRowsPerPageChange,
+  onRowClick,
   stickyHeader = true,
   emptyTitle,
   emptyDescription,
+  emptyText,
   sx = {},
 }) => {
   return (
@@ -36,15 +39,18 @@ const DataTable = ({
         <Table stickyHeader={stickyHeader} size="small">
           <TableHead>
             <TableRow>
-              {columns.map((col) => (
-                <TableCell
-                  key={col.id}
-                  align={col.align || 'left'}
-                  style={{ minWidth: col.minWidth }}
-                >
-                  {col.label}
-                </TableCell>
-              ))}
+              {columns.map((col) => {
+                const colKey = col.id || col.key;
+                return (
+                  <TableCell
+                    key={colKey}
+                    align={col.align || 'left'}
+                    style={{ minWidth: col.minWidth || col.width }}
+                  >
+                    {col.label}
+                  </TableCell>
+                );
+              })}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -57,17 +63,25 @@ const DataTable = ({
             ) : rows.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={columns.length} sx={{ border: 0 }}>
-                  <EmptyState title={emptyTitle} description={emptyDescription} />
+                  <EmptyState title={emptyTitle || emptyText} description={emptyDescription} />
                 </TableCell>
               </TableRow>
             ) : (
               rows.map((row, idx) => (
-                <TableRow hover key={row.id ?? idx}>
-                  {columns.map((col) => (
-                    <TableCell key={col.id} align={col.align || 'left'}>
-                      {col.render ? col.render(row[col.id], row) : row[col.id] ?? '-'}
-                    </TableCell>
-                  ))}
+                <TableRow
+                  hover
+                  key={row.id ?? idx}
+                  onClick={onRowClick ? () => onRowClick(row) : undefined}
+                  sx={onRowClick ? { cursor: 'pointer' } : {}}
+                >
+                  {columns.map((col) => {
+                    const colKey = col.id || col.key;
+                    return (
+                      <TableCell key={colKey} align={col.align || 'left'}>
+                        {col.render ? col.render(row) : row[colKey] ?? '-'}
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               ))
             )}

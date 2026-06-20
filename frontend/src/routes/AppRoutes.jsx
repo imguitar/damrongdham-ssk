@@ -1,79 +1,109 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import AdminLayout from '../components/layout/AdminLayout';
 import PublicLayout from '../components/layout/PublicLayout';
+import CitizenLayout from '../components/layout/CitizenLayout';
 import ProtectedRoute from './ProtectedRoute';
+import CitizenProtectedRoute from './CitizenProtectedRoute';
 import NotFoundPage from '../pages/errors/NotFoundPage';
 import ForbiddenPage from '../pages/errors/ForbiddenPage';
 import { ROLES } from '../utils/constants';
 
-// ── Phase 9: Real pages ───────────────────────────────────────────────────────
+// ── Auth pages ────────────────────────────────────────────────────────────────
 import LoginPage          from '../pages/auth/LoginPage';
 import ChangePasswordPage from '../pages/auth/ChangePasswordPage';
 import ProfilePage        from '../pages/profile/ProfilePage';
 
-// ── Placeholder pages (replaced in Phase 10, 11 …) ──────────────────────────
+// ── Complaint pages ───────────────────────────────────────────────────────────
+import ComplaintListPage   from '../pages/complaints/ComplaintListPage';
+import ComplaintCreatePage from '../pages/complaints/ComplaintCreatePage';
+import ComplaintDetailPage from '../pages/complaints/ComplaintDetailPage';
+import ComplaintEditPage   from '../pages/complaints/ComplaintEditPage';
+
+// ── Admin pages ───────────────────────────────────────────────────────────────
+import UserListPage  from '../pages/users/UserListPage';
+import UserFormPage  from '../pages/users/UserFormPage';
+import AgencyListPage from '../pages/agencies/AgencyListPage';
+import SettingsPage   from '../pages/settings/SettingsPage';
+
+// ── Public pages ──────────────────────────────────────────────────────────────
+import PublicComplaintPage from '../pages/public/PublicComplaintPage';
+import PublicTrackPage     from '../pages/public/PublicTrackPage';
+import PublicSuccessPage   from '../pages/public/PublicSuccessPage';
+
+// ── Citizen pages ─────────────────────────────────────────────────────────────
+import CitizenLoginPage           from '../pages/citizen/CitizenLoginPage';
+import CitizenRegisterPage        from '../pages/citizen/CitizenRegisterPage';
+import CitizenComplaintListPage   from '../pages/citizen/CitizenComplaintListPage';
+import CitizenComplaintCreatePage from '../pages/citizen/CitizenComplaintCreatePage';
+import CitizenComplaintDetailPage from '../pages/citizen/CitizenComplaintDetailPage';
+import CitizenProfilePage         from '../pages/citizen/CitizenProfilePage';
+
+// ── Placeholder (Phase 11+) ───────────────────────────────────────────────────
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-
 const Placeholder = ({ title }) => (
   <Box py={6} textAlign="center">
     <Typography variant="h5" color="text.secondary">{title}</Typography>
-    <Typography variant="body2" color="text.disabled" mt={1}>
-      (อยู่ระหว่างพัฒนา)
-    </Typography>
+    <Typography variant="body2" color="text.disabled" mt={1}>(อยู่ระหว่างพัฒนา)</Typography>
   </Box>
 );
-
 const DashboardPage      = () => <Placeholder title="Dashboard" />;
-const ComplaintsPage     = () => <Placeholder title="เรื่องร้องเรียน" />;
-const ComplaintNewPage   = () => <Placeholder title="ยื่นเรื่องร้องเรียน" />;
-const ComplaintDetailPage= () => <Placeholder title="รายละเอียดเรื่องร้องเรียน" />;
-const ComplaintEditPage  = () => <Placeholder title="แก้ไขเรื่องร้องเรียน" />;
 const ReportsPage        = () => <Placeholder title="รายงาน" />;
 const NotificationsPage  = () => <Placeholder title="การแจ้งเตือน" />;
-const UsersPage          = () => <Placeholder title="จัดการผู้ใช้งาน" />;
-const UserNewPage        = () => <Placeholder title="เพิ่มผู้ใช้งาน" />;
-const UserEditPage       = () => <Placeholder title="แก้ไขผู้ใช้งาน" />;
-const AgenciesPage       = () => <Placeholder title="จัดการหน่วยงาน" />;
-const SettingsPage       = () => <Placeholder title="ตั้งค่า Master Data" />;
 const AuditLogsPage      = () => <Placeholder title="Audit Log" />;
-const PublicComplaintNew = () => <Placeholder title="ยื่นเรื่องร้องเรียน (ประชาชน)" />;
-const PublicTrackPage    = () => <Placeholder title="ติดตามสถานะเรื่องร้องเรียน" />;
+
 // ─────────────────────────────────────────────────────────────────────────────
 
-const { SUPER_ADMIN, ADMIN, SUPERVISOR, OFFICER, AGENCY_HEAD, AGENCY_OFFICER, VIEWER } = ROLES;
+const { SUPER_ADMIN, ADMIN, OFFICER, CHIEF, AGENCY_HEAD, AGENCY_OFFICER, EXECUTIVE } = ROLES;
 
-const ALL_STAFF    = [SUPER_ADMIN, ADMIN, SUPERVISOR, OFFICER, AGENCY_HEAD, AGENCY_OFFICER, VIEWER];
-const CENTER_ROLES = [SUPER_ADMIN, ADMIN, SUPERVISOR, OFFICER];
-const WRITE_ROLES  = [SUPER_ADMIN, ADMIN, SUPERVISOR, OFFICER];
-const REPORT_ROLES = [SUPER_ADMIN, ADMIN, SUPERVISOR, OFFICER, VIEWER];
+const ALL_STAFF    = [SUPER_ADMIN, ADMIN, OFFICER, CHIEF, AGENCY_HEAD, AGENCY_OFFICER, EXECUTIVE];
+const CENTER_ROLES = [SUPER_ADMIN, ADMIN, OFFICER, CHIEF];
+const WRITE_ROLES  = [SUPER_ADMIN, ADMIN, OFFICER, CHIEF];
+const REPORT_ROLES = [SUPER_ADMIN, ADMIN, OFFICER, CHIEF, EXECUTIVE];
 const ADMIN_ROLES  = [SUPER_ADMIN, ADMIN];
 
 const AppRoutes = () => (
   <Routes>
-    {/* ── Login — standalone (LoginPage has its own full-page centered layout) ── */}
+    {/* ── Login — standalone ──────────────────────────────────────────── */}
     <Route path="/login" element={<LoginPage />} />
 
-    {/* ── Public (with PublicLayout: AppBar + Footer) ── */}
+    {/* ── Public with AppBar + Footer ─────────────────────────────────── */}
     <Route element={<PublicLayout />}>
-      <Route path="/public/complaints/new" element={<PublicComplaintNew />} />
-      <Route path="/public/track" element={<PublicTrackPage />} />
+      <Route path="/public/complaints/new" element={<PublicComplaintPage />} />
+      <Route path="/public/track"          element={<PublicTrackPage />} />
+      <Route path="/public/success"        element={<PublicSuccessPage />} />
     </Route>
 
-    {/* ── Protected (auth required + AdminLayout) ── */}
+    {/* ── Citizen section (CitizenLayout) ─────────────────────────────── */}
+    <Route element={<CitizenLayout />}>
+      {/* Public citizen pages */}
+      <Route path="/citizen/login"    element={<CitizenLoginPage />} />
+      <Route path="/citizen/register" element={<CitizenRegisterPage />} />
+
+      {/* Protected citizen pages */}
+      <Route element={<CitizenProtectedRoute />}>
+        <Route path="/citizen"                                     element={<Navigate to="/citizen/complaints" replace />} />
+        <Route path="/citizen/complaints"                          element={<CitizenComplaintListPage />} />
+        <Route path="/citizen/complaints/new"                      element={<CitizenComplaintCreatePage />} />
+        <Route path="/citizen/complaints/:complaint_number"        element={<CitizenComplaintDetailPage />} />
+        <Route path="/citizen/profile"                             element={<CitizenProfilePage />} />
+      </Route>
+    </Route>
+
+    {/* ── Protected admin routes ───────────────────────────────────────── */}
     <Route element={<ProtectedRoute allowedRoles={ALL_STAFF} />}>
       <Route element={<AdminLayout />}>
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardPage />} />
 
         {/* Complaints — all staff */}
-        <Route path="/complaints" element={<ComplaintsPage />} />
+        <Route path="/complaints"     element={<ComplaintListPage />} />
         <Route path="/complaints/:id" element={<ComplaintDetailPage />} />
 
-        {/* Complaints write — center roles only */}
+        {/* Complaints write — center roles */}
         <Route element={<ProtectedRoute allowedRoles={WRITE_ROLES} />}>
-          <Route path="/complaints/new" element={<ComplaintNewPage />} />
-          <Route path="/complaints/:id/edit" element={<ComplaintEditPage />} />
+          <Route path="/complaints/new"       element={<ComplaintCreatePage />} />
+          <Route path="/complaints/:id/edit"  element={<ComplaintEditPage />} />
         </Route>
 
         {/* Reports */}
@@ -88,25 +118,25 @@ const AppRoutes = () => (
 
         {/* Admin only */}
         <Route element={<ProtectedRoute allowedRoles={ADMIN_ROLES} />}>
-          <Route path="/users" element={<UsersPage />} />
-          <Route path="/users/new" element={<UserNewPage />} />
-          <Route path="/users/:id/edit" element={<UserEditPage />} />
-          <Route path="/agencies" element={<AgenciesPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/settings/*" element={<SettingsPage />} />
-          <Route path="/audit-logs" element={<AuditLogsPage />} />
+          <Route path="/users"          element={<UserListPage />} />
+          <Route path="/users/new"      element={<UserFormPage />} />
+          <Route path="/users/:id/edit" element={<UserFormPage />} />
+          <Route path="/agencies"       element={<AgencyListPage />} />
+          <Route path="/settings"       element={<SettingsPage />} />
+          <Route path="/settings/*"     element={<SettingsPage />} />
+          <Route path="/audit-logs"     element={<AuditLogsPage />} />
         </Route>
 
-        {/* Profile — all authenticated */}
-        <Route path="/profile" element={<ProfilePage />} />
+        {/* All authenticated */}
+        <Route path="/profile"         element={<ProfilePage />} />
         <Route path="/change-password" element={<ChangePasswordPage />} />
       </Route>
     </Route>
 
-    {/* ── Error pages ── */}
+    {/* ── Error pages ──────────────────────────────────────────────────── */}
     <Route path="/403" element={<ForbiddenPage />} />
     <Route path="/404" element={<NotFoundPage />} />
-    <Route path="*" element={<Navigate to="/404" replace />} />
+    <Route path="*"    element={<Navigate to="/404" replace />} />
   </Routes>
 );
 

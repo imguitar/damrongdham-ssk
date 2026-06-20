@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { AuthProvider } from './contexts/AuthContext';
+import { CitizenAuthProvider } from './contexts/CitizenAuthContext';
 import theme from './theme/theme';
 import App from './App.jsx';
 import './index.css';
@@ -14,7 +15,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <AuthProvider>
-          <App />
+          <CitizenAuthProvider>
+            <App />
+          </CitizenAuthProvider>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>

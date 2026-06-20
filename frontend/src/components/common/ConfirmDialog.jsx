@@ -8,6 +8,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 const ConfirmDialog = ({
   open,
   onClose,
+  onCancel,
   onConfirm,
   title = 'ยืนยันการดำเนินการ',
   message,
@@ -15,14 +16,16 @@ const ConfirmDialog = ({
   cancelLabel = 'ยกเลิก',
   confirmColor = 'primary',
   loading = false,
-}) => (
-  <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+}) => {
+  const handleCancel = onCancel || onClose;
+  return (
+  <Dialog open={open} onClose={handleCancel} maxWidth="xs" fullWidth>
     <DialogTitle>{title}</DialogTitle>
     <DialogContent>
       <DialogContentText>{message}</DialogContentText>
     </DialogContent>
     <DialogActions sx={{ px: 3, pb: 2 }}>
-      <Button onClick={onClose} disabled={loading}>
+      <Button onClick={handleCancel} disabled={loading}>
         {cancelLabel}
       </Button>
       <Button
@@ -35,6 +38,7 @@ const ConfirmDialog = ({
       </Button>
     </DialogActions>
   </Dialog>
-);
+  );
+};
 
 export default ConfirmDialog;

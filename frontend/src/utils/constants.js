@@ -61,23 +61,21 @@ export const PRIORITY_COLORS = {
 export const ROLES = {
   SUPER_ADMIN:    'super_admin',
   ADMIN:          'admin',
-  SUPERVISOR:     'supervisor',
   OFFICER:        'officer',
+  CHIEF:          'chief',
   AGENCY_HEAD:    'agency_head',
   AGENCY_OFFICER: 'agency_officer',
-  REPORTER:       'reporter',
-  VIEWER:         'viewer',
+  EXECUTIVE:      'executive',
 };
 
 export const ROLE_LABELS = {
   super_admin:    'ผู้ดูแลระบบสูงสุด',
   admin:          'ผู้ดูแลระบบ',
-  supervisor:     'หัวหน้างาน',
   officer:        'เจ้าหน้าที่',
+  chief:          'หัวหน้าเจ้าหน้าที่',
   agency_head:    'หัวหน้าหน่วยงาน',
   agency_officer: 'เจ้าหน้าที่หน่วยงาน',
-  reporter:       'ผู้ร้องเรียน',
-  viewer:         'ผู้ชม',
+  executive:      'ผู้บริหาร',
 };
 
 export const DRAWER_WIDTH = 240;

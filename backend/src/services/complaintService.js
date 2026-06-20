@@ -2,6 +2,7 @@
 
 const pool = require('../config/database');
 const { calculateDueDate } = require('./slaService');
+const notifSvc = require('./notificationService');
 
 const CENTER_ROLES = ['super_admin', 'admin', 'officer', 'chief'];
 const AGENCY_ROLES = ['agency_officer', 'agency_head'];
@@ -58,7 +59,7 @@ const changeStatus = async (conn, complaintId, fromStatus, toStatus, changedBy, 
 
 // For center-only transitions (screen, reject, review, close, sendBack) — handles own transaction
 const executeTransition = async (complaintId, action, userId, role, options = {}) => {
-  const [[complaint]] = await pool.query('SELECT id, status, category_id FROM complaints WHERE id = ?', [complaintId]);
+  const [[complaint]] = await pool.query('SELECT id, status, category_id, complaint_number FROM complaints WHERE id = ?', [complaintId]);
   if (!complaint) throw Object.assign(new Error('ไม่พบเรื่องร้องเรียน'), { statusCode: 404, code: 'NOT_FOUND' });
 
   const { valid, to, message } = validateTransition(complaint.status, action, role);
@@ -87,6 +88,12 @@ const executeTransition = async (complaintId, action, userId, role, options = {}
   } finally {
     conn.release();
   }
+
+  // Notify after commit — fire and forget (only for transitions that affect other parties)
+  if (['review', 'close', 'sendBack'].includes(action)) {
+    notifSvc.notifyWorkflow(complaintId, action, { complaint_number: complaint.complaint_number });
+  }
+
   return to;
 };
 
@@ -128,6 +135,12 @@ const executeAssign = async (complaint, userId, role, { agencyId, note } = {}) =
   } finally {
     conn.release();
   }
+  // Notify agency after assign commit — fire and forget
+  notifSvc.notifyWorkflow(complaint.id, 'assign', {
+    complaint_number: complaint.complaint_number,
+    agencyId,
+  });
+
   return { to, dueDate, assignmentId };
 };
 

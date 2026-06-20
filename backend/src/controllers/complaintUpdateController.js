@@ -1,5 +1,6 @@
 'use strict';
 
+const pool = require('../config/database');
 const complaintModel = require('../models/complaintModel');
 const complaintUpdateModel = require('../models/complaintUpdateModel');
 const { success, error } = require('../utils/response');
@@ -28,6 +29,14 @@ const create = async (req, res, next) => {
       content: content.trim(),
       updatedBy: req.user.id,
     });
+
+    // Reset escalation clock when agency posts a PROGRESS update
+    if (update_type === 'PROGRESS') {
+      await pool.query(
+        'UPDATE complaints SET last_progress_at = NOW(), escalation_level = 0, updated_at = NOW() WHERE id = ?',
+        [complaint.id]
+      );
+    }
 
     return success(res, { id, message: 'บันทึกการอัปเดตเรียบร้อย' }, 201);
   } catch (err) {

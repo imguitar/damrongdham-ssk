@@ -3,6 +3,7 @@
 require('dotenv').config();
 
 const { app } = require('./app');
+const { startAllJobs } = require('./jobs');
 
 const PORT = process.env.PORT || 5001;
 
@@ -17,4 +18,5 @@ app.listen(PORT, '0.0.0.0', () => {
   Mode:   ${process.env.NODE_ENV || 'development'}
   ============================================================
   `);
+  startAllJobs();
 });

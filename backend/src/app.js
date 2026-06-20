@@ -21,6 +21,7 @@ const userRouter = require('./routes/userRoutes');
 const dashboardRouter = require('./routes/dashboardRoutes');
 const reportRouter = require('./routes/reportRoutes');
 const auditLogRouter = require('./routes/auditLogRoutes');
+const notificationRouter = require('./routes/notificationRoutes');
 
 const app = express();
 
@@ -47,6 +48,7 @@ app.use('/api/users', userRouter);
 app.use('/api/dashboard', dashboardRouter);
 app.use('/api/reports', reportRouter);
 app.use('/api/audit-logs', auditLogRouter);
+app.use('/api/notifications', notificationRouter);
 
 // ============================================
 // Serve Frontend (Production)

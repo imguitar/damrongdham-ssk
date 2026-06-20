@@ -43,16 +43,8 @@ import DashboardPage from '../pages/dashboard/DashboardPage';
 import ReportPage    from '../pages/reports/ReportPage';
 import AuditLogPage  from '../pages/audit/AuditLogPage';
 
-// ── Placeholder (Phase 12+) ───────────────────────────────────────────────────
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-const Placeholder = ({ title }) => (
-  <Box py={6} textAlign="center">
-    <Typography variant="h5" color="text.secondary">{title}</Typography>
-    <Typography variant="body2" color="text.disabled" mt={1}>(อยู่ระหว่างพัฒนา)</Typography>
-  </Box>
-);
-const NotificationsPage = () => <Placeholder title="การแจ้งเตือน" />;
+// ── Phase 12 pages ────────────────────────────────────────────────────────────
+import NotificationPage from '../pages/notifications/NotificationPage';
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -113,10 +105,8 @@ const AppRoutes = () => (
           <Route path="/reports" element={<ReportPage />} />
         </Route>
 
-        {/* Notifications */}
-        <Route element={<ProtectedRoute allowedRoles={CENTER_ROLES} />}>
-          <Route path="/notifications" element={<NotificationsPage />} />
-        </Route>
+        {/* Notifications — all staff can view their own notifications */}
+        <Route path="/notifications" element={<NotificationPage />} />
 
         {/* Admin only */}
         <Route element={<ProtectedRoute allowedRoles={ADMIN_ROLES} />}>

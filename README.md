@@ -142,7 +142,17 @@ damrongdham-ssk/
 | 9 | Frontend Authentication | ✅ |
 | 10 | Complaint Management UI | ✅ |
 | 11 | Dashboard and Report UI | ✅ |
-| 12–15 | ... | ⏳ |
+| 12 | Notification and SLA Alert | ✅ |
+| 13–15 | ... | ⏳ |
+
+## API Endpoints (Phase 12 เพิ่ม)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/notifications` | รายการการแจ้งเตือน (paginated, `?unread_only=true`) |
+| GET | `/api/notifications/unread-count` | นับการแจ้งเตือนที่ยังไม่อ่าน (30s polling) |
+| PATCH | `/api/notifications/:id/read` | ทำเครื่องหมายอ่านแล้ว |
+| PATCH | `/api/notifications/read-all` | ทำเครื่องหมายอ่านทั้งหมด |
 
 ## API Endpoints (Phase 7 เพิ่ม)
 

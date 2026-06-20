@@ -6,6 +6,7 @@ const complaintModel = require('../models/complaintModel');
 const { validateTransition, changeStatus, AGENCY_ROLES } = require('../services/complaintService');
 const { success, error } = require('../utils/response');
 const { writeAuditLog } = require('../middleware/auditLog');
+const notifSvc = require('../services/notificationService');
 
 // Check agency ownership for all assignment actions
 const checkAgencyAccess = (req, assignment) => {
@@ -56,6 +57,8 @@ const accept = async (req, res, next) => {
 
     writeAuditLog({ userId: req.user.id, action: 'ACCEPT_ASSIGNMENT', resource: 'assignments', resourceId: assignment.id, ipAddress: req.ip, userAgent: req.get('user-agent') });
 
+    notifSvc.notifyWorkflow(complaint.id, 'accept', { complaint_number: complaint.complaint_number });
+
     const updated = await assignmentModel.findById(assignment.id);
     return success(res, { assignment: updated });
   } catch (err) {
@@ -98,6 +101,8 @@ const returnComplaint = async (req, res, next) => {
 
     writeAuditLog({ userId: req.user.id, action: 'RETURN_ASSIGNMENT', resource: 'assignments', resourceId: assignment.id, details: { return_reason }, ipAddress: req.ip, userAgent: req.get('user-agent') });
 
+    notifSvc.notifyWorkflow(complaint.id, 'return', { complaint_number: complaint.complaint_number });
+
     const updated = await assignmentModel.findById(assignment.id);
     return success(res, { assignment: updated });
   } catch (err) {
@@ -133,6 +138,8 @@ const start = async (req, res, next) => {
     }
 
     writeAuditLog({ userId: req.user.id, action: 'START_ASSIGNMENT', resource: 'assignments', resourceId: assignment.id, ipAddress: req.ip, userAgent: req.get('user-agent') });
+
+    notifSvc.notifyWorkflow(complaint.id, 'start', { complaint_number: complaint.complaint_number });
 
     const updated = await assignmentModel.findById(assignment.id);
     return success(res, { assignment: updated });
@@ -179,6 +186,8 @@ const resolve = async (req, res, next) => {
     }
 
     writeAuditLog({ userId: req.user.id, action: 'RESOLVE_ASSIGNMENT', resource: 'assignments', resourceId: assignment.id, ipAddress: req.ip, userAgent: req.get('user-agent') });
+
+    notifSvc.notifyWorkflow(complaint.id, 'resolve', { complaint_number: complaint.complaint_number });
 
     const updated = await assignmentModel.findById(assignment.id);
     return success(res, { assignment: updated });

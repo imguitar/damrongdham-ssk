@@ -762,15 +762,15 @@ feat: complete phase 11 dashboard and report ui
 | 12.9 | สร้าง Notification Dropdown | ใน `Topbar.jsx` |
 
 ### Acceptance Criteria
-- [ ] Notification สร้างอัตโนมัติเมื่อ Workflow Action เกิดขึ้น
-- [ ] Notification Badge แสดง Unread Count
-- [ ] Click Notification → ไปหน้า Complaint Detail
-- [ ] Mark as Read / Mark All as Read ทำงาน
-- [ ] Scheduled Job: ตรวจ Overdue ทุกวัน 08:00
-- [ ] Scheduled Job: ตรวจ Near Due ทุกวัน 08:00
-- [ ] is_overdue Flag อัปเดตอัตโนมัติ
-- [ ] ⭐ Scheduled Job: เร่งรัดการอัพเดตสถานะ — ส่ง N-10 (30 วัน → เจ้าหน้าที่ผู้รับผิดชอบ), N-11 (45 วัน → +หัวหน้าหน่วยงาน), N-12 (52 วัน → +หัวหน้าหน่วยงาน) ครั้งเดียวต่อระดับ
-- [ ] ⭐ มีการอัปเดตความคืบหน้า → รีเซ็ต `last_progress_at`/`escalation_level` และเริ่มนับ 30 วันใหม่
+- [x] Notification สร้างอัตโนมัติเมื่อ Workflow Action เกิดขึ้น
+- [x] Notification Badge แสดง Unread Count
+- [x] Click Notification → ไปหน้า Complaint Detail
+- [x] Mark as Read / Mark All as Read ทำงาน
+- [x] Scheduled Job: ตรวจ Overdue ทุกวัน 08:00
+- [x] Scheduled Job: ตรวจ Near Due ทุกวัน 08:00
+- [x] is_overdue Flag อัปเดตอัตโนมัติ
+- [x] ⭐ Scheduled Job: เร่งรัดการอัพเดตสถานะ — ส่ง ESCALATION_L1 (30 วัน → center), ESCALATION_L2 (45 วัน → center+agency_head), ESCALATION_L3 (52 วัน → center+agency_head) ครั้งเดียวต่อระดับ
+- [x] ⭐ มีการอัปเดตความคืบหน้า (PROGRESS) → รีเซ็ต `last_progress_at`/`escalation_level=0` และเริ่มนับ 30 วันใหม่
 
 ### Git Commit
 ```

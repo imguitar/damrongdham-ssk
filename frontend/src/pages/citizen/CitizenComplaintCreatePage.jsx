@@ -64,13 +64,15 @@ const CitizenComplaintCreatePage = () => {
         subdistrict_id: Number(form.subdistrict_id) || undefined,
       };
       const res = await citizenApi.submitComplaint(payload);
-      const complaintNumber = res.data?.data?.complaint_number;
+      const complaintNumber = res.data?.data?.complaint?.complaint_number;
+      const complaintId = res.data?.data?.complaint?.id;
 
-      if (pendingFiles.length) {
+      if (pendingFiles.length && complaintId) {
         await Promise.all(
           pendingFiles.map((file) => {
             const fd = new FormData();
             fd.append('file', file);
+            fd.append('complaint_id', complaintId);
             return citizenApi.uploadAttachment(fd).catch(() => {});
           })
         );

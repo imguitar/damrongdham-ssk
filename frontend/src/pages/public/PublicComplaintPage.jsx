@@ -66,12 +66,14 @@ const PublicComplaintPage = () => {
       };
       const res = await publicApi.submitComplaint(payload);
       const complaintNumber = res.data?.data?.complaint_number;
+      const complaintId = res.data?.data?.id;
 
-      if (pendingFiles.length) {
+      if (pendingFiles.length && complaintId) {
         await Promise.all(
           pendingFiles.map((file) => {
             const fd = new FormData();
             fd.append('file', file);
+            fd.append('complaint_id', complaintId);
             return publicApi.uploadAttachment(fd).catch(() => {});
           })
         );

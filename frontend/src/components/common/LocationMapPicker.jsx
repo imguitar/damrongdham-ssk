@@ -26,7 +26,13 @@ const LocationMapPicker = ({ latitude, longitude, onChange, readOnly = false }) 
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markerRef = useRef(null);
+  const readOnlyRef = useRef(readOnly);
+  const onChangeRef = useRef(onChange);
   const [gpsLoading, setGpsLoading] = useState(false);
+
+  // Keep refs current so click handler never captures stale values
+  useEffect(() => { readOnlyRef.current = readOnly; }, [readOnly]);
+  useEffect(() => { onChangeRef.current = onChange; }, [onChange]);
 
   const lat = parseFloat(latitude) || null;
   const lng = parseFloat(longitude) || null;
@@ -47,17 +53,19 @@ const LocationMapPicker = ({ latitude, longitude, onChange, readOnly = false }) 
       markerRef.current = L.marker([lat, lng]).addTo(map);
     }
 
-    if (!readOnly) {
-      map.on('click', (e) => {
-        const { lat: newLat, lng: newLng } = e.latlng;
-        if (markerRef.current) {
-          markerRef.current.setLatLng([newLat, newLng]);
-        } else {
-          markerRef.current = L.marker([newLat, newLng]).addTo(map);
-        }
-        onChange?.({ latitude: newLat.toFixed(7), longitude: newLng.toFixed(7) });
-      });
-    }
+    // Always register click; check readOnlyRef at call-time (not capture-time)
+    // This prevents the bug where readOnly=true on first render (while masterData
+    // loads) causes the handler to be skipped permanently.
+    map.on('click', (e) => {
+      if (readOnlyRef.current) return;
+      const { lat: newLat, lng: newLng } = e.latlng;
+      if (markerRef.current) {
+        markerRef.current.setLatLng([newLat, newLng]);
+      } else {
+        markerRef.current = L.marker([newLat, newLng]).addTo(map);
+      }
+      onChangeRef.current?.({ latitude: newLat.toFixed(7), longitude: newLng.toFixed(7) });
+    });
 
     mapInstanceRef.current = map;
 
@@ -87,7 +95,7 @@ const LocationMapPicker = ({ latitude, longitude, onChange, readOnly = false }) 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude: gLat, longitude: gLng } = pos.coords;
-        onChange?.({ latitude: gLat.toFixed(7), longitude: gLng.toFixed(7) });
+        onChangeRef.current?.({ latitude: gLat.toFixed(7), longitude: gLng.toFixed(7) });
         setGpsLoading(false);
       },
       () => {

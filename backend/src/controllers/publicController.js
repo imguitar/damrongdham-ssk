@@ -152,6 +152,15 @@ const getPublicComplainantTypes = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+const getPublicSubdistricts = async (req, res, next) => {
+  try {
+    const { district_id } = req.query;
+    if (!district_id) return error(res, 'VALIDATION_ERROR', 'กรุณาระบุ district_id', 400);
+    const rows = await masterDataModel.findSubdistrictsByDistrictId(district_id, true);
+    return success(res, { subdistricts: rows });
+  } catch (err) { next(err); }
+};
+
 module.exports = {
   submitComplaint,
   trackComplaint,
@@ -163,4 +172,5 @@ module.exports = {
   getPublicServiceTypes,
   getPublicComplaintNatures,
   getPublicComplainantTypes,
+  getPublicSubdistricts,
 };

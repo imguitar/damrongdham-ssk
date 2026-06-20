@@ -13,6 +13,7 @@ router.get('/master-data/districts', publicController.getPublicDistricts);
 router.get('/master-data/service-types', publicController.getPublicServiceTypes);
 router.get('/master-data/complaint-natures', publicController.getPublicComplaintNatures);
 router.get('/master-data/complainant-types', publicController.getPublicComplainantTypes);
+router.get('/master-data/subdistricts', publicController.getPublicSubdistricts);
 
 // Public complaint submission (no auth)
 router.post('/complaints', validateComplaint, publicController.submitComplaint);

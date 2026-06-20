@@ -5,6 +5,8 @@ export const getCategories = () => axiosInstance.get('/public/master-data/catego
 export const getChannels = () => axiosInstance.get('/public/master-data/channels');
 export const getProvinces = () => axiosInstance.get('/public/master-data/provinces');
 export const getDistricts = () => axiosInstance.get('/public/master-data/districts');
+export const getSubdistricts = (district_id) =>
+  axiosInstance.get('/public/master-data/subdistricts', { params: { district_id } });
 export const getServiceTypes = () => axiosInstance.get('/public/master-data/service-types');
 export const getComplaintNatures = () => axiosInstance.get('/public/master-data/complaint-natures');
 export const getComplainantTypes = () => axiosInstance.get('/public/master-data/complainant-types');

@@ -49,6 +49,10 @@ const useMasterData = ({ usePublic = false } = {}) => {
   };
 
   const fetchSubdistricts = async (district_id) => {
+    if (usePublic) {
+      const res = await publicApi.getSubdistricts(district_id);
+      return res?.data?.data?.subdistricts || [];
+    }
     const res = await masterDataApi.listSubdistricts(district_id);
     return res?.data?.data?.subdistricts || [];
   };

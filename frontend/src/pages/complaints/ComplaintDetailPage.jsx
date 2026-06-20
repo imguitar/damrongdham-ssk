@@ -40,7 +40,7 @@ import { ROLES, STATUS_LABELS } from '../../utils/constants';
 import { formatDate, formatDateTime } from '../../utils/formatters';
 
 // ── Role groups ───────────────────────────────────────────────
-const CENTER_ROLES = [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.OFFICER];
+const CENTER_ROLES = [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.OFFICER, ROLES.CHIEF];
 const AGENCY_ROLES = [ROLES.AGENCY_HEAD, ROLES.AGENCY_OFFICER];
 const CAN_SEE_PII = [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.OFFICER];
 

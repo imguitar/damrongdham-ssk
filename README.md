@@ -138,7 +138,8 @@ damrongdham-ssk/
 | 5 | Complaint CRUD API | ✅ |
 | 6 | Assignment & Status Workflow API | ✅ |
 | 7 | Dashboard and Report API | ✅ |
-| 8–15 | ... | ⏳ |
+| 8 | Frontend Layout and Routing | ✅ |
+| 9–15 | ... | ⏳ |
 
 ## API Endpoints (Phase 7 เพิ่ม)
 

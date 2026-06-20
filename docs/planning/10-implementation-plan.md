@@ -577,13 +577,13 @@ feat: complete phase 7 dashboard and report api
 | 8.12 | สร้าง Error Pages (404, 403) | `frontend/src/pages/errors/` |
 
 ### Acceptance Criteria
-- [ ] AdminLayout แสดง Sidebar + Topbar ถูกต้อง
-- [ ] PublicLayout แสดง Header + Footer ถูกต้อง
-- [ ] Sidebar Menu เปลี่ยนตาม Role
-- [ ] Route Guard ทำงาน (ไม่ Login → Redirect to /login)
-- [ ] Route Guard ทำงาน (Role ไม่มีสิทธิ์ → /403)
-- [ ] Shared Components ทำงานถูกต้อง
-- [ ] Responsive (Desktop + Tablet)
+- [x] AdminLayout แสดง Sidebar + Topbar ถูกต้อง
+- [x] PublicLayout แสดง Header + Footer ถูกต้อง
+- [x] Sidebar Menu เปลี่ยนตาม Role
+- [x] Route Guard ทำงาน (ไม่ Login → Redirect to /login)
+- [x] Route Guard ทำงาน (Role ไม่มีสิทธิ์ → /403)
+- [x] Shared Components ทำงานถูกต้อง
+- [x] Responsive (Desktop + Tablet)
 
 ### Git Commit
 ```

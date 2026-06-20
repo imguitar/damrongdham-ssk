@@ -328,7 +328,7 @@ GET /api/complaints?status=IN_PROGRESS&category_id=1&agency_id=2&district_id=3
 | POST | `/api/complaints/:id/assign` | ส่งต่อหน่วยงาน | ✅ | officer, chief | SCREENING → ASSIGNED, Request: `{ agency_id, note }` |
 | GET | `/api/complaints/:id/assignments` | ดูประวัติการส่งต่อ | ✅ | ทุก Role (Login) | — |
 | PATCH | `/api/assignments/:id/accept` | หน่วยงานรับเรื่อง | ✅ | agency_officer, agency_head | ASSIGNED → ACCEPTED |
-| PATCH | `/api/assignments/:id/return` | หน่วยงานส่งคืน | ✅ | agency_officer, agency_head | ASSIGNED/ACCEPTED → RETURNED, ต้องมี `reason` |
+| PATCH | `/api/assignments/:id/return` | หน่วยงานส่งคืน | ✅ | agency_officer, agency_head | ASSIGNED/ACCEPTED → RETURNED, ต้องมี `return_reason` |
 | PATCH | `/api/assignments/:id/start` | เริ่มดำเนินการ | ✅ | agency_officer, agency_head | ACCEPTED → IN_PROGRESS |
 | PATCH | `/api/assignments/:id/resolve` | ส่งผลดำเนินการ | ✅ | agency_officer, agency_head | IN_PROGRESS → RESOLVED, ต้องมี `content` |
 

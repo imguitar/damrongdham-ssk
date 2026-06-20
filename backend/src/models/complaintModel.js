@@ -157,7 +157,7 @@ const findAll = async ({
   if (district_id) { whereConditions.push('c.district_id = ?'); filterParams.push(parseInt(district_id)); }
   if (provinceIdFilter) { whereConditions.push('c.province_id = ?'); filterParams.push(parseInt(provinceIdFilter)); }
   if (priority) { whereConditions.push('c.priority = ?'); filterParams.push(priority); }
-  if (is_overdue === 'true') { whereConditions.push('c.is_overdue = 1'); }
+  if (is_overdue === 'true' || is_overdue === '1') { whereConditions.push('c.is_overdue = 1'); }
   if (search) {
     whereConditions.push('(c.title LIKE ? OR c.complaint_number LIKE ?)');
     filterParams.push(`%${search}%`, `%${search}%`);

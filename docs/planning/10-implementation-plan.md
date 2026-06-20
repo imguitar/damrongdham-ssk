@@ -850,12 +850,32 @@ feat: complete phase 13 docker integration
 | 14.12 | อัปเดต README.md |
 
 ### Acceptance Criteria
-- [ ] ทุก API Endpoint ทำงานตาม Contract
-- [ ] Workflow ทำงานถูกต้องครบทุกสถานะ
-- [ ] ทุก Role เข้าถึงได้เฉพาะหน้า/ข้อมูลที่มีสิทธิ์
-- [ ] ไม่มี Critical/High Bug เหลือ
-- [ ] Security เบื้องต้นผ่าน
-- [ ] README.md ครบถ้วน
+- [x] ทุก API Endpoint ทำงานตาม Contract
+- [x] Workflow ทำงานถูกต้องครบทุกสถานะ
+- [x] ทุก Role เข้าถึงได้เฉพาะหน้า/ข้อมูลที่มีสิทธิ์
+- [x] ไม่มี Critical/High Bug เหลือ
+- [x] Security เบื้องต้นผ่าน
+- [x] README.md ครบถ้วน
+
+### Bugs Found & Fixed
+- **Bug #1**: `?is_overdue=1` filter ไม่ทำงาน — `complaintModel.js` ตรวจเฉพาะ `=== 'true'` แก้เป็น `=== 'true' || === '1'`
+- **Doc #1**: `06-api-contract.md` ระบุ field return เป็น `reason` แก้เป็น `return_reason` ให้ตรงกับ implementation
+
+### Test Evidence (API)
+| ทดสอบ | ผล |
+|-------|-----|
+| Auth: login, /me, unauthorized | ✅ |
+| Complaints: CRUD, search, filter | ✅ |
+| Workflow T-01→T-14 (ครบทุก transition) | ✅ |
+| Dashboard: ทุก endpoint, agency filter, executive | ✅ |
+| Reports: monthly, by-category, by-agency, overdue | ✅ |
+| Export Excel: ทุก type (officer pass, agency 403) | ✅ |
+| Notifications: list, unread-count, mark-read, read-all | ✅ |
+| Public: master-data, submit anonymous, track | ✅ |
+| Citizen: register, login, /me, submit complaint, list | ✅ |
+| Anonymity: masking ทุก role, reveal โดย super_admin | ✅ |
+| Security: parameterized SQL, auth bypass 401 | ✅ |
+| SLA Alert: overdue + near-due notifications | ✅ (Phase 12) |
 
 ### Git Commit
 ```

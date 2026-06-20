@@ -4,6 +4,7 @@ const complaintModel = require('../models/complaintModel');
 const anonymousRevealModel = require('../models/anonymousRevealModel');
 const agencyModel = require('../models/agencyModel');
 const { executeTransition, executeAssign } = require('../services/complaintService');
+const notifSvc = require('../services/notificationService');
 const { writeAuditLog } = require('../middleware/auditLog');
 const { success, successList, error } = require('../utils/response');
 const { parsePagination, paginationMeta } = require('../utils/pagination');
@@ -285,12 +286,13 @@ const sendBack = async (req, res, next) => {
   }
 };
 
-// PATCH /:id/self-handle — SCREENING → IN_PROGRESS (center handles itself)
+// PATCH /:id/self-handle — T-13: SCREENING → IN_PROGRESS (center handles itself)
 const selfHandle = async (req, res, next) => {
   try {
     await executeTransition(req.params.id, 'selfHandle', req.user.id, req.user.role, { note: req.body.note });
     writeAuditLog({ userId: req.user.id, action: 'SELF_HANDLE_COMPLAINT', resource: 'complaints', resourceId: req.params.id, ipAddress: req.ip, userAgent: req.get('user-agent') });
     const complaint = await complaintModel.findById(req.params.id);
+    notifSvc.notifyWorkflow(complaint.id, 'selfHandle', { complaint_number: complaint.complaint_number });
     return success(res, { complaint });
   } catch (err) {
     return handleServiceError(err, res, next);

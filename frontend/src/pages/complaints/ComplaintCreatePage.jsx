@@ -78,8 +78,7 @@ const ComplaintCreatePage = () => {
         source: 'STAFF',
       };
       const res = await complaintApi.create(payload);
-      const created = res.data?.data;
-      const complaintId = created?.id;
+      const complaintId = res.data?.data?.complaint?.id;
 
       // Upload pending files
       if (pendingFiles.length && complaintId) {

@@ -143,7 +143,8 @@ damrongdham-ssk/
 | 10 | Complaint Management UI | ✅ |
 | 11 | Dashboard and Report UI | ✅ |
 | 12 | Notification and SLA Alert | ✅ |
-| 13–15 | ... | ⏳ |
+| 13 | Docker Integration | ✅ |
+| 14–15 | ... | ⏳ |
 
 ## API Endpoints (Phase 12 เพิ่ม)
 

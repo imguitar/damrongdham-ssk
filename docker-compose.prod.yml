@@ -32,6 +32,7 @@ services:
       - DB_NAME=${MYSQL_DATABASE:-damrongdham_db}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-8h}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:5001}
     volumes:
       - app_uploads:/app/uploads     # เก็บไฟล์แนบถาวร (persistent)
     depends_on:

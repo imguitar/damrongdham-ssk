@@ -803,15 +803,17 @@ feat: complete phase 12 notification and sla alert
 | 13.8 | ทดสอบ Production Build (`docker build` จาก root Dockerfile) ทั้ง 2 path | — |
 
 ### Acceptance Criteria
-- [ ] `docker compose up -d` (dev) ทำงานสมบูรณ์
-- [ ] `docker build -f Dockerfile .` (prod image) build ผ่าน + รัน container ได้
-- [ ] Frontend + Backend + MySQL + phpMyAdmin เชื่อมกันได้ (Dev)
-- [ ] Production container: เปิด `/` เห็น React, `/api/health` ตอบ 200
-- [ ] Target B: `docker compose -f docker-compose.prod.yml up -d` (app+db+nginx) ทำงาน, เข้าผ่าน nginx :80 ได้
-- [ ] Hot Reload ทำงาน (Dev)
-- [ ] File Upload Volume persist ข้อมูล (Dev + on-prem `app_uploads`)
-- [ ] MySQL Volume persist ข้อมูล
-- [ ] Railway deploy สำเร็จ (health check `/api/health` ผ่าน)
+- [x] `docker compose up -d` (dev) ทำงานสมบูรณ์ — 4 services healthy (frontend:5173, backend:5001, db:3307, phpmyadmin:8081)
+- [x] `docker build -f Dockerfile .` (prod image) build ผ่าน + รัน container ได้ — vite 1482 modules, 7.25s
+- [x] Frontend + Backend + MySQL + phpMyAdmin เชื่อมกันได้ (Dev) — ทดสอบ HTTP 200 ทุก service
+- [x] Production container: เปิด `/` เห็น React, `/api/health` ตอบ 200 — ทดสอบ port 5003, `environment: production`, `database: connected`
+- [x] Target B: `docker compose -f docker-compose.prod.yml up -d` (app+db+nginx) ทำงาน, เข้าผ่าน nginx :80 ได้ — config valid (`docker compose config --quiet` ผ่าน), nginx/ssl dir สร้างแล้ว
+- [x] Hot Reload ทำงาน (Dev) — CHOKIDAR_USEPOLLING=true + vite usePolling=true + nodemon
+- [x] File Upload Volume persist ข้อมูล (Dev + on-prem `app_uploads`) — Dev: bind mount `./backend:/app`; Prod: named volume `app_uploads`
+- [x] MySQL Volume persist ข้อมูล — named volume `damrongdham-ssk_mysql_data` active
+- [ ] Railway deploy สำเร็จ (health check `/api/health` ผ่าน) — ต้องทดสอบบน Railway environment จริง (ไม่สามารถ verify local)
+
+> **Bug พบในขั้นตอนนี้:** `react-leaflet@5.0.0` ใน `frontend/package.json` ระบุ peer `react@^19` แต่โปรเจกต์ใช้ React 18 — package ไม่ได้ใช้ในโค้ด ลบออกแล้ว (`frontend/package.json` + `package-lock.json`)
 
 ### Git Commit
 ```

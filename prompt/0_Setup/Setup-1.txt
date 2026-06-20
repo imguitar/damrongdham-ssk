@@ -26,6 +26,31 @@ Tech Stack ที่ต้องการใช้:
 * Database Tool: phpMyAdmin (Dev)
 * Deploy: Railway (single-container จาก Dockerfile multi-stage — ไม่ใช้ Nginx แยก)
 
+รายละเอียด Development Environment ที่ต้องระบุในเอกสาร:
+
+* Frontend ใช้ Vite port 5173 และรองรับ Hot Reload
+* Backend ใช้ Express port 5001 และรองรับ Hot Reload ด้วย nodemon
+* หลีกเลี่ยง port 5000 เพราะ macOS ใช้กับ AirPlay Receiver
+* MySQL 8 ใช้ host port 3307 map ไป container port 3306
+* phpMyAdmin ใช้ host port 8081 map ไป container port 80
+* ถ้าเครื่องเป็น Apple Silicon (M1/M2/M3/M4) ให้ระบุข้อควรระวังว่า phpMyAdmin อาจต้องใช้ `platform: linux/amd64`
+* ทุก service อยู่ใน custom Docker bridge network เดียวกัน
+* Backend และ phpMyAdmin ต้องเชื่อมต่อ MySQL ผ่านชื่อ service `db` และ internal port 3306 ไม่ใช้ `localhost`
+* ใช้ bind mounts สำหรับ Frontend/Backend เพื่อพัฒนาแบบ Hot Reload
+* ใช้ anonymous volume สำหรับ `node_modules` เพื่อป้องกัน host overwrite และปัญหา architecture ไม่ตรง
+* กำหนด environment variables ผ่านไฟล์ `.env` และอ้างอิงใน `docker-compose.yml` ด้วยรูปแบบ `${VARIABLE:-default}`
+* ไม่ต้องใส่ `version: "3.8"` ใน `docker-compose.yml` เพราะ Docker Compose รุ่นใหม่ไม่ใช้แล้ว
+* MySQL ต้องมี healthcheck และ service ที่พึ่งพา DB ต้องใช้ `depends_on` พร้อม `condition: service_healthy`
+* SQL init script ให้วางใน `db/init/01-init.sql` และใช้ charset/collation ที่รองรับภาษาไทย เช่น `utf8mb4`
+
+รายละเอียด Production Environment ที่ต้องระบุในเอกสาร:
+
+* Railway เป็น deployment target หลัก ใช้ root `Dockerfile` แบบ multi-stage สำหรับ single-container app
+* Railway จัดการ SSL/domain เอง ไม่ต้องใช้ Nginx แยก
+* หากมี on-premise/Ubuntu เป็นทางเลือก ให้ระบุว่าใช้ image/app เดียวกันร่วมกับ MySQL และ Nginx reverse proxy ได้ แต่ต้องไม่ทำให้โค้ดผูกกับ target ใด target หนึ่ง
+* ห้ามใส่ secrets หรือ production config ลงใน source code โดยตรง ให้ใช้ environment variables
+* ต้องระบุข้อจำกัดว่า Railway filesystem เป็น ephemeral หากมี uploads ในอนาคตต้องใช้ Railway Volume หรือ Object Storage
+
 งานที่ต้องการ:
 ช่วยจัดทำเอกสาร Tech Stack Decision โดยมีหัวข้อ:
 
@@ -41,6 +66,18 @@ Tech Stack ที่ต้องการใช้:
 10. Assumptions
 11. Open Questions
 12. Key Decisions
+13. Docker Service Map & Port Mapping
+14. Docker Network Rules
+15. Environment Variable Strategy
+16. Known Setup Risks / Lessons Learned
+
+ในหัวข้อ Known Setup Risks / Lessons Learned ให้ระบุอย่างน้อย:
+
+* Port 5000 อาจชนกับ macOS AirPlay Receiver จึงใช้ backend port 5001
+* phpMyAdmin บน Apple Silicon อาจต้องกำหนด `platform: linux/amd64`
+* `version` ใน Docker Compose เป็น attribute ที่ล้าสมัย
+* `node_modules` ใน Docker ควรใช้ anonymous volume และเมื่อเพิ่ม package ใหม่ต้อง rebuild container
+* Backend อาจเชื่อมต่อ DB ไม่ได้ถ้าไม่มี MySQL healthcheck และ `depends_on` ที่รอ DB พร้อม
 
 ให้จัดทำผลลัพธ์เป็น Markdown สำหรับบันทึกเป็นไฟล์:
 

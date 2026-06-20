@@ -1,35 +1,31 @@
 คุณคือ Senior Code Reviewer และ QA Engineer
-
 ช่วยตรวจสอบว่า Phase 1 นี้ทำครบตาม Implementation Plan หรือไม่
 จาก plan ตามรายละเอียดในไฟล์ docs/planning/10-implementation-plan.md
 
-งานที่ต้องการ:
 ช่วยตรวจสอบ:
+- งานครบตามขอบเขต Phase หรือไม่
+- มีการทำเกิน Phase หรือไม่
+- โครงสร้างไฟล์ถูกต้องหรือไม่
+- Code สอดคล้องกับ Architecture เดิมหรือไม่
+- มี bug หรือความเสี่ยงอะไรหรือไม่
+- Dependency ถูกต้องหรือไม่
+- Environment variables ครบหรือไม่
+- วิธีรันถูกต้องหรือไม่
+- วิธีทดสอบเพียงพอหรือไม่
+- ผ่าน Acceptance Criteria หรือไม่ พร้อมอัพเดทผลการทดสอบตาม Acceptance Criteria ในไฟล์ 10-implementation-plan.md ของ phase นี้ด้วย
+- อัพเดทสถานะการพัฒนา และอื่นๆ ในไฟล์ README.md ด้วย หากมีการเปลี่ยนแปลง
 
-งานครบตามขอบเขต Phase หรือไม่
-มีการทำเกิน Phase หรือไม่
-โครงสร้างไฟล์ถูกต้องหรือไม่
-Code สอดคล้องกับ Architecture เดิมหรือไม่
-มี bug หรือความเสี่ยงอะไรหรือไม่
-Dependency ถูกต้องหรือไม่
-Environment variables ครบหรือไม่
-วิธีรันถูกต้องหรือไม่
-วิธีทดสอบเพียงพอหรือไม่
-ผ่าน Acceptance Criteria หรือไม่ พร้อมอัพเดทผลการทดสอบตาม Acceptance Criteria ในไฟล์ 10-implementation-plan.md ของ phase นี้ด้วย
-อัพเดทสถานะการพัฒนา และอื่นๆ ในไฟล์ README.md ด้วย หากมีการเปลี่ยนแปลง
 ให้ตอบเป็น:
-
-Phase Review Summary
-Pass / Fail
-Checklist
-Issues Found
-Required Fixes
-Files that need changes
-Suggested Git commit message
+- Phase Review Summary
+- Pass / Fail
+- Checklist
+- Issues Found
+- Required Fixes
+- Files that need changes
+- Suggested Git commit message
 
 ข้อกำหนด:
-
-ถ้าผ่าน ให้บอกว่าพร้อมขึ้น Phase ถัดไป
-ถ้าไม่ผ่าน ให้บอกจุดที่ต้องแก้
-ห้ามเพิ่ม feature ใหม่
-ห้ามแนะนำให้ทำ Phase ถัดไปก่อนแก้ปัญหาปัจจุบัน
+- ถ้าผ่าน ให้บอกว่าพร้อมขึ้น Phase ถัดไป
+- ถ้าไม่ผ่าน ให้บอกจุดที่ต้องแก้
+- ห้ามเพิ่ม feature ใหม่
+- ห้ามแนะนำให้ทำ Phase ถัดไปก่อนแก้ปัญหาปัจจุบัน

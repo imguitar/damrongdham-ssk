@@ -1,37 +1,38 @@
+คุณคือ Senior Full-stack Developer และ Software Engineer
 Phase ก่อนหน้าผ่าน Acceptance Criteria แล้ว
-
 ตอนนี้ให้เริ่มทำ Phase ถัดไปเท่านั้น
 
-ข้อกำหนด:
+Phase ที่ต้องทำตอนนี้ 
+- phase 7
+- จาก plan ตามรายละเอียดในไฟล์ docs/planning/10-implementation-plan.md
 
-อ้างอิงจาก Implementation Plan เดิม
-อ้างอิงจาก Phase Completion Report ของ Phase ก่อนหน้า
-ห้ามแก้สิ่งที่ทำเสร็จแล้วถ้าไม่จำเป็น
-ห้ามเปลี่ยน Architecture เดิม
-ทำเฉพาะ Phase นี้เท่านั้น
-ถ้าต้องแก้ไฟล์เดิม ให้ระบุเหตุผลก่อน
-ถ้ามี dependency จาก Phase ก่อนหน้า ให้ตรวจสอบก่อนเริ่ม
+ข้อกำหนด:
+- อ้างอิงจาก Implementation Plan เดิม
+- อ้างอิงจาก Phase Completion Report ของ Phase ก่อนหน้า
+- ห้ามแก้สิ่งที่ทำเสร็จแล้วถ้าไม่จำเป็น
+- ห้ามเปลี่ยน Architecture เดิม
+- ทำเฉพาะ Phase นี้เท่านั้น
+- ถ้าต้องแก้ไฟล์เดิม ให้ระบุเหตุผลก่อน
+- ถ้ามี dependency จาก Phase ก่อนหน้า ให้ตรวจสอบก่อนเริ่ม
 
 เอกสารอ้างอิง:
-
-docs/planning/PROJECT_CONTEXT.md
-docs/planning/10-implementation-plan.md
-Phase Completion Report ของ Phase ก่อนหน้า
-
-Phase ที่ต้องทำตอนนี้ คือ phase 2
-จาก plan ตามรายละเอียดในไฟล์ docs/planning/10-implementation-plan.md
-
+- docs/planning/PROJECT_CONTEXT.md
+- docs/planning/10-implementation-plan.md
+- Phase Completion Report ของ Phase ก่อนหน้า
 
 งานที่ต้องการ:
+- ตรวจ dependency จาก Phase ก่อนหน้า
+- วิเคราะห์ว่า Phase นี้ต้องสร้างหรือแก้ไขไฟล์ใดบ้าง
+- แสดงรายการไฟล์ที่จะสร้างหรือแก้ไขก่อน
+- เขียน code เฉพาะไฟล์ที่จำเป็นใน Phase นี้
+- แสดงโครงสร้างไฟล์หลังทำเสร็จ
+- อธิบายวิธีติดตั้ง dependency ถ้ามี
+- อธิบายวิธีรันระบบ
+- อธิบายวิธีทดสอบ
+- ระบุ Acceptance Criteria ของ Phase นี้
+- ระบุ TODO สำหรับ Phase ถัดไป โดยยังไม่ต้องทำ
+- แนะนำ Git commit message สำหรับ Phase นี้
 
-ตรวจ dependency จาก Phase ก่อนหน้า
-ระบุขอบเขตของ Phase นี้
-ระบุไฟล์ที่จะสร้างหรือแก้ไข
-เขียน code เฉพาะ Phase นี้
-อธิบายวิธีรัน
-อธิบายวิธีทดสอบ
-ตรวจ Acceptance Criteria
-แนะนำ Git commit message
 
 ย้ำ:
-ทำเฉพาะ Phase นี้เท่านั้น
+- ทำเฉพาะ Phase นี้เท่านั้น

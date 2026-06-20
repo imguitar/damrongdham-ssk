@@ -3,10 +3,10 @@
 อ้างอิงจากเอกสาร Planning ก่อนหน้า:
 
 1. System Overview
-   [วางสรุปจาก docs/planning/01-system-overview.md]
+   [สรุปจาก docs/planning/01-system-overview.md]
 
 2. Requirements
-   [วางสรุปจาก docs/planning/02-requirements.md]
+   [สรุปจาก docs/planning/02-requirements.md]
    
 ช่วยออกแบบ User Roles และ Permissions
 

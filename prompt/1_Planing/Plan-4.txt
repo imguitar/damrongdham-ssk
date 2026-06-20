@@ -2,13 +2,13 @@
 อ้างอิงจากเอกสาร Planning ก่อนหน้า:
 
 1. System Overview
-   [วางสรุปจาก docs/planning/01-system-overview.md]
+   [สรุปจาก docs/planning/01-system-overview.md]
 
 2. Requirements
-   [วางสรุปจาก docs/planning/02-requirements.md]
+   [สรุปจาก docs/planning/02-requirements.md]
 
 3. User Roles and Permissions
-   [วางสรุปจาก docs/planning/03-user-roles.md]
+   [สรุปจาก docs/planning/03-user-roles.md]
 
 ช่วยออกแบบ Workflow การทำงานของระบบร้องเรียนศูนย์ดำรงธรรม
 

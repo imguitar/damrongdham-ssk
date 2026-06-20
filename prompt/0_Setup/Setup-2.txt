@@ -10,6 +10,17 @@
 เป้าหมาย:
 ต้องการให้ AI ทำงานเป็นระบบ ไม่เขียนโค้ดเกินขอบเขต ไม่ข้าม Phase และไม่เปลี่ยน Architecture เอง
 
+บริบทของโปรเจกต์ที่กติกานี้ต้องรองรับ:
+
+* Project: Damrongdham SSK / ระบบรับเรื่องร้องเรียนศูนย์ดำรงธรรมจังหวัดศรีสะเกษ
+* Frontend: React 18 + Vite 5 + MUI 5
+* Backend: Node.js 20 LTS + Express 4
+* Database: MySQL 8
+* Dev Infrastructure: Docker Compose + phpMyAdmin
+* Deployment หลัก: Railway แบบ single-container จาก root `Dockerfile`
+* Development ports: frontend 5173, backend 5001, MySQL host 3307 -> container 3306, phpMyAdmin 8081 -> 80
+* Docker network rule: service ภายใน Docker ต้องคุยกันผ่าน service name และ internal port ไม่ใช้ `localhost`
+
 งานที่ต้องการ:
 ช่วยออกแบบ AI Working Rules สำหรับโปรเจกต์นี้ โดยมีหัวข้อ:
 
@@ -27,6 +38,10 @@
 12. How AI Should Ask Questions
 13. How AI Should Handle Unclear Requirements
 14. How AI Should Report Changes
+15. Docker Development Rules
+16. Git / GitHub Workflow Rules
+17. Skill / Project Instruction Rules
+18. Environment & Secret Handling Rules
 
 กติกาสำคัญที่ต้องมี:
 
@@ -39,6 +54,48 @@
 * ทุก Phase ต้องมีวิธีรัน วิธีทดสอบ และ Acceptance Criteria
 * ทุก Phase ต้องมี Git Commit Message ที่แนะนำ
 * หลังจบ Phase ต้องมี Phase Completion Report
+
+Docker Development Rules ที่ต้องระบุ:
+
+* ใช้ `docker-compose.yml` สำหรับ development environment
+* ไม่ใส่ `version` ใน `docker-compose.yml`
+* ใช้ frontend port 5173 และ backend port 5001
+* หลีกเลี่ยง backend port 5000 เพราะ macOS AirPlay Receiver อาจใช้อยู่
+* MySQL ใช้ host port 3307 และ container port 3306
+* phpMyAdmin ใช้ host port 8081 และ container port 80
+* หากใช้ Apple Silicon และ image ไม่รองรับ ARM โดยตรง ให้พิจารณา `platform: linux/amd64` เฉพาะ service ที่จำเป็น
+* ใช้ bind mounts สำหรับ source code และ anonymous volume สำหรับ `node_modules`
+* Backend/phpMyAdmin ติดต่อ DB ผ่าน service name `db` และ internal port 3306
+* MySQL ต้องมี healthcheck และ service ที่พึ่งพา DB ต้องรอ `service_healthy`
+* เมื่อเพิ่ม dependency ใหม่ ต้องระบุว่าต้อง rebuild container หรือ restart service เท่านั้น
+
+Git / GitHub Workflow Rules ที่ต้องระบุ:
+
+* ก่อน commit ต้องตรวจสอบ `git status` และตรวจว่า `.env` ไม่ถูก track
+* `.gitignore` ต้องครอบคลุม `.env`, `node_modules`, `dist`, logs และไฟล์ local ที่ไม่ควร commit
+* ใช้ Conventional Commits เป็นหลัก เช่น `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`
+* ทุก Phase ต้องเสนอ commit message ที่ชัดเจนและสอดคล้องกับงาน
+* README.md ควรอัปเดตเมื่อคำสั่งรัน, dependency, port หรือ workflow เปลี่ยน
+* หากต้อง push GitHub ให้ใช้ GitHub CLI (`gh`) ได้ แต่ต้องไม่ทำขั้นตอน login/authorize แทนผู้ใช้โดยไม่แจ้งก่อน
+* ห้าม commit secrets, production credentials, token หรือข้อมูลส่วนบุคคลจริง
+* หาก repo ยังไม่มี README ที่เพียงพอ ให้แนะนำหัวข้อ README ได้แก่ project name, description, tech stack, install/run, port mapping, Docker commands, folder structure, license/owner
+
+Skill / Project Instruction Rules ที่ต้องระบุ:
+
+* AI ต้องอ่าน project instruction หรือ skill ที่เกี่ยวข้องก่อนเริ่มงานกับโปรเจกต์
+* หากมี `.agents/skills/[skill-name]/SKILL.md` ต้องใช้เป็นแหล่งกติกาหลักร่วมกับเอกสาร planning
+* ชื่อ skill ควรเป็น lowercase และใช้ `-` คั่น เช่น `damrongdham-dev`
+* `SKILL.md` ควรมี YAML frontmatter ที่ประกอบด้วย `name` และ `description` ที่สั้น ชัดเจน และ match กับโปรเจกต์
+* skill ควรระบุ When to Use, When NOT to Use, Project Architecture, Service Map & Ports, Network Rules, Environment Variables, Commands, Coding Guidelines, Output Format และ Examples
+* ข้อมูลที่ยาว เช่น API spec หรือ DB schema ควรอ้างอิงจากเอกสารใน `docs/planning/` แทนการคัดลอกทั้งหมดลง skill
+* เมื่อ architecture, ports, service หรือ convention เปลี่ยน ต้องพิจารณาอัปเดต skill และ planning docs ให้ตรงกัน
+
+Environment & Secret Handling Rules ที่ต้องระบุ:
+
+* ใช้ `.env` สำหรับ local development และ `.env.example` สำหรับตัวอย่างค่า
+* ห้ามใส่ secret จริงใน source code, prompt, README หรือ planning docs
+* production environment ให้ตั้งค่าผ่าน platform env vars เช่น Railway variables
+* เมื่อแสดงตัวอย่าง config ให้ใช้ placeholder เท่านั้น
 
 ให้จัดทำผลลัพธ์เป็น Markdown สำหรับบันทึกเป็นไฟล์:
 

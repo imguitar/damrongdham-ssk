@@ -1,26 +1,20 @@
-สรุป Phase ก่อนขึ้น Phase ถัดไป
-
 คุณคือ Technical Lead และ Project Manager
-
 ช่วยสรุปผลการทำ Phase นี้ ก่อนเริ่ม Phase ถัดไป
 
 งานที่ต้องการ:
 ช่วยสรุปเป็น Phase Completion Report โดยมีหัวข้อ:
-
-Phase Summary
-Completed Tasks
-Files Created
-Files Modified
-Test Results
-Acceptance Criteria Status
-Known Issues
-Risks
-Next Phase Readiness
-Recommended Git Commit Message
+- Phase Summary
+- Completed Tasks
+- Files Created
+- Files Modified
+- Test Results
+- Acceptance Criteria Status
+- Known Issues
+- Risks
+- Next Phase Readiness
+- Recommended Git Commit Message
 
 ให้ตอบว่า:
-
-Phase นี้ผ่านหรือไม่
-พร้อมขึ้น Phase ถัดไปหรือยัง
-ถ้ายังไม่พร้อม ต้องแก้อะไรก่อน
-หากพร้อมแล้ว ให้ทำการ git push phase นี้ด้วย
+- Phase นี้ผ่านหรือไม่
+- พร้อมขึ้น Phase ถัดไปหรือยัง
+- ถ้ายังไม่พร้อม ต้องแก้อะไรก่อน

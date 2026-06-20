@@ -1,58 +1,51 @@
-Prompt A: เริ่มทำ Phase ที่กำหนดเท่านั้น
-
 คุณคือ Senior Full-stack Developer และ Software Engineer
+ตอนนี้เข้าสู่ช่วงที่ 2 คือ  Implementation by Phase
 
-ตอนนี้เข้าสู่ช่วงที่ 2: Implementation by Phase
+Phase ที่ต้องทำตอนนี้ 
+- phase 1
+- จาก plan ตามรายละเอียดในไฟล์ docs/planning/10-implementation-plan.md
 
 ข้อกำหนดสำคัญ:
-
-ให้ทำเฉพาะ Phase ที่ระบุเท่านั้น
-ห้ามทำ Phase ถัดไป
-ห้ามเพิ่ม feature นอกเหนือจาก Implementation Plan
-ห้ามเปลี่ยน Architecture เดิม ถ้าไม่จำเป็น
-ถ้าจำเป็นต้องเปลี่ยนจากแผนเดิม ให้แจ้งเหตุผลก่อน
-ให้สร้างหรือแก้ไขเฉพาะไฟล์ที่เกี่ยวข้องกับ Phase นี้
-ต้องอธิบายวิธีรันและวิธีทดสอบหลังทำเสร็จ
-ต้องระบุว่า Phase นี้ผ่าน Acceptance Criteria ได้อย่างไร
+- ให้ทำเฉพาะ Phase ที่ระบุเท่านั้น
+- ห้ามทำ Phase ถัดไป
+- ห้ามเพิ่ม feature นอกเหนือจาก Implementation Plan
+- ห้ามเปลี่ยน Architecture เดิม ถ้าไม่จำเป็น
+- ถ้าจำเป็นต้องเปลี่ยนจากแผนเดิม ให้แจ้งเหตุผลก่อน
+- ให้สร้างหรือแก้ไขเฉพาะไฟล์ที่เกี่ยวข้องกับ Phase นี้
+- ต้องอธิบายวิธีรันและวิธีทดสอบหลังทำเสร็จ
+- ต้องระบุว่า Phase นี้ผ่าน Acceptance Criteria ได้อย่างไร
 
 อ้างอิงเอกสาร Planning:
-
-docs/planning/PROJECT_CONTEXT.md
-docs/planning/10-implementation-plan.md
-เอกสาร planning อื่น ๆ ที่เกี่ยวข้อง
-
-Tech Stack:
-
-Frontend: React + Vite + MUI
-Backend: Node.js + Express
-Database: MySQL 8
-Docker: Docker Compose
-
-Phase ที่ต้องทำตอนนี้ คือ phase 1
-จาก plan ตามรายละเอียดในไฟล์ docs/planning/10-implementation-plan.md
+- docs/planning/PROJECT_CONTEXT.md
+- docs/planning/10-implementation-plan.md
+- เอกสาร planning อื่น ๆ ที่เกี่ยวข้อง
 
 งานที่ต้องการ:
+- วิเคราะห์ว่า Phase นี้ต้องสร้างหรือแก้ไขไฟล์ใดบ้าง
+- แสดงรายการไฟล์ที่จะสร้างหรือแก้ไขก่อน
+- เขียน code เฉพาะไฟล์ที่จำเป็นใน Phase นี้
+- แสดงโครงสร้างไฟล์หลังทำเสร็จ
+- อธิบายวิธีติดตั้ง dependency ถ้ามี
+- อธิบายวิธีรันระบบ
+- อธิบายวิธีทดสอบ
+- ระบุ Acceptance Criteria ของ Phase นี้
+- ระบุ TODO สำหรับ Phase ถัดไป โดยยังไม่ต้องทำ
+- แนะนำ Git commit message สำหรับ Phase นี้
 
-วิเคราะห์ว่า Phase นี้ต้องสร้างหรือแก้ไขไฟล์ใดบ้าง
-แสดงรายการไฟล์ที่จะสร้างหรือแก้ไขก่อน
-เขียน code เฉพาะไฟล์ที่จำเป็นใน Phase นี้
-แสดงโครงสร้างไฟล์หลังทำเสร็จ
-อธิบายวิธีติดตั้ง dependency ถ้ามี
-อธิบายวิธีรันระบบ
-อธิบายวิธีทดสอบ
-ระบุ Acceptance Criteria ของ Phase นี้
-ระบุ TODO สำหรับ Phase ถัดไป โดยยังไม่ต้องทำ
-แนะนำ Git commit message สำหรับ Phase นี้
+Tech Stack:
+- Frontend: React + Vite + MUI
+- Backend: Node.js + Express
+- Database: MySQL 8
+- Docker: Docker Compose
 
 รูปแบบคำตอบ:
-
-เริ่มจากสรุปขอบเขตของ Phase
-ต่อด้วยรายการไฟล์ที่เกี่ยวข้อง
-ต่อด้วย code แยกตามไฟล์
-ต่อด้วยวิธีรัน
-ต่อด้วยวิธีทดสอบ
-ต่อด้วย Acceptance Criteria Checklist
-ปิดท้ายด้วย Git commit message
+- เริ่มจากสรุปขอบเขตของ Phase
+- ต่อด้วยรายการไฟล์ที่เกี่ยวข้อง
+- ต่อด้วย code แยกตามไฟล์
+- ต่อด้วยวิธีรัน
+- ต่อด้วยวิธีทดสอบ
+- ต่อด้วย Acceptance Criteria Checklist
+- ปิดท้ายด้วย Git commit message
 
 ย้ำอีกครั้ง:
-ทำเฉพาะ Phase นี้เท่านั้น ห้ามทำเกิน Phase
+- ทำเฉพาะ Phase นี้เท่านั้น ห้ามทำเกิน Phase

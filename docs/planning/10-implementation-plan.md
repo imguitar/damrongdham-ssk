@@ -859,6 +859,8 @@ feat: complete phase 13 docker integration
 
 ### Bugs Found & Fixed
 - **Bug #1**: `?is_overdue=1` filter ไม่ทำงาน — `complaintModel.js` ตรวจเฉพาะ `=== 'true'` แก้เป็น `=== 'true' || === '1'`
+- **Bug #2**: ปุ่มแก้ไขแสดงสำหรับเรื่อง CLOSED/REJECTED — `ComplaintDetailPage.jsx` ทำให้ 400 Bad Request; แก้โดยเพิ่ม `!['CLOSED','REJECTED'].includes(st)` guard
+- **Bug #3**: 500 Internal Server Error เมื่อแก้ไขเรื่องที่ไม่มี lat/lng — frontend ส่ง `latitude:''` → MySQL ER_TRUNCATED_WRONG_VALUE; แก้ทั้ง frontend (`ComplaintEditPage.jsx` แปลง empty string เป็น `undefined`) และ backend (`complaintModel.js` sanitize `''` → `null` สำหรับ DECIMAL columns)
 - **Doc #1**: `06-api-contract.md` ระบุ field return เป็น `reason` แก้เป็น `return_reason` ให้ตรงกับ implementation
 
 ### Test Evidence (API)

@@ -353,7 +353,7 @@ const ComplaintDetailPage = () => {
             <Chip label="ปกปิดตัวตน" size="small" color="warning" variant="outlined" />
           )}
         </Box>
-        {isCenter && (
+        {isCenter && !['CLOSED', 'REJECTED'].includes(st) && (
           <Button
             variant="outlined"
             startIcon={<EditIcon />}

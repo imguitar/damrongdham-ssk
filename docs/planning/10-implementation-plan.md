@@ -534,6 +534,7 @@ feat: complete phase 6 assignment and status workflow api
 | GET | `/api/reports/overdue` | รายงานเรื่องเกินกำหนด |
 | GET | `/api/reports/export/excel` | Export Excel |
 | GET | `/api/audit-logs` | ดู Audit Log |
+| GET | `/api/audit-logs/:id` | ดูรายละเอียด Log |
 
 ### Acceptance Criteria
 - [x] Dashboard Summary แสดงตัวเลขถูกต้อง

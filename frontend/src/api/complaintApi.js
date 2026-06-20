@@ -12,6 +12,7 @@ export const assign = (id, data) => axiosInstance.post(`/complaints/${id}/assign
 export const review = (id, data) => axiosInstance.patch(`/complaints/${id}/review`, data);
 export const close = (id, data) => axiosInstance.patch(`/complaints/${id}/close`, data);
 export const sendBack = (id, data) => axiosInstance.patch(`/complaints/${id}/send-back`, data);
+export const selfClose = (id, data) => axiosInstance.patch(`/complaints/${id}/self-close`, data);
 
 // Assignment actions
 export const getAssignments = (id) => axiosInstance.get(`/complaints/${id}/assignments`);

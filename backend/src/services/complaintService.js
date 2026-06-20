@@ -13,6 +13,7 @@ const TRANSITION_MAP = {
   SCREENING:   {
     assign:    { to: 'ASSIGNED',    roles: CENTER_ROLES },
     reject:    { to: 'REJECTED',    roles: CENTER_ROLES },
+    selfClose: { to: 'CLOSED',      roles: CENTER_ROLES },
   },
   ASSIGNED:    {
     accept:    { to: 'ACCEPTED',    roles: AGENCY_ROLES },
@@ -70,7 +71,7 @@ const executeTransition = async (complaintId, action, userId, role, options = {}
     if (!options.rejectionReason) throw Object.assign(new Error('กรุณาระบุเหตุผลการปฏิเสธ'), { statusCode: 400, code: 'VALIDATION_ERROR' });
     extraFields.rejection_reason = options.rejectionReason;
   }
-  if (action === 'close') {
+  if (action === 'close' || action === 'selfClose') {
     if (!options.closedSummary) throw Object.assign(new Error('กรุณาระบุสรุปผลการดำเนินงาน'), { statusCode: 400, code: 'VALIDATION_ERROR' });
     extraFields.closed_summary = options.closedSummary;
     extraFields.closed_at = new Date();

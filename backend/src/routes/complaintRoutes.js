@@ -36,6 +36,8 @@ router.patch('/:id/review',    authorize(...CENTER_ROLES), complaintController.r
 router.patch('/:id/close',     authorize(...CENTER_ROLES), complaintController.close);
 // T-11: REVIEWING → IN_PROGRESS
 router.patch('/:id/send-back', authorize(...CENTER_ROLES), complaintController.sendBack);
+// SCREENING → CLOSED (center handles itself)
+router.patch('/:id/self-close', authorize(...CENTER_ROLES), complaintController.selfClose);
 
 // ── Assignments list for a complaint ───────────────────────────────────────────
 router.get('/:id/assignments', authorize(...STAFF_ROLES), assignmentController.list);

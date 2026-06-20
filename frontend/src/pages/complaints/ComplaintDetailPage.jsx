@@ -195,7 +195,7 @@ const ComplaintDetailPage = () => {
       },
       reject: {
         title: 'ปฏิเสธเรื่อง',
-        fields: [{ key: 'reason', label: 'เหตุผล', type: 'textarea', required: true }],
+        fields: [{ key: 'rejection_reason', label: 'เหตุผล', type: 'textarea', required: true }],
         onConfirm: (v) => runAction(() => complaintApi.reject(id, v), v),
       },
       assign: {
@@ -222,8 +222,13 @@ const ComplaintDetailPage = () => {
       },
       close: {
         title: 'ปิดเรื่อง',
-        fields: [{ key: 'summary', label: 'สรุปผลการดำเนินการ', type: 'textarea', required: true }],
+        fields: [{ key: 'closed_summary', label: 'สรุปผลการดำเนินการ', type: 'textarea', required: true }],
         onConfirm: (v) => runAction(() => complaintApi.close(id, v), v),
+      },
+      selfClose: {
+        title: 'ศูนย์ดำรงธรรมจัดการเอง',
+        fields: [{ key: 'closed_summary', label: 'สรุปการดำเนินการของศูนย์', type: 'textarea', required: true }],
+        onConfirm: (v) => runAction(() => complaintApi.selfClose(id, v), v),
       },
       sendBack: {
         title: 'ส่งกลับให้หน่วยงานแก้ไข',
@@ -377,6 +382,9 @@ const ComplaintDetailPage = () => {
               <>
                 <Button variant="contained" size="small" color="success" onClick={() => openDialog('assign')}>
                   ส่งต่อหน่วยงาน (T-02)
+                </Button>
+                <Button variant="outlined" size="small" color="info" onClick={() => openDialog('selfClose')}>
+                  ศูนย์จัดการเอง
                 </Button>
                 <Button variant="outlined" size="small" color="error" onClick={() => openDialog('reject')}>
                   ปฏิเสธเรื่อง (T-03)

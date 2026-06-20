@@ -312,11 +312,12 @@ GET /api/complaints?status=IN_PROGRESS&category_id=1&agency_id=2&district_id=3
 
 | Method | Endpoint | Description | Auth | Roles | หมายเหตุ |
 |--------|----------|-------------|:----:|-------|---------|
-| PATCH | `/api/complaints/:id/screen` | เริ่มคัดกรอง | ✅ | officer, chief | NEW → SCREENING |
-| PATCH | `/api/complaints/:id/reject` | ปฏิเสธเรื่อง | ✅ | officer, chief | SCREENING → REJECTED, ต้องมี `reason` |
-| PATCH | `/api/complaints/:id/close` | ปิดเรื่อง | ✅ | officer, chief | REVIEWING → CLOSED, ต้องมี `summary` |
-| PATCH | `/api/complaints/:id/review` | เริ่มตรวจสอบผล | ✅ | officer, chief | RESOLVED → REVIEWING |
-| PATCH | `/api/complaints/:id/send-back` | ส่งกลับแก้ไข | ✅ | officer, chief | REVIEWING → IN_PROGRESS, ต้องมี `note` |
+| PATCH | `/api/complaints/:id/screen` | เริ่มคัดกรอง | ✅ | officer, chief | NEW → SCREENING (หรือ RETURNED → SCREENING, T-12) |
+| PATCH | `/api/complaints/:id/reject` | ปฏิเสธเรื่อง | ✅ | officer, chief | SCREENING → REJECTED (T-03), body: `{ rejection_reason }` (บังคับ) |
+| PATCH | `/api/complaints/:id/self-handle` | ศูนย์จัดการเอง | ✅ | officer, chief | SCREENING → IN_PROGRESS (T-13), body: `{ note }` (optional) |
+| PATCH | `/api/complaints/:id/close` | ปิดเรื่อง | ✅ | officer, chief | REVIEWING → CLOSED (T-10) หรือ IN_PROGRESS → CLOSED (T-14 selfHandle), body: `{ closed_summary }` (บังคับ) |
+| PATCH | `/api/complaints/:id/review` | เริ่มตรวจสอบผล | ✅ | officer, chief | RESOLVED → REVIEWING (T-09) |
+| PATCH | `/api/complaints/:id/send-back` | ส่งกลับแก้ไข | ✅ | officer, chief | REVIEWING → IN_PROGRESS (T-11), body: `{ note }` |
 
 ---
 

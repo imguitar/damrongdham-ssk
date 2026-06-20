@@ -181,8 +181,9 @@ damrongdham-ssk/
 | PATCH | `/api/complaints/:id/screen` | เริ่มคัดกรอง (T-01/T-12) |
 | PATCH | `/api/complaints/:id/reject` | ปฏิเสธเรื่อง (T-03) |
 | POST | `/api/complaints/:id/assign` | ส่งต่อหน่วยงาน (T-02) |
+| PATCH | `/api/complaints/:id/self-handle` | ศูนย์จัดการเอง (T-13) |
 | PATCH | `/api/complaints/:id/review` | เริ่มตรวจผล (T-09) |
-| PATCH | `/api/complaints/:id/close` | ปิดเรื่อง (T-10) |
+| PATCH | `/api/complaints/:id/close` | ปิดเรื่อง (T-10/T-14) |
 | PATCH | `/api/complaints/:id/send-back` | ส่งกลับแก้ไข (T-11) |
 | GET | `/api/complaints/:id/assignments` | ดูรายการมอบหมาย |
 | POST | `/api/complaints/:id/updates` | อัปเดตความคืบหน้า |

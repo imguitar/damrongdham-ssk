@@ -679,9 +679,10 @@ feat: complete phase 9 frontend authentication
 - [x] ⭐ Checkbox ปกปิดตัวตนทำงาน + เรื่อง anonymous แสดงป้ายแทนข้อมูลผู้ร้อง
 - [x] ⭐ super_admin เปิดเผยตัวตนผ่าน UI (กรอกเหตุผล) ได้
 - [x] ⭐ ฟอร์มยื่นเรื่องบังคับกรอกเบอร์โทร (รวมกรณีปกปิดตัวตน) + เลือกประเภทงานบริการ/ลักษณะเรื่อง/ประเภทผู้ร้องเรียนได้
-- [x] ⭐ ระบุจุดเกิดเหตุ (จังหวัด/อำเภอ/ตำบล/รหัสไปรษณีย์/สถานที่) + ปักหมุดบนแผนที่ Leaflet (GPS/เลือกพิกัด) ได้
-- [x] ⭐ แนบไฟล์หลักฐานตอนยื่นเรื่องได้ทั้งฝั่งเจ้าหน้าที่และประชาชน
-- [x] ⭐ CRUD Master Data ใหม่ (Provinces, Service Types, Complaint Natures, Complainant Types) ทำงานถูกต้อง
+- [x] ⭐ ระบุจุดเกิดเหตุ (จังหวัด/อำเภอ/ตำบล/รหัสไปรษณีย์/สถานที่) + ปักหมุดบนแผนที่ Leaflet (GPS/เลือกพิกัด) ได้ *(fix: readOnlyRef/onChangeRef pattern)*
+- [x] ⭐ แนบไฟล์หลักฐานตอนยื่นเรื่องได้ทั้งฝั่งเจ้าหน้าที่และประชาชน *(fix: ส่ง complaint_id ใน FormData)*
+- [x] ⭐ CRUD Master Data ใหม่ (Service Types, Complaint Natures, Complainant Types) ทำงานถูกต้อง
+- [ ] ⭐ Province/District CRUD ใน SettingsPage *(gap: ไม่มี tab Province/District — ข้อมูลเป็น static seed ผลกระทบต่ำ)*
 
 ### ความเสี่ยง
 | ความเสี่ยง | วิธีรับมือ |
@@ -909,16 +910,16 @@ docs: complete phase 15 production deployment guide
 
 ### Acceptance Criteria (ระดับฟีเจอร์ Citizen + Anonymous)
 
-- [ ] ประชาชนสมัครสมาชิก + Login ด้วยอีเมล/รหัสผ่านได้
-- [ ] สมาชิกดูรายการ "เรื่องของฉัน" + สถานะ + Timeline ย่อ ได้
-- [ ] สมาชิกแก้ไขข้อมูลส่วนตัว + เปลี่ยนรหัสผ่านได้
-- [ ] ยื่นเรื่องใหม่ได้ทั้งแบบสมาชิก (ผูกบัญชี) และแบบ Guest (ไม่ Login)
-- [ ] เลือก "ปกปิดตัวตน" ได้ทุกช่องทางการยื่น
-- [ ] เรื่อง anonymous: staff ทุก Role **ไม่เห็น**ข้อมูลผู้ร้องและ citizen_id ใน list/detail/timeline/export/dashboard
-- [ ] เรื่อง anonymous: ข้อมูลผู้ร้องยังถูกบันทึกครบใน DB
-- [ ] สมาชิกที่ยื่น anonymous ยังเห็นเรื่องของตนใน "เรื่องของฉัน"
-- [ ] super_admin เปิดเผยตัวตนได้ + ระบบบันทึก `anonymous_reveal_logs` + `audit_logs` ทุกครั้ง
-- [ ] Citizen JWT เรียก endpoint ฝั่ง staff ไม่ได้ (403) และกลับกัน
+- [x] ประชาชนสมัครสมาชิก + Login ด้วยอีเมล/รหัสผ่านได้
+- [ ] สมาชิกดูรายการ "เรื่องของฉัน" + สถานะ + Timeline ย่อ ได้ *(gap: CitizenComplaintDetailPage ไม่มี timeline ย่อ)*
+- [ ] สมาชิกแก้ไขข้อมูลส่วนตัว + เปลี่ยนรหัสผ่านได้ *(gap: profile edit ✅ แต่ change-password UI ขาด)*
+- [x] ยื่นเรื่องใหม่ได้ทั้งแบบสมาชิก (ผูกบัญชี) และแบบ Guest (ไม่ Login)
+- [x] เลือก "ปกปิดตัวตน" ได้ทุกช่องทางการยื่น
+- [x] เรื่อง anonymous: staff ทุก Role **ไม่เห็น**ข้อมูลผู้ร้องและ citizen_id ใน list/detail/timeline/export/dashboard
+- [x] เรื่อง anonymous: ข้อมูลผู้ร้องยังถูกบันทึกครบใน DB
+- [x] สมาชิกที่ยื่น anonymous ยังเห็นเรื่องของตนใน "เรื่องของฉัน"
+- [x] super_admin เปิดเผยตัวตนได้ + ระบบบันทึก `anonymous_reveal_logs` + `audit_logs` ทุกครั้ง
+- [x] Citizen JWT เรียก endpoint ฝั่ง staff ไม่ได้ (403) และกลับกัน
 
 ---
 

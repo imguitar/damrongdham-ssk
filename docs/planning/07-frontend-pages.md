@@ -359,7 +359,9 @@
 | ✏️ แก้ไข | ไม่ใช่ CLOSED/REJECTED | officer, chief, admin | — |
 | 🔍 เริ่มคัดกรอง | NEW | officer, chief | `PATCH /api/complaints/:id/screen` |
 | 📤 ส่งต่อหน่วยงาน | SCREENING | officer, chief | `POST /api/complaints/:id/assign` |
+| 🏢 ศูนย์จัดการเอง | SCREENING | officer, chief | `PATCH /api/complaints/:id/self-handle` |
 | ❌ ปฏิเสธเรื่อง | SCREENING | officer, chief | `PATCH /api/complaints/:id/reject` |
+| ✅ ปิดเรื่อง (จัดการเอง) | IN_PROGRESS (ไม่มี assignment) | officer, chief | `PATCH /api/complaints/:id/close` |
 | ✅ รับเรื่อง | ASSIGNED | agency_officer, agency_head | `PATCH /api/assignments/:id/accept` |
 | ↩️ ส่งคืน | ASSIGNED/ACCEPTED | agency_officer, agency_head | `PATCH /api/assignments/:id/return` |
 | ▶️ เริ่มดำเนินการ | ACCEPTED | agency_officer, agency_head | `PATCH /api/assignments/:id/start` |

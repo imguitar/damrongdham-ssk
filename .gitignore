@@ -3,8 +3,10 @@
 .env.production
 .env.*.local
 
-# Nginx SSL certificates (on-premise)
-nginx/ssl/
+# Nginx SSL certificates (on-premise) — ignore cert files, keep directory structure
+nginx/ssl/*.pem
+nginx/ssl/*.crt
+nginx/ssl/*.key
 
 # Node modules
 node_modules/

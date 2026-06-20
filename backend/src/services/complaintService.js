@@ -11,9 +11,9 @@ const AGENCY_ROLES = ['agency_officer', 'agency_head'];
 const TRANSITION_MAP = {
   NEW:         { screen:    { to: 'SCREENING',   roles: CENTER_ROLES } },
   SCREENING:   {
-    assign:    { to: 'ASSIGNED',    roles: CENTER_ROLES },
-    reject:    { to: 'REJECTED',    roles: CENTER_ROLES },
-    selfClose: { to: 'CLOSED',      roles: CENTER_ROLES },
+    assign:      { to: 'ASSIGNED',    roles: CENTER_ROLES },
+    reject:      { to: 'REJECTED',    roles: CENTER_ROLES },
+    selfHandle:  { to: 'IN_PROGRESS', roles: CENTER_ROLES },
   },
   ASSIGNED:    {
     accept:    { to: 'ACCEPTED',    roles: AGENCY_ROLES },
@@ -23,7 +23,10 @@ const TRANSITION_MAP = {
     start:     { to: 'IN_PROGRESS', roles: AGENCY_ROLES },
     return:    { to: 'RETURNED',    roles: AGENCY_ROLES },
   },
-  IN_PROGRESS: { resolve:   { to: 'RESOLVED',    roles: AGENCY_ROLES } },
+  IN_PROGRESS: {
+    resolve: { to: 'RESOLVED', roles: AGENCY_ROLES },
+    close:   { to: 'CLOSED',   roles: CENTER_ROLES },
+  },
   RESOLVED:    { review:    { to: 'REVIEWING',   roles: CENTER_ROLES } },
   REVIEWING:   {
     close:     { to: 'CLOSED',      roles: CENTER_ROLES },
@@ -71,7 +74,7 @@ const executeTransition = async (complaintId, action, userId, role, options = {}
     if (!options.rejectionReason) throw Object.assign(new Error('กรุณาระบุเหตุผลการปฏิเสธ'), { statusCode: 400, code: 'VALIDATION_ERROR' });
     extraFields.rejection_reason = options.rejectionReason;
   }
-  if (action === 'close' || action === 'selfClose') {
+  if (action === 'close') {
     if (!options.closedSummary) throw Object.assign(new Error('กรุณาระบุสรุปผลการดำเนินงาน'), { statusCode: 400, code: 'VALIDATION_ERROR' });
     extraFields.closed_summary = options.closedSummary;
     extraFields.closed_at = new Date();

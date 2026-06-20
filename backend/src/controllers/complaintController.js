@@ -285,12 +285,11 @@ const sendBack = async (req, res, next) => {
   }
 };
 
-// PATCH /:id/self-close — SCREENING → CLOSED (center handles itself)
-const selfClose = async (req, res, next) => {
+// PATCH /:id/self-handle — SCREENING → IN_PROGRESS (center handles itself)
+const selfHandle = async (req, res, next) => {
   try {
-    const { closed_summary } = req.body;
-    await executeTransition(req.params.id, 'selfClose', req.user.id, req.user.role, { closedSummary: closed_summary });
-    writeAuditLog({ userId: req.user.id, action: 'SELF_CLOSE_COMPLAINT', resource: 'complaints', resourceId: req.params.id, details: { closed_summary }, ipAddress: req.ip, userAgent: req.get('user-agent') });
+    await executeTransition(req.params.id, 'selfHandle', req.user.id, req.user.role, { note: req.body.note });
+    writeAuditLog({ userId: req.user.id, action: 'SELF_HANDLE_COMPLAINT', resource: 'complaints', resourceId: req.params.id, ipAddress: req.ip, userAgent: req.get('user-agent') });
     const complaint = await complaintModel.findById(req.params.id);
     return success(res, { complaint });
   } catch (err) {
@@ -298,4 +297,4 @@ const selfClose = async (req, res, next) => {
   }
 };
 
-module.exports = { list, getById, create, update, getTimeline, getUpdates, revealIdentity, screen, reject, assign, review, close, sendBack, selfClose };
+module.exports = { list, getById, create, update, getTimeline, getUpdates, revealIdentity, screen, reject, assign, review, close, sendBack, selfHandle };

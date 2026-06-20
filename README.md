@@ -141,7 +141,8 @@ damrongdham-ssk/
 | 8 | Frontend Layout and Routing | ✅ |
 | 9 | Frontend Authentication | ✅ |
 | 10 | Complaint Management UI | ✅ |
-| 11–15 | ... | ⏳ |
+| 11 | Dashboard and Report UI | ✅ |
+| 12–15 | ... | ⏳ |
 
 ## API Endpoints (Phase 7 เพิ่ม)
 

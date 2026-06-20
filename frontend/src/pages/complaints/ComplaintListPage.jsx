@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
@@ -43,11 +43,17 @@ const EMPTY_FILTERS = { search: '', status: '', priority: '', category_id: '' };
 const ComplaintListPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Support receiving initial filter from Dashboard card clicks via location.state
+  const initFilters = location.state?.status
+    ? { ...EMPTY_FILTERS, status: location.state.status }
+    : EMPTY_FILTERS;
 
   const [complaints, setComplaints] = useState([]);
   const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 25, totalPages: 0 });
-  const [filters, setFilters] = useState(EMPTY_FILTERS);
-  const [activeFilters, setActiveFilters] = useState(EMPTY_FILTERS);
+  const [filters, setFilters] = useState(initFilters);
+  const [activeFilters, setActiveFilters] = useState(initFilters);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [categories, setCategories] = useState([]);

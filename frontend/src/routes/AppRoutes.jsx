@@ -38,7 +38,12 @@ import CitizenComplaintCreatePage from '../pages/citizen/CitizenComplaintCreateP
 import CitizenComplaintDetailPage from '../pages/citizen/CitizenComplaintDetailPage';
 import CitizenProfilePage         from '../pages/citizen/CitizenProfilePage';
 
-// ── Placeholder (Phase 11+) ───────────────────────────────────────────────────
+// ── Phase 11 pages ────────────────────────────────────────────────────────────
+import DashboardPage from '../pages/dashboard/DashboardPage';
+import ReportPage    from '../pages/reports/ReportPage';
+import AuditLogPage  from '../pages/audit/AuditLogPage';
+
+// ── Placeholder (Phase 12+) ───────────────────────────────────────────────────
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 const Placeholder = ({ title }) => (
@@ -47,10 +52,7 @@ const Placeholder = ({ title }) => (
     <Typography variant="body2" color="text.disabled" mt={1}>(อยู่ระหว่างพัฒนา)</Typography>
   </Box>
 );
-const DashboardPage      = () => <Placeholder title="Dashboard" />;
-const ReportsPage        = () => <Placeholder title="รายงาน" />;
-const NotificationsPage  = () => <Placeholder title="การแจ้งเตือน" />;
-const AuditLogsPage      = () => <Placeholder title="Audit Log" />;
+const NotificationsPage = () => <Placeholder title="การแจ้งเตือน" />;
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -108,7 +110,7 @@ const AppRoutes = () => (
 
         {/* Reports */}
         <Route element={<ProtectedRoute allowedRoles={REPORT_ROLES} />}>
-          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/reports" element={<ReportPage />} />
         </Route>
 
         {/* Notifications */}
@@ -124,7 +126,7 @@ const AppRoutes = () => (
           <Route path="/agencies"       element={<AgencyListPage />} />
           <Route path="/settings"       element={<SettingsPage />} />
           <Route path="/settings/*"     element={<SettingsPage />} />
-          <Route path="/audit-logs"     element={<AuditLogsPage />} />
+          <Route path="/audit-logs"     element={<AuditLogPage />} />
         </Route>
 
         {/* All authenticated */}

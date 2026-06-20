@@ -719,14 +719,15 @@ feat: complete phase 10 complaint management ui
 | 11.8 | ติดตั้ง Recharts หรือ Chart.js | `frontend/package.json` |
 
 ### Acceptance Criteria
-- [ ] Dashboard แสดง 6 Summary Cards ถูกต้อง
-- [ ] Charts 4 แบบแสดงข้อมูลถูกต้อง
-- [ ] ตาราง Overdue + Near Due แสดงถูกต้อง
-- [ ] Click Card → Navigate ไป Complaint List + Filter
-- [ ] Report 4 Tabs ทำงานถูกต้อง
-- [ ] Export Excel ดาวน์โหลดได้
-- [ ] Dashboard Filter (ปี/เดือน) ทำงาน
-- [ ] Audit Log แสดงรายการ + Filter ได้
+- [x] Dashboard แสดง 6 Summary Cards ถูกต้อง
+- [x] Charts 4 แบบแสดงข้อมูลถูกต้อง (Line trend, Pie by-status, 2× Bar by-category/by-agency)
+- [x] ตาราง Overdue + Near Due แสดงถูกต้อง (CENTER_ADMIN เท่านั้น)
+- [x] Click Card → Navigate ไป Complaint List + Filter (ผ่าน `location.state`)
+- [x] Report 4 Tabs ทำงานถูกต้อง (รายเดือน / ตามประเภท / ตามหน่วยงาน / เกินกำหนด)
+- [x] Export Excel ดาวน์โหลดได้ (blob download, type map ใช้ `-` ถูกต้อง)
+- [x] Dashboard Filter (date_from/date_to) + Year selector สำหรับ Trend chart
+- [x] Audit Log แสดงรายการ + Filter (action, resource, date range) + Pagination ได้
+- *Note: Chart components เป็น inline แทน `components/charts/` directory (ตาม plan 11.4/11.5) — functional equivalent*
 
 ### Git Commit
 ```

@@ -139,7 +139,8 @@ damrongdham-ssk/
 | 6 | Assignment & Status Workflow API | ✅ |
 | 7 | Dashboard and Report API | ✅ |
 | 8 | Frontend Layout and Routing | ✅ |
-| 9–15 | ... | ⏳ |
+| 9 | Frontend Authentication | ✅ |
+| 10–15 | ... | ⏳ |
 
 ## API Endpoints (Phase 7 เพิ่ม)
 

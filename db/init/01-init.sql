@@ -795,15 +795,52 @@ INSERT INTO `subdistricts` (`district_id`, `name`, `code`) VALUES
   (22, 'หนองบัวดง', '332203'),
   (22, 'โจด',       '332204');
 
--- ─── 11. users — Super Admin (1 คน) ──────────────────────────
--- username: admin | password: admin123 (bcrypt rounds=10)
--- role_id=1 (super_admin) | agency_id=NULL (ศูนย์ดำรงธรรม)
+-- ─── 11. users — Seed Accounts (Dev/Demo) ────────────────────
+-- Roles: 1=super_admin, 2=admin, 3=officer, 4=chief,
+--        5=agency_officer, 6=agency_head, 7=executive, 8=public
+-- agency_id=1 → สำนักงานที่ดินจังหวัดศรีสะเกษ
 INSERT INTO `users` (`username`, `password_hash`, `full_name`, `email`, `role_id`, `agency_id`) VALUES
+  -- admin / admin123 (bcrypt rounds=10)
   ('admin',
    '$2b$10$pRfTs3c3SOg32jv9QOwL.uOz5LaAeyg6TiQPUFrjhCSAFa4tCuN5q',
    'ผู้ดูแลระบบสูงสุด',
    'admin@dcms.local',
    1,
+   NULL),
+  -- officer1 / Officer@123 (bcrypt rounds=10)
+  ('officer1',
+   '$2b$10$lZdU3deXHsE/LdigSKsHmOgDPC9lF5OpXeBhbDXzoDp9BxMpUXj1q',
+   'เจ้าหน้าที่ 1',
+   NULL,
+   3,
+   NULL),
+  -- agency1 / Agency@123 (bcrypt rounds=10)
+  ('agency1',
+   '$2b$10$JcLwCqMj19PduGs.XdP4S.ez0GvA.12PkS2SR1UozQJhtOZ4Z4rP.',
+   'เจ้าหน้าที่หน่วยงาน 1',
+   NULL,
+   5,
+   1),
+  -- test_agency_head / AgencyHead@123 (bcrypt rounds=10)
+  ('test_agency_head',
+   '$2b$10$vgxeU6jL9nLDLvIsWJySBu6/KDrJwbL1ChJ5Md.Q5Bo92QPvbLuri',
+   'Test Agency Head',
+   NULL,
+   6,
+   1),
+  -- test_agency_off / Agency@123 (bcrypt rounds=10)
+  ('test_agency_off',
+   '$2b$10$sCO7zshYNOiko9DieNFHyOuhvBRIB0vio3TgGu2nqtscqhdu/M8Oa',
+   'Test Agency Officer',
+   NULL,
+   5,
+   1),
+  -- test_exec / Exec@123 (bcrypt rounds=10)
+  ('test_exec',
+   '$2b$10$RKk0.fUk1bw5HfBtciNxp.0i7KRfCSDq2b.za4Tzs.IiXNNG7lxwK',
+   'Test Executive',
+   NULL,
+   7,
    NULL);
 
 -- ─── 12. citizens — Test Account (Dev/Demo เท่านั้น) ─────────

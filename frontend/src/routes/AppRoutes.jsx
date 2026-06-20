@@ -6,7 +6,12 @@ import NotFoundPage from '../pages/errors/NotFoundPage';
 import ForbiddenPage from '../pages/errors/ForbiddenPage';
 import { ROLES } from '../utils/constants';
 
-// ── Placeholder pages (replaced in Phase 9, 10, 11 …) ───────────────────────
+// ── Phase 9: Real pages ───────────────────────────────────────────────────────
+import LoginPage          from '../pages/auth/LoginPage';
+import ChangePasswordPage from '../pages/auth/ChangePasswordPage';
+import ProfilePage        from '../pages/profile/ProfilePage';
+
+// ── Placeholder pages (replaced in Phase 10, 11 …) ──────────────────────────
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
@@ -19,7 +24,6 @@ const Placeholder = ({ title }) => (
   </Box>
 );
 
-const LoginPage          = () => <Placeholder title="หน้า Login" />;
 const DashboardPage      = () => <Placeholder title="Dashboard" />;
 const ComplaintsPage     = () => <Placeholder title="เรื่องร้องเรียน" />;
 const ComplaintNewPage   = () => <Placeholder title="ยื่นเรื่องร้องเรียน" />;
@@ -33,8 +37,6 @@ const UserEditPage       = () => <Placeholder title="แก้ไขผู้ใ
 const AgenciesPage       = () => <Placeholder title="จัดการหน่วยงาน" />;
 const SettingsPage       = () => <Placeholder title="ตั้งค่า Master Data" />;
 const AuditLogsPage      = () => <Placeholder title="Audit Log" />;
-const ProfilePage        = () => <Placeholder title="โปรไฟล์ของฉัน" />;
-const ChangePasswordPage = () => <Placeholder title="เปลี่ยนรหัสผ่าน" />;
 const PublicComplaintNew = () => <Placeholder title="ยื่นเรื่องร้องเรียน (ประชาชน)" />;
 const PublicTrackPage    = () => <Placeholder title="ติดตามสถานะเรื่องร้องเรียน" />;
 // ─────────────────────────────────────────────────────────────────────────────
@@ -49,9 +51,11 @@ const ADMIN_ROLES  = [SUPER_ADMIN, ADMIN];
 
 const AppRoutes = () => (
   <Routes>
-    {/* ── Public (no auth required) ── */}
+    {/* ── Login — standalone (LoginPage has its own full-page centered layout) ── */}
+    <Route path="/login" element={<LoginPage />} />
+
+    {/* ── Public (with PublicLayout: AppBar + Footer) ── */}
     <Route element={<PublicLayout />}>
-      <Route path="/login" element={<LoginPage />} />
       <Route path="/public/complaints/new" element={<PublicComplaintNew />} />
       <Route path="/public/track" element={<PublicTrackPage />} />
     </Route>

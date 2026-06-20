@@ -614,12 +614,12 @@ feat: complete phase 8 frontend layout and routing
 | 9.8 | จัดการ Token Expired (Redirect to Login) | Axios interceptor |
 
 ### Acceptance Criteria
-- [ ] Login สำเร็จ → Redirect ไป Dashboard
-- [ ] Login ผิด → แสดง Error Alert
-- [ ] Logout → ลบ Token + Redirect ไป Login
-- [ ] Token หมดอายุ → Redirect ไป Login
-- [ ] เปลี่ยนรหัสผ่านได้
-- [ ] ดูข้อมูล Profile ได้
+- [x] Login สำเร็จ → Redirect ไป Dashboard
+- [x] Login ผิด → แสดง Error Alert
+- [x] Logout → ลบ Token + Redirect ไป Login
+- [x] Token หมดอายุ → Redirect ไป Login
+- [x] เปลี่ยนรหัสผ่านได้
+- [x] ดูข้อมูล Profile ได้
 
 ### Git Commit
 ```

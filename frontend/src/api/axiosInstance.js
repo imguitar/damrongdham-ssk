@@ -6,6 +6,36 @@ const axiosInstance = axios.create({
   timeout: 30000,
 });
 
-// Interceptors will be wired up in Phase 9 (auth token injection + 401 redirect)
+// Request interceptor — inject JWT token from localStorage
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('dcms_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Response interceptor — handle 401 (token expired / invalid)
+// Skip redirect for auth endpoints themselves (/auth/login, /auth/me) so their
+// callers can handle errors directly (e.g., show "wrong password" on login page).
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (
+      error.response?.status === 401 &&
+      !error.config?.url?.includes('/auth/')
+    ) {
+      localStorage.removeItem('dcms_token');
+      localStorage.removeItem('dcms_user');
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default axiosInstance;

@@ -23,12 +23,17 @@ const runEscalationCheck = async () => {
         'UPDATE complaints SET escalation_level = 1, last_escalation_at = NOW() WHERE id = ?',
         [c.id]
       );
-      notifSvc.createForCenterUsers({
+      const agencyId = await notifSvc.getActiveAgencyId(c.id);
+      const notifData = {
         complaintId: c.id,
         type: 'ESCALATION_L1',
         title: notifSvc.NOTIFICATION_TEMPLATES.ESCALATION_L1.title,
         message: notifSvc.NOTIFICATION_TEMPLATES.ESCALATION_L1.message(c.complaint_number),
-      }).catch((err) => console.error('[EscalationJob] L1 notify error:', err.message));
+      };
+      notifSvc.createForCenterUsers(notifData).catch((err) => console.error('[EscalationJob] L1 center error:', err.message));
+      if (agencyId) {
+        notifSvc.createForAgencyUsers(agencyId, notifData).catch((err) => console.error('[EscalationJob] L1 agency error:', err.message));
+      }
     }
 
     if (l0.length) console.log(`[EscalationJob] L1 escalated: ${l0.length}`);
@@ -56,7 +61,7 @@ const runEscalationCheck = async () => {
       };
       notifSvc.createForCenterUsers(notifData).catch((err) => console.error('[EscalationJob] L2 center error:', err.message));
       if (agencyId) {
-        notifSvc.createForAgencyHeads(agencyId, notifData).catch((err) => console.error('[EscalationJob] L2 agency error:', err.message));
+        notifSvc.createForAgencyUsers(agencyId, notifData).catch((err) => console.error('[EscalationJob] L2 agency error:', err.message));
       }
     }
 
@@ -85,7 +90,7 @@ const runEscalationCheck = async () => {
       };
       notifSvc.createForCenterUsers(notifData).catch((err) => console.error('[EscalationJob] L3 center error:', err.message));
       if (agencyId) {
-        notifSvc.createForAgencyHeads(agencyId, notifData).catch((err) => console.error('[EscalationJob] L3 agency error:', err.message));
+        notifSvc.createForAgencyUsers(agencyId, notifData).catch((err) => console.error('[EscalationJob] L3 agency error:', err.message));
       }
     }
 

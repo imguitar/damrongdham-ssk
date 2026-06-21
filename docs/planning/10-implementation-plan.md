@@ -769,7 +769,7 @@ feat: complete phase 11 dashboard and report ui
 - [x] Scheduled Job: ตรวจ Overdue ทุกวัน 08:00
 - [x] Scheduled Job: ตรวจ Near Due ทุกวัน 08:00
 - [x] is_overdue Flag อัปเดตอัตโนมัติ
-- [x] ⭐ Scheduled Job: เร่งรัดการอัพเดตสถานะ — ส่ง ESCALATION_L1 (30 วัน → center), ESCALATION_L2 (45 วัน → center+agency_head), ESCALATION_L3 (52 วัน → center+agency_head) ครั้งเดียวต่อระดับ
+- [x] ⭐ Scheduled Job: เร่งรัดการอัพเดตสถานะ — ส่ง ESCALATION_L1 (30 วัน → center+agency_users), ESCALATION_L2 (45 วัน → center+agency_users), ESCALATION_L3 (52 วัน → center+agency_users) ครั้งเดียวต่อระดับ
 - [x] ⭐ มีการอัปเดตความคืบหน้า (PROGRESS) → รีเซ็ต `last_progress_at`/`escalation_level=0` และเริ่มนับ 30 วันใหม่
 
 > **หมายเหตุ (นอกขอบเขต Phase 12):** มีการเพิ่ม Transition T-13 (ศูนย์จัดการเอง: SCREENING → IN_PROGRESS) และ T-14 (IN_PROGRESS → CLOSED โดย center เมื่อจัดการเองเสร็จ) ระหว่าง Phase นี้ เพื่อรองรับ workflow ที่ศูนย์ดำรงธรรมจัดการเรื่องโดยไม่ส่งต่อหน่วยงาน ดูรายละเอียดใน `docs/planning/04-complaint-workflow.md` §8.6

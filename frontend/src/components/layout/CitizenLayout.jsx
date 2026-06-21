@@ -15,6 +15,7 @@ import Typography from '@mui/material/Typography';
 import { Outlet } from 'react-router-dom';
 import { useCitizenAuth } from '../../contexts/CitizenAuthContext';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import { AUTH_APPBAR_HEIGHT, AUTH_APPBAR_TITLE_FONT_SIZE } from '../../utils/constants';
 
 const CitizenLayout = () => {
   const { citizen, logout } = useCitizenAuth();
@@ -29,14 +30,14 @@ const CitizenLayout = () => {
   return (
     <Box minHeight="100vh" display="flex" flexDirection="column" bgcolor="background.default">
       <AppBar position="static" color="primary" elevation={1}>
-        <Toolbar>
+        <Toolbar sx={{ gap: 1, minHeight: `${AUTH_APPBAR_HEIGHT}px !important`, height: AUTH_APPBAR_HEIGHT }}>
           <Typography
             variant="h6"
             component={RouterLink}
             to="/citizen"
-            sx={{ color: 'white', textDecoration: 'none', fontWeight: 700, flexGrow: 1 }}
+            sx={{ color: 'white', textDecoration: 'none', fontWeight: 700, flexGrow: 1, fontSize: AUTH_APPBAR_TITLE_FONT_SIZE }}
           >
-            ศูนย์ดำรงธรรมจังหวัดศรีสะเกษ
+            Sisaket E-Complaint Management System
           </Typography>
 
           {citizen ? (
@@ -44,7 +45,8 @@ const CitizenLayout = () => {
               <Button
                 component={RouterLink}
                 to="/citizen/complaints"
-                sx={{ color: 'white', mr: 1 }}
+                size="small"
+                sx={{ color: 'white' }}
               >
                 เรื่องของฉัน
               </Button>
@@ -52,7 +54,8 @@ const CitizenLayout = () => {
                 component={RouterLink}
                 to="/citizen/complaints/new"
                 variant="outlined"
-                sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.5)', mr: 1 }}
+                size="small"
+                sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.5)' }}
               >
                 ยื่นเรื่องใหม่
               </Button>
@@ -80,13 +83,14 @@ const CitizenLayout = () => {
             </>
           ) : (
             <>
-              <Button component={RouterLink} to="/citizen/login" sx={{ color: 'white', mr: 1 }}>
+              <Button component={RouterLink} to="/citizen/login" size="small" sx={{ color: 'white' }}>
                 เข้าสู่ระบบ
               </Button>
               <Button
                 component={RouterLink}
                 to="/citizen/register"
                 variant="outlined"
+                size="small"
                 sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.5)' }}
               >
                 สมัครสมาชิก
@@ -111,16 +115,8 @@ const CitizenLayout = () => {
         }}
       >
         <Typography variant="body2" color="text.secondary">
-          ศูนย์ดำรงธรรมจังหวัดศรีสะเกษ — ระบบรับเรื่องร้องเรียน DCMS
+          Sisaket E-Complaint Management System
         </Typography>
-        <Box mt={0.5}>
-          <Link component={RouterLink} to="/public/complaints/new" variant="body2" sx={{ mr: 2 }}>
-            ยื่นเรื่อง (ไม่ต้องสมัครสมาชิก)
-          </Link>
-          <Link component={RouterLink} to="/public/track" variant="body2">
-            ติดตามสถานะ
-          </Link>
-        </Box>
       </Box>
     </Box>
   );

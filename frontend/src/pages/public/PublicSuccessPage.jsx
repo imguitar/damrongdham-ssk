@@ -22,7 +22,7 @@ const PublicSuccessPage = () => {
             ส่งเรื่องร้องเรียนสำเร็จ
           </Typography>
           <Typography variant="body1" color="text.secondary" mb={3}>
-            ศูนย์ดำรงธรรมจังหวัดศรีสะเกษได้รับเรื่องของท่านแล้ว
+            Sisaket E-Complaint Management System ได้รับเรื่องของท่านแล้ว
           </Typography>
 
           {complaintNumber && (

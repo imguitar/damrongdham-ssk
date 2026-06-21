@@ -208,7 +208,7 @@ const ComplaintDetailPage = () => {
             required: true,
             load: () =>
               agencyApi.list().then((r) =>
-                (r.data?.data?.agencies || []).filter((a) => a.is_active)
+                (r.data?.data?.agencies || []).filter((a) => a.is_active && !a.is_center)
               ),
           },
           { key: 'note', label: 'หมายเหตุ', type: 'text' },
@@ -239,16 +239,16 @@ const ComplaintDetailPage = () => {
         title: 'รับเรื่อง',
         fields: [{ key: 'note', label: 'หมายเหตุ', type: 'text' }],
         onConfirm: (v) => {
-          const a = assignments.find((x) => ['PENDING', 'ASSIGNED'].includes(x.status));
+          const a = assignments.find((x) => x.status === 'PENDING');
           if (!a) return;
           runAction(() => assignmentApi.accept(a.id, v), v);
         },
       },
       returnComplaint: {
         title: 'ส่งคืนเรื่อง',
-        fields: [{ key: 'reason', label: 'เหตุผล', type: 'textarea', required: true }],
+        fields: [{ key: 'return_reason', label: 'เหตุผล', type: 'textarea', required: true }],
         onConfirm: (v) => {
-          const a = assignments.find((x) => x.status === 'ACCEPTED' || x.status === 'IN_PROGRESS');
+          const a = assignments.find((x) => x.status === 'PENDING' || x.status === 'ACCEPTED');
           if (!a) return;
           runAction(() => assignmentApi.returnComplaint(a.id, v), v);
         },
@@ -264,9 +264,9 @@ const ComplaintDetailPage = () => {
       },
       resolve: {
         title: 'ส่งผลดำเนินการ',
-        fields: [{ key: 'result', label: 'ผลการดำเนินการ', type: 'textarea', required: true }],
+        fields: [{ key: 'content', label: 'ผลการดำเนินการ', type: 'textarea', required: true }],
         onConfirm: (v) => {
-          const a = assignments.find((x) => x.status === 'IN_PROGRESS');
+          const a = assignments.find((x) => x.status === 'ACCEPTED');
           if (!a) return;
           runAction(() => assignmentApi.resolve(a.id, v), v);
         },
@@ -406,7 +406,7 @@ const ComplaintDetailPage = () => {
                 </Button>
               </>
             )}
-            {isCenter && st === 'IN_PROGRESS' && !myAssignment && (
+            {isCenter && st === 'IN_PROGRESS' && (!myAssignment || myAssignment.is_center) && (
               <Button variant="contained" size="small" color="success" onClick={() => openDialog('close')}>
                 ปิดเรื่อง
               </Button>
@@ -417,7 +417,7 @@ const ComplaintDetailPage = () => {
               </Button>
             )}
 
-            {isAgency && myAssignment?.status === 'ASSIGNED' && (
+            {isAgency && myAssignment?.status === 'PENDING' && (
               <>
                 <Button variant="contained" size="small" color="success" onClick={() => openDialog('accept')}>
                   รับเรื่อง (T-04)
@@ -427,7 +427,7 @@ const ComplaintDetailPage = () => {
                 </Button>
               </>
             )}
-            {isAgency && myAssignment?.status === 'ACCEPTED' && (
+            {isAgency && myAssignment?.status === 'ACCEPTED' && st === 'ACCEPTED' && (
               <>
                 <Button variant="contained" size="small" onClick={() => openDialog('start')}>
                   เริ่มดำเนินการ (T-06)
@@ -437,7 +437,7 @@ const ComplaintDetailPage = () => {
                 </Button>
               </>
             )}
-            {isAgency && myAssignment?.status === 'IN_PROGRESS' && (
+            {isAgency && myAssignment?.status === 'ACCEPTED' && st === 'IN_PROGRESS' && (
               <Button variant="contained" size="small" color="success" onClick={() => openDialog('resolve')}>
                 ส่งผลดำเนินการ (T-08)
               </Button>

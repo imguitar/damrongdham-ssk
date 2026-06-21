@@ -130,6 +130,7 @@ CREATE TABLE `agencies` (
   `contact_email` VARCHAR(255),
   `address`       TEXT,
   `is_active`     TINYINT(1)   NOT NULL DEFAULT 1,
+  `is_center`     TINYINT(1)   NOT NULL DEFAULT 0,
   `created_at`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
@@ -492,7 +493,9 @@ INSERT INTO `complaint_categories` (`name`, `sla_days`) VALUES
   ('ขอความช่วยเหลือ / สงเคราะห์ผู้เดือดร้อน',                   10),
   ('ร้องทุกข์ทั่วไป / อื่นๆ',                                   15);
 
--- ─── 8. agencies (10 records — หน่วยงานศรีสะเกษ) ────────────
+-- ─── 8. agencies (center + 10 หน่วยงานศรีสะเกษ) ────────────
+INSERT INTO `agencies` (`name`, `short_name`, `is_center`) VALUES
+  ('ศูนย์ดำรงธรรมจังหวัดศรีสะเกษ',                             'ศดธ.ศก.',   1);
 INSERT INTO `agencies` (`name`, `short_name`) VALUES
   ('สำนักงานที่ดินจังหวัดศรีสะเกษ',                            'สนง.ที่ดิน'),
   ('สำนักงานทรัพยากรธรรมชาติและสิ่งแวดล้อมจังหวัดศรีสะเกษ',    'ทสจ.ศก.'),

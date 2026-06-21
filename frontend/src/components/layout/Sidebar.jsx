@@ -2,10 +2,12 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
+import Avatar from '@mui/material/Avatar';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -18,7 +20,8 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import HistoryIcon from '@mui/icons-material/History';
 
 import { useAuth } from '../../contexts/AuthContext';
-import { ROLES, DRAWER_WIDTH } from '../../utils/constants';
+import { ADMIN_HEADER_HEIGHT, MINI_DRAWER_WIDTH, ROLES, DRAWER_WIDTH } from '../../utils/constants';
+import appIcon from '../icons/App-Icon-v2.png';
 
 const { SUPER_ADMIN, ADMIN, OFFICER, CHIEF, AGENCY_HEAD, AGENCY_OFFICER, EXECUTIVE } = ROLES;
 
@@ -89,17 +92,46 @@ const ADMIN_MENU_ITEMS = [
   },
 ];
 
-const MenuItem = ({ item, selected }) => {
+const MenuItem = ({ item, selected, open }) => {
   const navigate = useNavigate();
-  return (
-    <ListItemButton selected={selected} onClick={() => navigate(item.path)} sx={{ mx: 1 }}>
-      <ListItemIcon sx={{ minWidth: 36 }}>{item.icon}</ListItemIcon>
-      <ListItemText primary={item.label} primaryTypographyProps={{ fontSize: '0.9rem' }} />
+  const button = (
+    <ListItemButton
+      selected={selected}
+      onClick={() => navigate(item.path)}
+      sx={{
+        mx: 1,
+        px: open ? 1.5 : 1,
+        minHeight: 44,
+        justifyContent: open ? 'flex-start' : 'center',
+      }}
+    >
+      <ListItemIcon
+        sx={{
+          minWidth: 0,
+          justifyContent: 'center',
+          mr: open ? 1.5 : 0,
+        }}
+      >
+        {item.icon}
+      </ListItemIcon>
+      <ListItemText
+        primary={item.label}
+        primaryTypographyProps={{ fontSize: '0.9rem', noWrap: true }}
+        sx={{ opacity: open ? 1 : 0, width: open ? 'auto' : 0 }}
+      />
     </ListItemButton>
+  );
+
+  if (open) return button;
+
+  return (
+    <Tooltip title={item.label} placement="right">
+      {button}
+    </Tooltip>
   );
 };
 
-const SidebarContent = () => {
+const SidebarContent = ({ open }) => {
   const { user } = useAuth();
   const location = useLocation();
 
@@ -117,46 +149,99 @@ const SidebarContent = () => {
       {/* Logo / Header */}
       <Box
         sx={{
-          px: 2,
-          py: 2.5,
+          px: open ? 2 : 1,
+          py: 0,
           background: 'linear-gradient(135deg, #1565C0 0%, #0D47A1 100%)',
           color: '#fff',
-          minHeight: 64,
+          minHeight: ADMIN_HEADER_HEIGHT,
+          height: ADMIN_HEADER_HEIGHT,
           display: 'flex',
           alignItems: 'center',
+          justifyContent: open ? 'flex-start' : 'center',
           borderRadius: 0,
         }}
       >
-        <Box>
-          <Typography variant="subtitle2" fontWeight={700} lineHeight={1.2}>
-            ศูนย์ดำรงธรรม
-          </Typography>
-          <Typography variant="caption" sx={{ opacity: 0.8 }}>
-            จังหวัดศรีสะเกษ
-          </Typography>
-        </Box>
+        {open ? (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+            <Avatar
+              variant="rounded"
+              sx={{
+                width: 34,
+                height: 34,
+                bgcolor: 'rgba(255,255,255,0.16)',
+                color: '#fff',
+                borderRadius: 2,
+              }}
+            >
+              <Box
+                component="img"
+                src={appIcon}
+                alt="App icon"
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
+            </Avatar>
+            <Box>
+              <Typography variant="subtitle2" fontWeight={700} lineHeight={1.2}>
+                Sisaket E-CMS
+              </Typography>
+              <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                จังหวัดศรีสะเกษ
+              </Typography>
+            </Box>
+          </Box>
+        ) : (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Avatar
+              variant="rounded"
+              sx={{
+                width: 28,
+                height: 28,
+                bgcolor: 'rgba(255,255,255,0.16)',
+                color: '#fff',
+                borderRadius: 1.5,
+              }}
+            >
+              <Box
+                component="img"
+                src={appIcon}
+                alt="App icon"
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
+            </Avatar>
+          </Box>
+        )}
       </Box>
 
       <Box sx={{ flex: 1, overflow: 'auto', py: 1 }}>
         <List dense disablePadding>
           {visibleMain.map((item) => (
-            <MenuItem key={item.id} item={item} selected={isSelected(item.path)} />
+            <MenuItem key={item.id} item={item} selected={isSelected(item.path)} open={open} />
           ))}
         </List>
 
         {visibleAdmin.length > 0 && (
           <>
             <Divider sx={{ my: 1, mx: 2 }} />
-            <Typography
-              variant="caption"
-              color="text.disabled"
-              sx={{ px: 3, pb: 0.5, display: 'block', fontWeight: 600, letterSpacing: 0.5 }}
-            >
-              จัดการระบบ
-            </Typography>
+            {open && (
+              <Typography
+                variant="caption"
+                color="text.disabled"
+                sx={{ px: 3, pb: 0.5, display: 'block', fontWeight: 600, letterSpacing: 0.5 }}
+              >
+                จัดการระบบ
+              </Typography>
+            )}
             <List dense disablePadding>
               {visibleAdmin.map((item) => (
-                <MenuItem key={item.id} item={item} selected={isSelected(item.path)} />
+                <MenuItem key={item.id} item={item} selected={isSelected(item.path)} open={open} />
               ))}
             </List>
           </>
@@ -166,8 +251,8 @@ const SidebarContent = () => {
   );
 };
 
-const Sidebar = ({ mobileOpen, onMobileClose }) => (
-  <Box component="nav" sx={{ width: { md: DRAWER_WIDTH }, flexShrink: { md: 0 } }}>
+const Sidebar = ({ drawerOpen, mobileOpen, onMobileClose }) => (
+  <Box component="nav" sx={{ width: { md: drawerOpen ? DRAWER_WIDTH : MINI_DRAWER_WIDTH }, flexShrink: { md: 0 } }}>
     {/* Mobile drawer */}
     <Drawer
       variant="temporary"
@@ -179,7 +264,7 @@ const Sidebar = ({ mobileOpen, onMobileClose }) => (
         '& .MuiDrawer-paper': { width: DRAWER_WIDTH, boxSizing: 'border-box', borderRadius: 0 },
       }}
     >
-      <SidebarContent />
+      <SidebarContent open />
     </Drawer>
 
     {/* Desktop drawer */}
@@ -187,17 +272,25 @@ const Sidebar = ({ mobileOpen, onMobileClose }) => (
       variant="permanent"
       sx={{
         display: { xs: 'none', md: 'block' },
+        width: drawerOpen ? DRAWER_WIDTH : MINI_DRAWER_WIDTH,
+        flexShrink: 0,
+        whiteSpace: 'nowrap',
         '& .MuiDrawer-paper': {
-          width: DRAWER_WIDTH,
+          width: drawerOpen ? DRAWER_WIDTH : MINI_DRAWER_WIDTH,
           boxSizing: 'border-box',
           borderRight: '1px solid',
           borderColor: 'divider',
           borderRadius: 0,
+          overflowX: 'hidden',
+          transition: (theme) => theme.transitions.create('width', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
         },
       }}
       open
     >
-      <SidebarContent />
+      <SidebarContent open={drawerOpen} />
     </Drawer>
   </Box>
 );

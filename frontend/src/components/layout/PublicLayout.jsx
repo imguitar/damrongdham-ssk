@@ -10,7 +10,7 @@ const PublicLayout = () => (
     <AppBar position="static" color="primary">
       <Toolbar>
         <Typography variant="h6" fontWeight={700} sx={{ flexGrow: 1 }}>
-          ศูนย์ดำรงธรรมจังหวัดศรีสะเกษ
+          Sisaket E-Complaint Management System
         </Typography>
       </Toolbar>
     </AppBar>
@@ -33,7 +33,7 @@ const PublicLayout = () => (
       }}
     >
       <Typography variant="caption" color="text.secondary">
-        © {new Date().getFullYear()} ศูนย์ดำรงธรรมจังหวัดศรีสะเกษ
+        © {new Date().getFullYear()} Sisaket E-Complaint Management System
       </Typography>
     </Box>
   </Box>

@@ -79,6 +79,14 @@ export const ROLE_LABELS = {
 };
 
 export const DRAWER_WIDTH = 240;
+export const MINI_DRAWER_WIDTH = 72;
+export const ADMIN_HEADER_HEIGHT = 80;
+export const AUTH_APPBAR_HEIGHT = 64;
+export const AUTH_APPBAR_TITLE_FONT_SIZE = { xs: '1rem', sm: '1.25rem' };
+export const AUTH_CARD_MAX_WIDTH = 440;
+export const AUTH_CARD_MIN_HEIGHT = 520;
+export const AUTH_LOGIN_ICON_SIZE = 120;
+export const AUTH_LOGIN_ICON_RADIUS = 2;
 
 export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 export const DEFAULT_PAGE_SIZE = 25;

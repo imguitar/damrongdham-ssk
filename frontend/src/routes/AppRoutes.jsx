@@ -59,7 +59,8 @@ const ADMIN_ROLES  = [SUPER_ADMIN, ADMIN];
 const AppRoutes = () => (
   <Routes>
     {/* ── Login — standalone ──────────────────────────────────────────── */}
-    <Route path="/login" element={<LoginPage />} />
+    <Route path="/login"         element={<LoginPage />} />
+    <Route path="/citizen/login" element={<CitizenLoginPage />} />
 
     {/* ── Public with AppBar + Footer ─────────────────────────────────── */}
     <Route element={<PublicLayout />}>
@@ -71,7 +72,6 @@ const AppRoutes = () => (
     {/* ── Citizen section (CitizenLayout) ─────────────────────────────── */}
     <Route element={<CitizenLayout />}>
       {/* Public citizen pages */}
-      <Route path="/citizen/login"    element={<CitizenLoginPage />} />
       <Route path="/citizen/register" element={<CitizenRegisterPage />} />
 
       {/* Protected citizen pages */}

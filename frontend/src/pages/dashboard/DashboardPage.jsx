@@ -52,6 +52,15 @@ const STATUS_HEX = {
   REVIEWING: '#6a1b9a', CLOSED: '#2e7d32', REJECTED: '#c62828', RETURNED: '#e65100',
 };
 
+const SUMMARY_GRADIENTS = {
+  primary:   'linear-gradient(135deg, #0D47A1 0%, #1565C0 55%, #1976D2 100%)',
+  info:      'linear-gradient(135deg, #01579B 0%, #0277BD 55%, #039BE5 100%)',
+  warning:   'linear-gradient(135deg, #7A3E00 0%, #E65100 55%, #F57C00 100%)',
+  error:     'linear-gradient(135deg, #7F1D1D 0%, #B71C1C 55%, #C62828 100%)',
+  secondary: 'linear-gradient(135deg, #1B5E20 0%, #2E7D32 55%, #43A047 100%)',
+  success:   'linear-gradient(135deg, #0B3D2E 0%, #1B5E20 55%, #2E7D32 100%)',
+};
+
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -83,17 +92,48 @@ const ChartCard = ({ title, children, action }) => (
 );
 
 const SummaryCard = ({ label, value, icon, color, onClick }) => (
-  <Card sx={{ height: '100%' }}>
-    <CardActionArea onClick={onClick} sx={{ height: '100%' }}>
-      <CardContent>
-        <Box display="flex" justifyContent="space-between" alignItems="flex-start">
+  <Card
+    sx={{
+      height: '100%',
+      color: '#fff',
+      background: SUMMARY_GRADIENTS[color] || SUMMARY_GRADIENTS.primary,
+      overflow: 'hidden',
+    }}
+  >
+    <CardActionArea
+      onClick={onClick}
+      sx={{
+        height: '100%',
+        color: 'inherit',
+        '&:hover': {
+          backgroundColor: 'rgba(255,255,255,0.08)',
+        },
+      }}
+    >
+      <CardContent sx={{ height: '100%', display: 'flex', alignItems: 'center' }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
           <Box>
-            <Typography variant="body2" color="text.secondary" noWrap>{label}</Typography>
-            <Typography variant="h4" fontWeight={700} color={`${color}.main`} lineHeight={1.2} mt={0.5}>
+            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.82)' }} noWrap>{label}</Typography>
+            <Typography variant="h4" fontWeight={700} color="inherit" lineHeight={1.2} mt={0.5}>
               {value?.toLocaleString('th-TH') ?? '-'}
             </Typography>
           </Box>
-          <Box sx={{ color: `${color}.main`, opacity: 0.6, mt: 0.5 }}>{icon}</Box>
+          <Box
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: '50%',
+              bgcolor: 'rgba(255,255,255,0.18)',
+              color: 'rgba(255,255,255,0.9)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              '& .MuiSvgIcon-root': { fontSize: 28 },
+            }}
+          >
+            {icon}
+          </Box>
         </Box>
       </CardContent>
     </CardActionArea>

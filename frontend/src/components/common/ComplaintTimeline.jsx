@@ -74,7 +74,12 @@ const ComplaintTimeline = ({ events = [] }) => {
               <StatusTransition from_status={ev.from_status} to_status={ev.to_status} />
             )}
             {ev.event_type === 'update' && (
-              <Typography variant="body2">{ev.content}</Typography>
+              <>
+                <Typography variant="caption" color="text.secondary" fontWeight="medium">
+                  {ev.update_type === 'RESULT' ? 'ผลการดำเนินการ' : 'บันทึก'}
+                </Typography>
+                <Typography variant="body2" mt={0.25}>{ev.content}</Typography>
+              </>
             )}
             {ev.note && (
               <Typography variant="body2" color="text.secondary" mt={0.5}>
@@ -84,6 +89,7 @@ const ComplaintTimeline = ({ events = [] }) => {
             <Box display="flex" justifyContent="space-between" mt={0.5}>
               <Typography variant="caption" color="text.secondary">
                 {ev.actor_name || '-'}
+                {ev.actor_agency && ` (${ev.actor_agency})`}
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 {formatDateTime(ev.created_at)}

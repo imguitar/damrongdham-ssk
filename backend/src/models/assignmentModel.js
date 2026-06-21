@@ -5,7 +5,8 @@ const pool = require('../config/database');
 const findById = async (id) => {
   const [[row]] = await pool.query(
     `SELECT ca.*,
-            a.name  AS agency_name,
+            a.name     AS agency_name,
+            a.is_center AS is_center,
             u.full_name  AS assigned_by_name,
             ua.full_name AS accepted_by_name
      FROM complaint_assignments ca
@@ -21,7 +22,8 @@ const findById = async (id) => {
 const findByComplaintId = async (complaintId) => {
   const [rows] = await pool.query(
     `SELECT ca.*,
-            a.name  AS agency_name,
+            a.name      AS agency_name,
+            a.is_center AS is_center,
             u.full_name  AS assigned_by_name,
             ua.full_name AS accepted_by_name
      FROM complaint_assignments ca
@@ -37,7 +39,7 @@ const findByComplaintId = async (complaintId) => {
 
 const findActiveByComplaintId = async (complaintId) => {
   const [[row]] = await pool.query(
-    `SELECT ca.*, a.name AS agency_name
+    `SELECT ca.*, a.name AS agency_name, a.is_center AS is_center
      FROM complaint_assignments ca
      LEFT JOIN agencies a ON a.id = ca.agency_id
      WHERE ca.complaint_id = ? AND ca.is_active = 1

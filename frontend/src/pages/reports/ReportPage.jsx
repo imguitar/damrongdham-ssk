@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -23,6 +23,12 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   LineChart, Line,
 } from 'recharts';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import * as agencyApi from '../../api/agencyApi';
+import * as complaintApi from '../../api/complaintApi';
 import * as reportApi from '../../api/reportApi';
 import { formatDateShort } from '../../utils/formatters';
 
@@ -30,6 +36,10 @@ import { formatDateShort } from '../../utils/formatters';
 
 const MONTHS_TH = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 const PRIORITY_LABELS_TH = { LOW: 'ต่ำ', MEDIUM: 'ปานกลาง', HIGH: 'สูง', CRITICAL: 'วิกฤต' };
+const STATUS_LABELS_TH = {
+  PENDING: 'รอดำเนินการ', SCREENED: 'ผ่านการคัดกรอง', ASSIGNED: 'ส่งต่อหน่วยงาน',
+  IN_PROGRESS: 'กำลังดำเนินการ', RESOLVED: 'แก้ไขแล้ว', CLOSED: 'ปิด', REJECTED: 'ปฏิเสธ',
+};
 
 const today = () => new Date().toISOString().slice(0, 10);
 const firstOfYear = () => `${new Date().getFullYear()}-01-01`;
@@ -56,8 +66,8 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 // ── Date filter bar ───────────────────────────────────────────────────────────
 
-const DateFilter = ({ from, to, onFromChange, onToChange, onSearch, loading }) => (
-  <Box display="flex" gap={1} alignItems="center" flexWrap="wrap" mb={2}>
+const DateFilter = ({ from, to, onFromChange, onToChange, onSearch, loading, mb = 2 }) => (
+  <Box display="flex" gap={1} alignItems="center" flexWrap="wrap" mb={mb}>
     <TextField
       type="date" label="ตั้งแต่" size="small"
       value={from} onChange={(e) => onFromChange(e.target.value)}
@@ -97,6 +107,8 @@ const MonthlyTab = () => {
     } catch { setError('โหลดข้อมูลไม่สำเร็จ'); }
     finally { setLoad(false); }
   }, [from, to]);
+
+  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const chartData = rows.map((r) => ({
     label: `${MONTHS_TH[(r.month || 1) - 1]} ${String(r.year).slice(-2)}`,
@@ -192,6 +204,8 @@ const ByCategoryTab = () => {
     finally { setLoad(false); }
   }, [from, to]);
 
+  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const chartData = rows.slice(0, 10).map((r) => ({
     name: r.name.length > 14 ? r.name.slice(0, 14) + '…' : r.name,
     ทั้งหมด: r.total,
@@ -263,14 +277,35 @@ const ByCategoryTab = () => {
 // ── Tab 3: By Agency ──────────────────────────────────────────────────────────
 
 const ByAgencyTab = () => {
-  const [from, setFrom]     = useState(firstOfYear());
-  const [to, setTo]         = useState(today());
-  const [rows, setRows]     = useState([]);
-  const [loading, setLoad]  = useState(false);
-  const [error, setError]   = useState('');
-  const [loaded, setLoaded] = useState(false);
+  const [from, setFrom]             = useState(firstOfYear());
+  const [to, setTo]                 = useState(today());
+  const [selectedAgency, setSelAg]  = useState('');
+  const [agencies, setAgencies]     = useState([]);
+  const [rows, setRows]             = useState([]);
+  const [loading, setLoad]          = useState(false);
+  const [error, setError]           = useState('');
+  const [loaded, setLoaded]         = useState(false);
 
-  const load = useCallback(async () => {
+  // Complaint list state (used when an agency is selected)
+  const [cRows, setCRows]   = useState([]);
+  const [cPage, setCPage]   = useState(0);
+  const [cTotal, setCTotal] = useState(0);
+  const [cLimit]            = useState(25);
+
+  const agencyChangedRef = useRef(false);
+
+  // Load agency dropdown once (includes center agency with is_center=1)
+  useEffect(() => {
+    agencyApi.list({ limit: 200 }).then((res) => {
+      const all = res.data?.data?.agencies || [];
+      // center first, then the rest alphabetically
+      const center = all.filter((a) => a.is_center);
+      const others = all.filter((a) => !a.is_center);
+      setAgencies([...center, ...others]);
+    }).catch(() => {});
+  }, []);
+
+  const loadAggregate = useCallback(async () => {
     setLoad(true); setError('');
     try {
       const res = await reportApi.getByAgency({ date_from: from, date_to: to });
@@ -280,6 +315,36 @@ const ByAgencyTab = () => {
     finally { setLoad(false); }
   }, [from, to]);
 
+  const loadComplaints = useCallback(async (pg = 0) => {
+    setLoad(true); setError('');
+    try {
+      const params = { date_from: from, date_to: to, page: pg + 1, limit: cLimit, agency_id: selectedAgency };
+      const res = await complaintApi.list(params);
+      setCRows(res.data?.data || []);
+      setCTotal(res.data?.pagination?.total || 0);
+      setCPage(pg);
+      setLoaded(true);
+    } catch { setError('โหลดข้อมูลไม่สำเร็จ'); }
+    finally { setLoad(false); }
+  }, [from, to, selectedAgency, cLimit]);
+
+  const load = useCallback(() => {
+    if (selectedAgency) loadComplaints(0);
+    else loadAggregate();
+  }, [selectedAgency, loadComplaints, loadAggregate]);
+
+  // Initial load
+  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Reload when agency selection changes (skip on initial mount)
+  useEffect(() => {
+    if (!agencyChangedRef.current) { agencyChangedRef.current = true; return; }
+    setLoaded(false); setCRows([]); setRows([]);
+    load();
+  }, [selectedAgency]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleAgencyChange = (e) => setSelAg(e.target.value);
+
   const chartData = rows.slice(0, 10).map((r) => ({
     name: (r.short_name || r.name || '').slice(0, 12),
     ทั้งหมด: r.total,
@@ -287,12 +352,34 @@ const ByAgencyTab = () => {
     เกิน: r.overdue,
   }));
 
+  const agencyLabel = agencies.find((a) => String(a.id) === String(selectedAgency))?.name || '';
+
   return (
     <Box>
-      <DateFilter from={from} to={to} onFromChange={setFrom} onToChange={setTo} onSearch={load} loading={loading} />
+      <Box display="flex" gap={1} alignItems="center" flexWrap="wrap" mb={2}>
+        <FormControl size="small" sx={{ minWidth: 260 }}>
+          <InputLabel>หน่วยงาน</InputLabel>
+          <Select
+            value={selectedAgency}
+            label="หน่วยงาน"
+            onChange={handleAgencyChange}
+          >
+            <MenuItem value="">-- ทั้งหมด (ภาพรวม) --</MenuItem>
+            {agencies.map((a) => (
+              <MenuItem key={a.id} value={String(a.id)}>
+                {a.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <DateFilter from={from} to={to} onFromChange={setFrom} onToChange={setTo} onSearch={load} loading={loading} mb={0} />
+      </Box>
+
       {error && <Typography color="error" variant="body2" mb={1}>{error}</Typography>}
       {loading && <LinearProgress sx={{ mb: 1 }} />}
-      {loaded && (
+
+      {/* Aggregate view (no agency selected) */}
+      {loaded && !selectedAgency && (
         <>
           {rows.length > 0 && (
             <Card sx={{ mb: 2 }}>
@@ -348,6 +435,66 @@ const ByAgencyTab = () => {
           </Card>
         </>
       )}
+
+      {/* Complaint list view (agency selected) */}
+      {loaded && selectedAgency && (
+        <Card>
+          <CardContent>
+            <SectionTitle>
+              รายการเรื่องร้องเรียน — {agencyLabel} ({cTotal.toLocaleString('th-TH')} รายการ)
+            </SectionTitle>
+            <Box sx={{ overflowX: 'auto' }}>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>เลขที่</TableCell>
+                    <TableCell>หัวเรื่อง</TableCell>
+                    <TableCell>สถานะ</TableCell>
+                    <TableCell>ความสำคัญ</TableCell>
+                    <TableCell align="right">วันที่รับเรื่อง</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {cRows.length === 0 ? (
+                    <TableRow><TableCell colSpan={5} align="center">ไม่มีข้อมูล</TableCell></TableRow>
+                  ) : cRows.map((r) => (
+                    <TableRow key={r.id}>
+                      <TableCell>
+                        <Typography variant="body2" color="primary.main">{r.complaint_number}</Typography>
+                      </TableCell>
+                      <TableCell>{(r.title || '').slice(0, 50)}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={STATUS_LABELS_TH[r.status] || r.status}
+                          size="small"
+                          color={r.status === 'CLOSED' ? 'success' : r.status === 'REJECTED' ? 'error' : 'default'}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={PRIORITY_LABELS_TH[r.priority] || r.priority}
+                          size="small"
+                          color={r.priority === 'CRITICAL' ? 'error' : r.priority === 'HIGH' ? 'warning' : 'default'}
+                        />
+                      </TableCell>
+                      <TableCell align="right">{formatDateShort(r.created_at)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
+            <TablePagination
+              component="div"
+              count={cTotal}
+              page={cPage}
+              rowsPerPage={cLimit}
+              rowsPerPageOptions={[25]}
+              onPageChange={(_, p) => loadComplaints(p)}
+              labelDisplayedRows={({ from: f, to: t, count }) => `${f}–${t} จาก ${count}`}
+            />
+          </CardContent>
+        </Card>
+      )}
     </Box>
   );
 };
@@ -376,6 +523,8 @@ const OverdueTab = () => {
     } catch { setError('โหลดข้อมูลไม่สำเร็จ'); }
     finally { setLoad(false); }
   }, [from, to, limit]);
+
+  useEffect(() => { load(0); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSearch = () => load(0);
 

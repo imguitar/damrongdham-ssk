@@ -271,9 +271,10 @@ const update = async (id, fields) => {
 const getTimeline = async (complaintId) => {
   const [statusLogs] = await pool.query(
     `SELECT sl.id, sl.complaint_id, sl.from_status, sl.to_status,
-            sl.note, sl.created_at, u.full_name AS actor_name
+            sl.note, sl.created_at, u.full_name AS actor_name, a.name AS actor_agency
      FROM complaint_status_logs sl
      LEFT JOIN users u ON u.id = sl.changed_by
+     LEFT JOIN agencies a ON a.id = u.agency_id
      WHERE sl.complaint_id = ?
      ORDER BY sl.created_at ASC`,
     [complaintId]
@@ -281,9 +282,10 @@ const getTimeline = async (complaintId) => {
 
   const [updates] = await pool.query(
     `SELECT cu.id, cu.complaint_id, cu.update_type, cu.content,
-            cu.created_at, u.full_name AS actor_name
+            cu.created_at, u.full_name AS actor_name, a.name AS actor_agency
      FROM complaint_updates cu
      LEFT JOIN users u ON u.id = cu.updated_by
+     LEFT JOIN agencies a ON a.id = u.agency_id
      WHERE cu.complaint_id = ?
      ORDER BY cu.created_at ASC`,
     [complaintId]

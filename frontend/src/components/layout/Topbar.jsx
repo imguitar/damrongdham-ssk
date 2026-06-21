@@ -24,7 +24,9 @@ import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 
 import { useAuth } from '../../contexts/AuthContext';
 import { useNotification } from '../../contexts/NotificationContext';
-import { DRAWER_WIDTH } from '../../utils/constants';
+import { ADMIN_HEADER_HEIGHT, DRAWER_WIDTH, MINI_DRAWER_WIDTH } from '../../utils/constants';
+import agency1Icon from '../icons/Agency-1.png';
+import agency2Icon from '../icons/Agency-2.png';
 
 const TYPE_COLOR = {
   SLA_OVERDUE:    'error',
@@ -44,7 +46,7 @@ const timeAgo = (dateStr) => {
   return `${Math.floor(diff / 86400)} วันที่แล้ว`;
 };
 
-const Topbar = ({ onMenuClick }) => {
+const Topbar = ({ drawerOpen, onDesktopDrawerToggle, onMobileMenuClick }) => {
   const { user, logout }                        = useAuth();
   const { unreadCount, notifications, markRead, markAllRead, fetchNotifications } = useNotification();
   const navigate                                = useNavigate();
@@ -85,17 +87,29 @@ const Topbar = ({ onMenuClick }) => {
       position="fixed"
       color="default"
       sx={{
-        width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
-        ml: { md: `${DRAWER_WIDTH}px` },
+        width: { md: `calc(100% - ${drawerOpen ? DRAWER_WIDTH : MINI_DRAWER_WIDTH}px)` },
+        ml: { md: `${drawerOpen ? DRAWER_WIDTH : MINI_DRAWER_WIDTH}px` },
         bgcolor: 'background.paper',
         borderBottom: '1px solid',
         borderColor: 'divider',
       }}
     >
-      <Toolbar>
-        <IconButton edge="start" onClick={onMenuClick} sx={{ mr: 1, display: { md: 'none' } }}>
+      <Toolbar
+        sx={{
+          minHeight: `${ADMIN_HEADER_HEIGHT}px !important`,
+          height: ADMIN_HEADER_HEIGHT,
+        }}
+      >
+        <IconButton edge="start" onClick={onMobileMenuClick} sx={{ mr: 1, display: { md: 'none' } }}>
           <MenuIcon />
         </IconButton>
+
+        <IconButton edge="start" onClick={onDesktopDrawerToggle} sx={{ mr: 1, display: { xs: 'none', md: 'inline-flex' } }}>
+          <MenuIcon />
+        </IconButton>
+
+        <Box component="img" src={agency1Icon} alt="agency-1" sx={{ height: 36, width: 'auto', mr: 1 }} />
+        <Box component="img" src={agency2Icon} alt="agency-2" sx={{ height: 36, width: 'auto' }} />
 
         <Box sx={{ flex: 1 }} />
 

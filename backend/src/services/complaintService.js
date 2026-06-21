@@ -13,7 +13,6 @@ const TRANSITION_MAP = {
   SCREENING:   {
     assign:      { to: 'ASSIGNED',    roles: CENTER_ROLES },
     reject:      { to: 'REJECTED',    roles: CENTER_ROLES },
-    selfHandle:  { to: 'IN_PROGRESS', roles: CENTER_ROLES },
   },
   ASSIGNED:    {
     accept:    { to: 'ACCEPTED',    roles: AGENCY_ROLES },
@@ -84,7 +83,11 @@ const executeTransition = async (complaintId, action, userId, role, options = {}
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
-    await changeStatus(conn, complaintId, complaint.status, to, userId, options.note || null, extraFields);
+    const noteForLog =
+      action === 'reject' ? (options.rejectionReason || null) :
+      action === 'close'  ? (options.closedSummary || null) :
+      (options.note || null);
+    await changeStatus(conn, complaintId, complaint.status, to, userId, noteForLog, extraFields);
     await conn.commit();
   } catch (err) {
     await conn.rollback();
@@ -148,8 +151,72 @@ const executeAssign = async (complaint, userId, role, { agencyId, note } = {}) =
   return { to, dueDate, assignmentId };
 };
 
+// Self-handle: assign to center agency + transition directly to IN_PROGRESS
+const executeSelfHandle = async (complaintId, userId, role, options = {}) => {
+  if (!CENTER_ROLES.includes(role)) {
+    throw Object.assign(new Error('ไม่มีสิทธิ์ดำเนินการนี้'), { statusCode: 403, code: 'FORBIDDEN' });
+  }
+
+  const [[complaint]] = await pool.query(
+    'SELECT id, status, category_id, complaint_number FROM complaints WHERE id = ?', [complaintId]
+  );
+  if (!complaint) throw Object.assign(new Error('ไม่พบเรื่องร้องเรียน'), { statusCode: 404, code: 'NOT_FOUND' });
+  if (complaint.status !== 'SCREENING') {
+    throw Object.assign(
+      new Error(`ไม่สามารถดำเนินการเองได้เมื่อสถานะเป็น ${complaint.status}`),
+      { statusCode: 400, code: 'INVALID_TRANSITION' }
+    );
+  }
+
+  const [[centerAgency]] = await pool.query(
+    'SELECT id FROM agencies WHERE is_center = 1 AND is_active = 1 LIMIT 1'
+  );
+  if (!centerAgency) {
+    throw Object.assign(new Error('ไม่พบข้อมูลหน่วยงานศูนย์ดำรงธรรม'), { statusCode: 500, code: 'CONFIG_ERROR' });
+  }
+
+  let slaDays = 15;
+  if (complaint.category_id) {
+    const [[cat]] = await pool.query('SELECT sla_days FROM complaint_categories WHERE id = ?', [complaint.category_id]);
+    if (cat) slaDays = cat.sla_days;
+  }
+  const dueDate = calculateDueDate(slaDays);
+
+  const conn = await pool.getConnection();
+  let assignmentId;
+  try {
+    await conn.beginTransaction();
+
+    await conn.query(
+      'UPDATE complaint_assignments SET is_active = 0 WHERE complaint_id = ? AND is_active = 1',
+      [complaint.id]
+    );
+
+    // status='ACCEPTED': center already accepted its own assignment — no handoff needed
+    const [result] = await conn.query(
+      `INSERT INTO complaint_assignments
+         (complaint_id, agency_id, assigned_by, assigned_at, due_date, status, note, is_active, created_at, updated_at)
+       VALUES (?, ?, ?, NOW(), ?, 'ACCEPTED', ?, 1, NOW(), NOW())`,
+      [complaint.id, centerAgency.id, userId, dueDate, options.note || null]
+    );
+    assignmentId = result.insertId;
+
+    await changeStatus(conn, complaint.id, complaint.status, 'IN_PROGRESS', userId, options.note || null, { due_date: dueDate });
+    await conn.commit();
+  } catch (err) {
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release();
+  }
+
+  notifSvc.notifyWorkflow(complaintId, 'selfHandle', { complaint_number: complaint.complaint_number });
+
+  return { to: 'IN_PROGRESS', dueDate, assignmentId };
+};
+
 module.exports = {
   CENTER_ROLES, AGENCY_ROLES, TRANSITION_MAP,
   validateTransition, changeStatus,
-  executeTransition, executeAssign,
+  executeTransition, executeAssign, executeSelfHandle,
 };

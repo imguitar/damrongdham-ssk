@@ -92,7 +92,7 @@ const PublicComplaintPage = () => {
       <Box textAlign="center" mb={3}>
         <Typography variant="h5" fontWeight={700}>ยื่นเรื่องร้องเรียน</Typography>
         <Typography variant="body2" color="text.secondary" mt={0.5}>
-          ศูนย์ดำรงธรรมจังหวัดศรีสะเกษ — ไม่ต้องสมัครสมาชิก
+          Sisaket E-Complaint Management System — ไม่ต้องสมัครสมาชิก
         </Typography>
       </Box>
 

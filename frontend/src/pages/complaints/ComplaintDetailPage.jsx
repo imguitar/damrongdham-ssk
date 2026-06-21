@@ -346,10 +346,10 @@ const ComplaintDetailPage = () => {
           </Typography>
           <StatusChip status={st} />
           <PriorityChip priority={complaint.priority} />
-          {complaint.is_overdue && (
+          {!!complaint.is_overdue && (
             <Chip icon={<WarningAmberIcon />} label="เกินกำหนด" color="error" size="small" />
           )}
-          {complaint.is_anonymous && (
+          {!!complaint.is_anonymous && (
             <Chip label="ปกปิดตัวตน" size="small" color="warning" variant="outlined" />
           )}
         </Box>

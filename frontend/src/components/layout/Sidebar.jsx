@@ -124,6 +124,7 @@ const SidebarContent = () => {
           minHeight: 64,
           display: 'flex',
           alignItems: 'center',
+          borderRadius: 0,
         }}
       >
         <Box>
@@ -175,7 +176,7 @@ const Sidebar = ({ mobileOpen, onMobileClose }) => (
       ModalProps={{ keepMounted: true }}
       sx={{
         display: { xs: 'block', md: 'none' },
-        '& .MuiDrawer-paper': { width: DRAWER_WIDTH, boxSizing: 'border-box' },
+        '& .MuiDrawer-paper': { width: DRAWER_WIDTH, boxSizing: 'border-box', borderRadius: 0 },
       }}
     >
       <SidebarContent />
@@ -191,6 +192,7 @@ const Sidebar = ({ mobileOpen, onMobileClose }) => (
           boxSizing: 'border-box',
           borderRight: '1px solid',
           borderColor: 'divider',
+          borderRadius: 0,
         },
       }}
       open

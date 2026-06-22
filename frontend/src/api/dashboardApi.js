@@ -8,3 +8,4 @@ export const getByDistrict = (params) => axiosInstance.get('/dashboard/by-distri
 export const getTrend      = (params) => axiosInstance.get('/dashboard/trend',        { params });
 export const getOverdue    = (params) => axiosInstance.get('/dashboard/overdue',      { params });
 export const getNearDue    = (params) => axiosInstance.get('/dashboard/near-due',     { params });
+export const getEscalated  = (params) => axiosInstance.get('/dashboard/escalated',    { params });

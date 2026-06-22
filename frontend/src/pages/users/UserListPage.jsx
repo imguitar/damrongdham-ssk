@@ -15,16 +15,18 @@ import FilterBar from '../../components/common/FilterBar';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import * as userApi from '../../api/userApi';
+import * as agencyApi from '../../api/agencyApi';
 import { ROLE_LABELS } from '../../utils/constants';
 import { formatDateTime } from '../../utils/formatters';
 
-const EMPTY_FILTERS = { search: '', role: '' };
+const EMPTY_FILTERS = { search: '', role: '', agency_id: '' };
 
 const ROLE_OPTIONS = Object.entries(ROLE_LABELS).map(([v, l]) => ({ value: v, label: l }));
 
 const UserListPage = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
+  const [agencies, setAgencies] = useState([]);
   const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 25, totalPages: 0 });
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [activeFilters, setActiveFilters] = useState(EMPTY_FILTERS);
@@ -32,12 +34,19 @@ const UserListPage = () => {
   const [error, setError] = useState('');
   const [toggleTarget, setToggleTarget] = useState(null);
 
+  useEffect(() => {
+    agencyApi.list({ limit: 200 })
+      .then((r) => setAgencies(r.data?.data?.agencies || []))
+      .catch(() => {});
+  }, []);
+
   const load = useCallback((page = 1, applied = activeFilters) => {
     setLoading(true);
     const params = {
       page, limit: pagination.limit,
       ...(applied.search ? { search: applied.search } : {}),
       ...(applied.role ? { role: applied.role } : {}),
+      ...(applied.agency_id ? { agency_id: applied.agency_id } : {}),
     };
     userApi.list(params)
       .then((res) => {
@@ -129,6 +138,12 @@ const UserListPage = () => {
         fields={[
           { key: 'search', label: 'ค้นหา (ชื่อ/Username)', type: 'text' },
           { key: 'role', label: 'บทบาท', type: 'select', options: ROLE_OPTIONS },
+          {
+            key: 'agency_id',
+            label: 'หน่วยงาน',
+            type: 'select',
+            options: agencies.map((a) => ({ value: String(a.id), label: a.name })),
+          },
         ]}
       />
 

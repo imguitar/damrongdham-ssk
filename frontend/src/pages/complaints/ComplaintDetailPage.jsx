@@ -274,7 +274,21 @@ const ComplaintDetailPage = () => {
       revealIdentity: {
         title: 'เปิดเผยตัวตนผู้ร้อง',
         fields: [{ key: 'reason', label: 'เหตุผลการเปิดเผย', type: 'textarea', required: true }],
-        onConfirm: (v) => runAction(() => complaintApi.revealIdentity(id, v), v),
+        onConfirm: async (v) => {
+          setActionLoading(true);
+          setActionError('');
+          try {
+            const res = await complaintApi.revealIdentity(id, v);
+            // Use unmasked complaint from response directly — load() would re-mask it
+            const unmasked = res.data?.data?.complaint;
+            if (unmasked) setComplaint(unmasked);
+            setDialog(null);
+          } catch (err) {
+            setActionError(err?.response?.data?.error?.message || 'เกิดข้อผิดพลาด');
+          } finally {
+            setActionLoading(false);
+          }
+        },
       },
     };
     setDialog({ type, ...defs[type] });
@@ -443,7 +457,7 @@ const ComplaintDetailPage = () => {
               </Button>
             )}
 
-            {role === ROLES.SUPER_ADMIN && complaint.is_anonymous && (
+            {role === ROLES.SUPER_ADMIN && !!complaint.is_anonymous && (
               <Button
                 variant="outlined"
                 size="small"

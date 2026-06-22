@@ -26,4 +26,7 @@ router.get('/trend',       authorize(...REPORT_ROLES), dashboardController.trend
 router.get('/overdue',     authorize(...CENTER_ADMIN),  dashboardController.overdue);
 router.get('/near-due',    authorize(...CENTER_ADMIN),  dashboardController.nearDue);
 
+// Escalation table — all staff (agency-scoped automatically)
+router.get('/escalated',   authorize(...ALL_STAFF),     dashboardController.escalated);
+
 module.exports = router;

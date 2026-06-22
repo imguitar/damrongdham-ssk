@@ -275,4 +275,33 @@ const nearDue = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-module.exports = { summary, byStatus, byCategory, byAgency, byDistrict, trend, overdue, nearDue };
+// ─── GET /api/dashboard/escalated ────────────────────────────────────────────
+// Returns complaints with escalation_level 1, 2, or 3 (not yet closed/rejected)
+const escalated = async (req, res, next) => {
+  try {
+    const effectiveAgencyId = AGENCY_ROLES.includes(req.user.role) ? req.user.agency_id : null;
+
+    let sql = `SELECT c.id, c.complaint_number, c.title,
+        c.escalation_level, c.priority, c.status,
+        c.due_date, c.last_progress_at, c.last_escalation_at,
+        a.name AS agency_name, a.short_name AS agency_short_name
+      FROM complaints c
+      LEFT JOIN complaint_assignments ca ON ca.complaint_id = c.id AND ca.is_active = 1
+      LEFT JOIN agencies a ON a.id = ca.agency_id`;
+
+    const vals = [];
+    if (effectiveAgencyId) {
+      sql += ' INNER JOIN complaint_assignments _ag ON _ag.complaint_id = c.id AND _ag.agency_id = ? AND _ag.is_active = 1';
+      vals.push(Number(effectiveAgencyId));
+    }
+
+    sql += ` WHERE c.escalation_level > 0
+        AND c.status NOT IN ('CLOSED','REJECTED')
+      ORDER BY c.escalation_level DESC, c.last_progress_at ASC`;
+
+    const [rows] = await pool.query(sql, vals);
+    return success(res, { escalated: rows });
+  } catch (err) { next(err); }
+};
+
+module.exports = { summary, byStatus, byCategory, byAgency, byDistrict, trend, overdue, nearDue, escalated };

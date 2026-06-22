@@ -44,7 +44,7 @@ const updateLastLogin = async (id) => {
 
 // ── User Management (admin CRUD) ───────────────────────────────────────────────
 
-const findAll = async ({ search, roleId, isActive, limit = 20, offset = 0 } = {}) => {
+const findAll = async ({ search, roleId, agencyId, isActive, limit = 20, offset = 0 } = {}) => {
   const conditions = [];
   const params = [];
 
@@ -53,6 +53,7 @@ const findAll = async ({ search, roleId, isActive, limit = 20, offset = 0 } = {}
     params.push(`%${search}%`, `%${search}%`, `%${search}%`);
   }
   if (roleId) { conditions.push('u.role_id = ?'); params.push(parseInt(roleId)); }
+  if (agencyId) { conditions.push('u.agency_id = ?'); params.push(parseInt(agencyId)); }
   if (isActive !== undefined) { conditions.push('u.is_active = ?'); params.push(isActive ? 1 : 0); }
 
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';

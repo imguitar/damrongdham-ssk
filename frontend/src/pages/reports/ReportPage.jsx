@@ -5,8 +5,12 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CircularProgress from '@mui/material/CircularProgress';
 import Chip from '@mui/material/Chip';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
 import LinearProgress from '@mui/material/LinearProgress';
+import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
+import Select from '@mui/material/Select';
 import Tab from '@mui/material/Tab';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -23,10 +27,6 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   LineChart, Line,
 } from 'recharts';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
 import * as agencyApi from '../../api/agencyApi';
 import * as complaintApi from '../../api/complaintApi';
 import * as reportApi from '../../api/reportApi';
@@ -37,8 +37,9 @@ import { formatDateShort } from '../../utils/formatters';
 const MONTHS_TH = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 const PRIORITY_LABELS_TH = { LOW: 'ต่ำ', MEDIUM: 'ปานกลาง', HIGH: 'สูง', CRITICAL: 'วิกฤต' };
 const STATUS_LABELS_TH = {
-  PENDING: 'รอดำเนินการ', SCREENED: 'ผ่านการคัดกรอง', ASSIGNED: 'ส่งต่อหน่วยงาน',
-  IN_PROGRESS: 'กำลังดำเนินการ', RESOLVED: 'แก้ไขแล้ว', CLOSED: 'ปิด', REJECTED: 'ปฏิเสธ',
+  NEW: 'รับเรื่องใหม่', SCREENING: 'กำลังคัดกรอง', ASSIGNED: 'ส่งต่อหน่วยงาน',
+  ACCEPTED: 'รับเรื่องแล้ว', IN_PROGRESS: 'กำลังดำเนินการ', RESOLVED: 'แก้ไขแล้ว',
+  REVIEWING: 'กำลังตรวจผล', CLOSED: 'ปิด', REJECTED: 'ปฏิเสธ', RETURNED: 'ส่งคืน',
 };
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -64,10 +65,28 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
-// ── Date filter bar ───────────────────────────────────────────────────────────
+// ── Shared filter bar (date + optional agency dropdown) ───────────────────────
 
-const DateFilter = ({ from, to, onFromChange, onToChange, onSearch, loading, mb = 2 }) => (
+const DateFilter = ({
+  from, to, onFromChange, onToChange, onSearch, loading, mb = 2,
+  agencies, agencyId, onAgencyChange,
+}) => (
   <Box display="flex" gap={1} alignItems="center" flexWrap="wrap" mb={mb}>
+    {agencies?.length > 0 && (
+      <FormControl size="small" sx={{ minWidth: 240 }}>
+        <InputLabel>หน่วยงาน</InputLabel>
+        <Select
+          value={agencyId || ''}
+          label="หน่วยงาน"
+          onChange={(e) => onAgencyChange(e.target.value)}
+        >
+          <MenuItem value="">-- ทั้งหมด --</MenuItem>
+          {agencies.map((a) => (
+            <MenuItem key={a.id} value={String(a.id)}>{a.name}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    )}
     <TextField
       type="date" label="ตั้งแต่" size="small"
       value={from} onChange={(e) => onFromChange(e.target.value)}
@@ -82,6 +101,7 @@ const DateFilter = ({ from, to, onFromChange, onToChange, onSearch, loading, mb 
       variant="outlined" size="small"
       startIcon={loading ? <CircularProgress size={14} /> : <FilterAltIcon />}
       onClick={onSearch} disabled={loading}
+      sx={{ height: 40 }}
     >
       กรอง
     </Button>
@@ -90,23 +110,26 @@ const DateFilter = ({ from, to, onFromChange, onToChange, onSearch, loading, mb 
 
 // ── Tab 1: Monthly ────────────────────────────────────────────────────────────
 
-const MonthlyTab = () => {
-  const [from, setFrom]     = useState(firstOfYear());
-  const [to, setTo]         = useState(today());
-  const [rows, setRows]     = useState([]);
-  const [loading, setLoad]  = useState(false);
-  const [error, setError]   = useState('');
-  const [loaded, setLoaded] = useState(false);
+const MonthlyTab = ({ agencies }) => {
+  const [from, setFrom]       = useState(firstOfYear());
+  const [to, setTo]           = useState(today());
+  const [agencyId, setAgency] = useState('');
+  const [rows, setRows]       = useState([]);
+  const [loading, setLoad]    = useState(false);
+  const [error, setError]     = useState('');
+  const [loaded, setLoaded]   = useState(false);
 
   const load = useCallback(async () => {
     setLoad(true); setError('');
     try {
-      const res = await reportApi.getMonthly({ date_from: from, date_to: to });
+      const params = { date_from: from, date_to: to };
+      if (agencyId) params.agency_id = agencyId;
+      const res = await reportApi.getMonthly(params);
       setRows(res.data?.data?.report || []);
       setLoaded(true);
     } catch { setError('โหลดข้อมูลไม่สำเร็จ'); }
     finally { setLoad(false); }
-  }, [from, to]);
+  }, [from, to, agencyId]);
 
   useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -119,7 +142,11 @@ const MonthlyTab = () => {
 
   return (
     <Box>
-      <DateFilter from={from} to={to} onFromChange={setFrom} onToChange={setTo} onSearch={load} loading={loading} />
+      <DateFilter
+        from={from} to={to} onFromChange={setFrom} onToChange={setTo}
+        onSearch={load} loading={loading}
+        agencies={agencies} agencyId={agencyId} onAgencyChange={setAgency}
+      />
       {error && <Typography color="error" variant="body2" mb={1}>{error}</Typography>}
       {loading && <LinearProgress sx={{ mb: 1 }} />}
       {loaded && (
@@ -186,23 +213,26 @@ const MonthlyTab = () => {
 
 // ── Tab 2: By Category ────────────────────────────────────────────────────────
 
-const ByCategoryTab = () => {
-  const [from, setFrom]     = useState(firstOfYear());
-  const [to, setTo]         = useState(today());
-  const [rows, setRows]     = useState([]);
-  const [loading, setLoad]  = useState(false);
-  const [error, setError]   = useState('');
-  const [loaded, setLoaded] = useState(false);
+const ByCategoryTab = ({ agencies }) => {
+  const [from, setFrom]       = useState(firstOfYear());
+  const [to, setTo]           = useState(today());
+  const [agencyId, setAgency] = useState('');
+  const [rows, setRows]       = useState([]);
+  const [loading, setLoad]    = useState(false);
+  const [error, setError]     = useState('');
+  const [loaded, setLoaded]   = useState(false);
 
   const load = useCallback(async () => {
     setLoad(true); setError('');
     try {
-      const res = await reportApi.getByCategory({ date_from: from, date_to: to });
+      const params = { date_from: from, date_to: to };
+      if (agencyId) params.agency_id = agencyId;
+      const res = await reportApi.getByCategory(params);
       setRows(res.data?.data?.report || []);
       setLoaded(true);
     } catch { setError('โหลดข้อมูลไม่สำเร็จ'); }
     finally { setLoad(false); }
-  }, [from, to]);
+  }, [from, to, agencyId]);
 
   useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -215,7 +245,11 @@ const ByCategoryTab = () => {
 
   return (
     <Box>
-      <DateFilter from={from} to={to} onFromChange={setFrom} onToChange={setTo} onSearch={load} loading={loading} />
+      <DateFilter
+        from={from} to={to} onFromChange={setFrom} onToChange={setTo}
+        onSearch={load} loading={loading}
+        agencies={agencies} agencyId={agencyId} onAgencyChange={setAgency}
+      />
       {error && <Typography color="error" variant="body2" mb={1}>{error}</Typography>}
       {loading && <LinearProgress sx={{ mb: 1 }} />}
       {loaded && (
@@ -276,34 +310,19 @@ const ByCategoryTab = () => {
 
 // ── Tab 3: By Agency ──────────────────────────────────────────────────────────
 
-const ByAgencyTab = () => {
-  const [from, setFrom]             = useState(firstOfYear());
-  const [to, setTo]                 = useState(today());
-  const [selectedAgency, setSelAg]  = useState('');
-  const [agencies, setAgencies]     = useState([]);
-  const [rows, setRows]             = useState([]);
-  const [loading, setLoad]          = useState(false);
-  const [error, setError]           = useState('');
-  const [loaded, setLoaded]         = useState(false);
+const ByAgencyTab = ({ agencies }) => {
+  const [from, setFrom]            = useState(firstOfYear());
+  const [to, setTo]                = useState(today());
+  const [selectedAgency, setSelAg] = useState('');
+  const [rows, setRows]            = useState([]);
+  const [loading, setLoad]         = useState(false);
+  const [error, setError]          = useState('');
+  const [loaded, setLoaded]        = useState(false);
 
-  // Complaint list state (used when an agency is selected)
   const [cRows, setCRows]   = useState([]);
   const [cPage, setCPage]   = useState(0);
   const [cTotal, setCTotal] = useState(0);
   const [cLimit]            = useState(25);
-
-  const agencyChangedRef = useRef(false);
-
-  // Load agency dropdown once (includes center agency with is_center=1)
-  useEffect(() => {
-    agencyApi.list({ limit: 200 }).then((res) => {
-      const all = res.data?.data?.agencies || [];
-      // center first, then the rest alphabetically
-      const center = all.filter((a) => a.is_center);
-      const others = all.filter((a) => !a.is_center);
-      setAgencies([...center, ...others]);
-    }).catch(() => {});
-  }, []);
 
   const loadAggregate = useCallback(async () => {
     setLoad(true); setError('');
@@ -333,17 +352,15 @@ const ByAgencyTab = () => {
     else loadAggregate();
   }, [selectedAgency, loadComplaints, loadAggregate]);
 
-  // Initial load
   useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Reload when agency selection changes (skip on initial mount)
+  // Reload when agency selection changes (skip initial mount)
+  const agencyChangedRef = useRef(false);
   useEffect(() => {
     if (!agencyChangedRef.current) { agencyChangedRef.current = true; return; }
     setLoaded(false); setCRows([]); setRows([]);
     load();
   }, [selectedAgency]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handleAgencyChange = (e) => setSelAg(e.target.value);
 
   const chartData = rows.slice(0, 10).map((r) => ({
     name: (r.short_name || r.name || '').slice(0, 12),
@@ -359,26 +376,22 @@ const ByAgencyTab = () => {
       <Box display="flex" gap={1} alignItems="center" flexWrap="wrap" mb={2}>
         <FormControl size="small" sx={{ minWidth: 260 }}>
           <InputLabel>หน่วยงาน</InputLabel>
-          <Select
-            value={selectedAgency}
-            label="หน่วยงาน"
-            onChange={handleAgencyChange}
-          >
+          <Select value={selectedAgency} label="หน่วยงาน" onChange={(e) => setSelAg(e.target.value)}>
             <MenuItem value="">-- ทั้งหมด (ภาพรวม) --</MenuItem>
             {agencies.map((a) => (
-              <MenuItem key={a.id} value={String(a.id)}>
-                {a.name}
-              </MenuItem>
+              <MenuItem key={a.id} value={String(a.id)}>{a.name}</MenuItem>
             ))}
           </Select>
         </FormControl>
-        <DateFilter from={from} to={to} onFromChange={setFrom} onToChange={setTo} onSearch={load} loading={loading} mb={0} />
+        <DateFilter
+          from={from} to={to} onFromChange={setFrom} onToChange={setTo}
+          onSearch={load} loading={loading} mb={0}
+        />
       </Box>
 
       {error && <Typography color="error" variant="body2" mb={1}>{error}</Typography>}
       {loading && <LinearProgress sx={{ mb: 1 }} />}
 
-      {/* Aggregate view (no agency selected) */}
       {loaded && !selectedAgency && (
         <>
           {rows.length > 0 && (
@@ -436,7 +449,6 @@ const ByAgencyTab = () => {
         </>
       )}
 
-      {/* Complaint list view (agency selected) */}
       {loaded && selectedAgency && (
         <Card>
           <CardContent>
@@ -501,9 +513,10 @@ const ByAgencyTab = () => {
 
 // ── Tab 4: Overdue ────────────────────────────────────────────────────────────
 
-const OverdueTab = () => {
+const OverdueTab = ({ agencies }) => {
   const [from, setFrom]       = useState(firstOfYear());
   const [to, setTo]           = useState(today());
+  const [agencyId, setAgency] = useState('');
   const [rows, setRows]       = useState([]);
   const [loading, setLoad]    = useState(false);
   const [error, setError]     = useState('');
@@ -515,22 +528,26 @@ const OverdueTab = () => {
   const load = useCallback(async (pg = 0) => {
     setLoad(true); setError('');
     try {
-      const res = await reportApi.getOverdue({ date_from: from, date_to: to, page: pg + 1, limit });
+      const params = { date_from: from, date_to: to, page: pg + 1, limit };
+      if (agencyId) params.agency_id = agencyId;
+      const res = await reportApi.getOverdue(params);
       setRows(res.data?.data?.report || []);
       setTotal(res.data?.data?.pagination?.total || 0);
       setPage(pg);
       setLoaded(true);
     } catch { setError('โหลดข้อมูลไม่สำเร็จ'); }
     finally { setLoad(false); }
-  }, [from, to, limit]);
+  }, [from, to, agencyId, limit]);
 
   useEffect(() => { load(0); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleSearch = () => load(0);
-
   return (
     <Box>
-      <DateFilter from={from} to={to} onFromChange={setFrom} onToChange={setTo} onSearch={handleSearch} loading={loading} />
+      <DateFilter
+        from={from} to={to} onFromChange={setFrom} onToChange={setTo}
+        onSearch={() => load(0)} loading={loading}
+        agencies={agencies} agencyId={agencyId} onAgencyChange={setAgency}
+      />
       {error && <Typography color="error" variant="body2" mb={1}>{error}</Typography>}
       {loading && <LinearProgress sx={{ mb: 1 }} />}
       {loaded && (
@@ -595,7 +612,17 @@ const OverdueTab = () => {
 
 const ReportPage = () => {
   const [tab, setTab]             = useState(0);
+  const [agencies, setAgencies]   = useState([]);
   const [exporting, setExporting] = useState(false);
+
+  useEffect(() => {
+    agencyApi.list({ limit: 200 }).then((r) => {
+      const all = r.data?.data?.agencies || [];
+      const center = all.filter((a) => a.is_center);
+      const others = all.filter((a) => !a.is_center);
+      setAgencies([...center, ...others]);
+    }).catch(() => {});
+  }, []);
 
   const exportTypeMap = ['monthly', 'by-category', 'by-agency', 'overdue'];
   const tabLabels     = ['รายเดือน', 'ตามประเภทเรื่อง', 'ตามหน่วยงาน', 'เรื่องเกินกำหนด'];
@@ -617,7 +644,12 @@ const ReportPage = () => {
     }
   };
 
-  const TAB_CONTENT = [<MonthlyTab />, <ByCategoryTab />, <ByAgencyTab />, <OverdueTab />];
+  const TAB_CONTENT = [
+    <MonthlyTab    agencies={agencies} />,
+    <ByCategoryTab agencies={agencies} />,
+    <ByAgencyTab   agencies={agencies} />,
+    <OverdueTab    agencies={agencies} />,
+  ];
 
   return (
     <Box>

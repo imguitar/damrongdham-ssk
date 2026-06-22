@@ -27,6 +27,7 @@ import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import NewReleasesIcon from '@mui/icons-material/NewReleases';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SendIcon from '@mui/icons-material/Send';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
@@ -142,8 +143,14 @@ const SummaryCard = ({ label, value, icon, color, onClick }) => (
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
+const ESCALATION_CONFIG = {
+  1: { label: 'L1', color: 'warning', bg: '#fff8e1', border: '#f9a825' },
+  2: { label: 'L2', color: 'error',   bg: '#fce4ec', border: '#c62828' },
+  3: { label: 'L3', color: 'error',   bg: '#4a0000', border: '#b71c1c' },
+};
+
 const EMPTY_DATA = {
-  summary: {}, byStatus: [], byCategory: [], byAgency: [], trend: [], overdue: [], nearDue: [],
+  summary: {}, byStatus: [], byCategory: [], byAgency: [], trend: [], overdue: [], nearDue: [], escalated: [],
 };
 
 const DashboardPage = () => {
@@ -177,9 +184,10 @@ const DashboardPage = () => {
         isReportRole ? dashboardApi.getTrend({ year })     : Promise.resolve(null),
         isCenterAdmin ? dashboardApi.getOverdue(params)   : Promise.resolve(null),
         isCenterAdmin ? dashboardApi.getNearDue(params)   : Promise.resolve(null),
+        dashboardApi.getEscalated(),
       ];
 
-      const [sumRes, statusRes, catRes, agRes, trendRes, overdueRes, nearRes] = await Promise.all(calls);
+      const [sumRes, statusRes, catRes, agRes, trendRes, overdueRes, nearRes, escalRes] = await Promise.all(calls);
 
       setData({
         summary:    sumRes?.data?.data?.summary      || {},
@@ -189,6 +197,7 @@ const DashboardPage = () => {
         trend:      trendRes?.data?.data?.trend       || [],
         overdue:    overdueRes?.data?.data?.overdue   || [],
         nearDue:    nearRes?.data?.data?.near_due     || [],
+        escalated:  escalRes?.data?.data?.escalated   || [],
       });
     } catch (err) {
       setError('โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่');
@@ -367,6 +376,91 @@ const DashboardPage = () => {
         </>
       )}
 
+      {/* ── Escalation Table — all staff ──────────────────────── */}
+      {data.escalated.length > 0 && (
+        <Card sx={{ mb: 2 }}>
+          <CardContent>
+            <Box display="flex" alignItems="center" gap={1} mb={1}>
+              <ErrorOutlineIcon color="error" fontSize="small" />
+              <Typography variant="subtitle1" fontWeight={700} color="error.main">
+                เรื่องที่ถูกเร่งรัด ({data.escalated.length})
+              </Typography>
+            </Box>
+            <Divider sx={{ mb: 1 }} />
+            {loading ? (
+              <Box display="flex" justifyContent="center" py={3}><CircularProgress size={28} /></Box>
+            ) : (
+              <Box sx={{ overflowX: 'auto' }}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>ระดับ</TableCell>
+                      <TableCell>เลขที่</TableCell>
+                      <TableCell>หัวเรื่อง</TableCell>
+                      <TableCell>หน่วยงาน</TableCell>
+                      <TableCell>ความสำคัญ</TableCell>
+                      <TableCell align="right">ไม่มีอัปเดต (วัน)</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {data.escalated.map((row) => {
+                      const cfg = ESCALATION_CONFIG[row.escalation_level] || ESCALATION_CONFIG[1];
+                      return (
+                        <TableRow
+                          key={row.id} hover sx={{ cursor: 'pointer' }}
+                          onClick={() => navigate(`/complaints/${row.id}`)}
+                        >
+                          <TableCell>
+                            <Chip
+                              label={cfg.label}
+                              size="small"
+                              color={cfg.color}
+                              variant={row.escalation_level === 3 ? 'filled' : 'outlined'}
+                              sx={row.escalation_level === 3 ? { color: '#fff', bgcolor: cfg.border } : {}}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2" color="primary.main" fontWeight={600}>
+                              {row.complaint_number}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2">{row.title?.slice(0, 40)}</Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2">{row.agency_short_name || row.agency_name || '-'}</Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Chip
+                              label={{ LOW: 'ต่ำ', MEDIUM: 'ปานกลาง', HIGH: 'สูง', CRITICAL: 'วิกฤต' }[row.priority] || row.priority}
+                              size="small"
+                              color={row.priority === 'CRITICAL' ? 'error' : row.priority === 'HIGH' ? 'warning' : 'default'}
+                            />
+                          </TableCell>
+                          <TableCell align="right">
+                            {row.last_progress_at ? (() => {
+                              const days = Math.floor((Date.now() - new Date(row.last_progress_at)) / 86400000);
+                              return (
+                                <Chip
+                                  label={`${days} วัน`}
+                                  size="small"
+                                  color={days >= 90 ? 'error' : days >= 60 ? 'error' : 'warning'}
+                                  variant={days >= 60 ? 'filled' : 'outlined'}
+                                />
+                              );
+                            })() : <Typography variant="caption" color="text.secondary">-</Typography>}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </Box>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* ── Overdue & Near-due Tables — CENTER_ADMIN only ─────── */}
       {isCenterAdmin && (
         <Grid container spacing={2}>
@@ -377,7 +471,7 @@ const DashboardPage = () => {
                 <Box display="flex" alignItems="center" gap={1} mb={1}>
                   <WarningAmberIcon color="error" fontSize="small" />
                   <Typography variant="subtitle1" fontWeight={700} color="error.main">
-                    เรื่องเกินกำหนด ({data.overdue.length})
+                    เรื่องเกินกำหนด SLA ({data.overdue.length})
                   </Typography>
                 </Box>
                 <Divider sx={{ mb: 1 }} />
@@ -428,7 +522,7 @@ const DashboardPage = () => {
                 <Box display="flex" alignItems="center" gap={1} mb={1}>
                   <HourglassEmptyIcon color="warning" fontSize="small" />
                   <Typography variant="subtitle1" fontWeight={700} color="warning.dark">
-                    เรื่องใกล้ครบกำหนด ({data.nearDue.length})
+                    เรื่องใกล้ครบกำหนด SLA ({data.nearDue.length})
                   </Typography>
                 </Box>
                 <Divider sx={{ mb: 1 }} />

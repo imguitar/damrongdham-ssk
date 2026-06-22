@@ -22,6 +22,7 @@ import Tabs from '@mui/material/Tabs';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import EditIcon from '@mui/icons-material/Edit';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
@@ -150,6 +151,8 @@ const ComplaintDetailPage = () => {
   const [updateText, setUpdateText] = useState('');
   const [updateLoading, setUpdateLoading] = useState(false);
   const [pendingFiles, setPendingFiles] = useState([]);
+  const [deleteDialog, setDeleteDialog] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -336,6 +339,19 @@ const ComplaintDetailPage = () => {
     }
   };
 
+  const handleDelete = async () => {
+    setDeleteLoading(true);
+    try {
+      await complaintApi.deleteComplaint(id);
+      navigate('/complaints');
+    } catch (err) {
+      setActionError(err?.response?.data?.error?.message || 'เกิดข้อผิดพลาด');
+      setDeleteDialog(false);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorAlert message={error} />;
   if (!complaint) return null;
@@ -367,15 +383,27 @@ const ComplaintDetailPage = () => {
             <Chip label="ปกปิดตัวตน" size="small" color="warning" variant="outlined" />
           )}
         </Box>
-        {isCenter && !['CLOSED', 'REJECTED'].includes(st) && (
-          <Button
-            variant="outlined"
-            startIcon={<EditIcon />}
-            onClick={() => navigate(`/complaints/${id}/edit`)}
-          >
-            แก้ไข
-          </Button>
-        )}
+        <Box display="flex" gap={1}>
+          {isCenter && !['CLOSED', 'REJECTED'].includes(st) && (
+            <Button
+              variant="outlined"
+              startIcon={<EditIcon />}
+              onClick={() => navigate(`/complaints/${id}/edit`)}
+            >
+              แก้ไข
+            </Button>
+          )}
+          {role === ROLES.SUPER_ADMIN && (
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<DeleteForeverIcon />}
+              onClick={() => setDeleteDialog(true)}
+            >
+              ลบเรื่อง
+            </Button>
+          )}
+        </Box>
       </Box>
 
       {actionError && <ErrorAlert message={actionError} sx={{ mb: 2 }} />}
@@ -661,6 +689,33 @@ const ComplaintDetailPage = () => {
           loading={actionLoading}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialog} onClose={() => setDeleteDialog(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>ยืนยันการลบเรื่องร้องเรียน</DialogTitle>
+        <DialogContent>
+          <Typography>
+            คุณต้องการลบเรื่อง <strong>{complaint.complaint_number}</strong> ออกจากระบบใช่หรือไม่?
+          </Typography>
+          <Typography variant="body2" color="error" mt={1}>
+            การลบจะไม่สามารถย้อนกลับได้ และข้อมูลทั้งหมดจะถูกลบถาวร
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialog(false)} disabled={deleteLoading}>
+            ยกเลิก
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleDelete}
+            disabled={deleteLoading}
+            startIcon={deleteLoading ? <CircularProgress size={16} /> : <DeleteForeverIcon />}
+          >
+            {deleteLoading ? 'กำลังลบ...' : 'ยืนยันลบ'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

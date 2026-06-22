@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -25,14 +26,25 @@ const INITIAL = {
   postal_code: '', incident_address: '', latitude: '', longitude: '',
 };
 
+const STAFF_ROLES = ['super_admin', 'admin', 'officer', 'chief', 'agency_head', 'agency_officer', 'executive'];
+
 const PublicComplaintPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isCitizen = !user || !STAFF_ROLES.includes(user.role);
   const masterData = useMasterData({ usePublic: true });
   const [form, setForm] = useState(INITIAL);
   const [pendingFiles, setPendingFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [errorMsg, setErrorMsg] = useState('');
+
+  // Set SSK E-CMS as default channel when channels load
+  useEffect(() => {
+    if (!masterData.channels?.length || form.channel_id) return;
+    const ssk = masterData.channels.find((c) => c.name === 'SSK E-CMS');
+    if (ssk) setForm((p) => ({ ...p, channel_id: ssk.id }));
+  }, [masterData.channels]); // eslint-disable-line
 
   const validate = () => {
     const e = {};
@@ -108,6 +120,7 @@ const PublicComplaintPage = () => {
             disabled={loading || masterData.loading}
             showComplainantInfo
             showAnonymous
+            lockChannel={isCitizen}
           />
 
           <Divider sx={{ my: 3 }} />

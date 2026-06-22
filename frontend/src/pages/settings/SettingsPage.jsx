@@ -196,7 +196,7 @@ const SettingsPage = () => {
 
   const handleToggle = async () => {
     if (!toggleTarget) return;
-    try { await cfg.toggleFn(toggleTarget.id); setToggleTarget(null); load(); }
+    try { await cfg.toggleFn(toggleTarget.id, !toggleTarget.is_active); setToggleTarget(null); load(); }
     catch { setError('เกิดข้อผิดพลาด'); }
   };
 

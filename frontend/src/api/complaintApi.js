@@ -34,3 +34,6 @@ export const downloadAttachment = (attachId) =>
 
 // Anonymous reveal (super_admin only)
 export const revealIdentity = (id, data) => axiosInstance.post(`/complaints/${id}/reveal-identity`, data);
+
+// Delete complaint (super_admin only)
+export const deleteComplaint = (id) => axiosInstance.delete(`/complaints/${id}`);

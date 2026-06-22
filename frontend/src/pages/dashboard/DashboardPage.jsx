@@ -486,6 +486,7 @@ const DashboardPage = () => {
                         <TableRow>
                           <TableCell>เลขที่</TableCell>
                           <TableCell>หน่วยงาน</TableCell>
+                          <TableCell>ครบกำหนด</TableCell>
                           <TableCell align="right">เกิน (วัน)</TableCell>
                         </TableRow>
                       </TableHead>
@@ -501,6 +502,9 @@ const DashboardPage = () => {
                             </TableCell>
                             <TableCell>
                               <Typography variant="body2">{row.agency_short_name || row.agency_name || '-'}</Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="body2">{formatDateShort(row.due_date)}</Typography>
                             </TableCell>
                             <TableCell align="right">
                               <Chip label={`${row.days_overdue} วัน`} color="error" size="small" />
@@ -536,6 +540,7 @@ const DashboardPage = () => {
                       <TableHead>
                         <TableRow>
                           <TableCell>เลขที่</TableCell>
+                          <TableCell>หน่วยงาน</TableCell>
                           <TableCell>ครบกำหนด</TableCell>
                           <TableCell align="right">เหลือ (วัน)</TableCell>
                         </TableRow>
@@ -549,6 +554,9 @@ const DashboardPage = () => {
                             <TableCell>
                               <Typography variant="body2" color="primary.main">{row.complaint_number}</Typography>
                               <Typography variant="caption" color="text.secondary" display="block">{row.title?.slice(0, 30)}</Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="body2">{row.agency_short_name || row.agency_name || '-'}</Typography>
                             </TableCell>
                             <TableCell>
                               <Typography variant="body2">{formatDateShort(row.due_date)}</Typography>

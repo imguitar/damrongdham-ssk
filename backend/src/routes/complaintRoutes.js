@@ -50,6 +50,9 @@ router.post('/:id/updates',    authorize(...STAFF_ROLES), complaintUpdateControl
 // ── Reveal identity — super_admin only ─────────────────────────────────────────
 router.post('/:id/reveal-identity', authorize('super_admin'), complaintController.revealIdentity);
 
+// ── Delete complaint — super_admin only ────────────────────────────────────────
+router.delete('/:id', authorize('super_admin'), complaintController.remove);
+
 // ── Attachments ─────────────────────────────────────────────────────────────────
 router.get('/:id/attachments',              authorize(...STAFF_ROLES), attachmentController.list);
 router.post('/:id/attachments',             authorize(...STAFF_ROLES), upload.single('file'), attachmentController.upload);

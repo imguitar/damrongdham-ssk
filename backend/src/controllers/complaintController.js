@@ -298,4 +298,28 @@ const selfHandle = async (req, res, next) => {
   }
 };
 
-module.exports = { list, getById, create, update, getTimeline, getUpdates, revealIdentity, screen, reject, assign, review, close, sendBack, selfHandle };
+// DELETE /:id — super_admin only
+const remove = async (req, res, next) => {
+  try {
+    const complaint = await complaintModel.findById(req.params.id);
+    if (!complaint) return error(res, 'NOT_FOUND', 'ไม่พบเรื่องร้องเรียน', 404);
+
+    await complaintModel.deleteById(req.params.id);
+
+    writeAuditLog({
+      userId: req.user.id,
+      action: 'DELETE',
+      resource: 'complaints',
+      resourceId: req.params.id,
+      details: { complaint_number: complaint.complaint_number },
+      ipAddress: req.ip,
+      userAgent: req.get('user-agent'),
+    });
+
+    return success(res, { message: 'ลบเรื่องร้องเรียนเรียบร้อยแล้ว' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { list, getById, create, update, getTimeline, getUpdates, revealIdentity, screen, reject, assign, review, close, sendBack, selfHandle, remove };

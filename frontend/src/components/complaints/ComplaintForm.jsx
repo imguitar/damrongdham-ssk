@@ -36,6 +36,7 @@ const ComplaintForm = ({
   disabled = false,
   showComplainantInfo = true,
   showAnonymous = false,
+  lockChannel = false,
 }) => {
   const [districts, setDistricts] = useState([]);
   const [subdistricts, setSubdistricts] = useState([]);
@@ -144,7 +145,7 @@ const ComplaintForm = ({
             required
             error={Boolean(errors.channel_id)}
             helperText={errors.channel_id}
-            disabled={disabled}
+            disabled={disabled || lockChannel}
           />
         </Grid>
         <Grid item xs={12} sm={6}>

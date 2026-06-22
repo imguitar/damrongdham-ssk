@@ -333,6 +333,25 @@ const findByCitizenId = async (citizenId, { limit = 20, offset = 0 }) => {
   return { rows, total };
 };
 
+const deleteById = async (id) => {
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    await conn.query('DELETE FROM anonymous_reveal_logs   WHERE complaint_id = ?', [id]);
+    await conn.query('DELETE FROM complaint_updates       WHERE complaint_id = ?', [id]);
+    await conn.query('DELETE FROM complaint_attachments   WHERE complaint_id = ?', [id]);
+    await conn.query('DELETE FROM complaint_status_logs   WHERE complaint_id = ?', [id]);
+    await conn.query('DELETE FROM complaint_assignments   WHERE complaint_id = ?', [id]);
+    await conn.query('DELETE FROM complaints              WHERE id = ?',           [id]);
+    await conn.commit();
+  } catch (err) {
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release();
+  }
+};
+
 module.exports = {
   create,
   findAll,
@@ -343,5 +362,6 @@ module.exports = {
   update,
   getTimeline,
   findUpdatesByComplaintId,
+  deleteById,
   findByCitizenId,
 };

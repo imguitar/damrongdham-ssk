@@ -83,37 +83,40 @@ curl -s -o /dev/null -w "%{http_code}\n" -X POST http://localhost:5001/api/citiz
 
 ---
 
-## 3. Automated Tests (แนวทาง — Phase L10)
+## 3. Automated Tests (Vitest — implemented)
 
-ยังไม่มี test framework ในโปรเจกต์ แนะนำ **Vitest** (เบา, ESM/CJS ได้) เพิ่มใน `backend`:
-```jsonc
-// backend/package.json (scripts)
-"test": "vitest run"
-```
-Mock LINE API ทุกจุด — **ห้ามเรียก LINE production จริงใน test**
+รัน: `docker exec damrongdham-backend sh -c 'cd /app && npm test'` (หรือ `npm test` ใน backend)
 
-### Unit
-- `lineLoginService`: generateSecret, state token roundtrip + reject ปลอม, buildAuthorizationUrl (scope %20, bot_prompt)
-- `verifyIdToken`: mock verify endpoint → aud/iss/nonce mismatch โยน error
-- `identityService.resolveLineIdentity`: identity ใหม่ (provisional) / มีอยู่ / duplicate race
-- `lineMessageTemplate`: มีเลขเรื่อง+สถานะ+URL, **ไม่มี PII**, buildByEvent unknown→null
-- `lineMessagingService`: retry classification (429/5xx/network→retry, 4xx→ไม่), 409→success, retry key UUID stable
-- `notificationOutboxJob.isEnabled`: preference on/off, ไม่มี pref → default on
-- `rateLimit`: เกิน max → 429 + Retry-After, IP อื่นไม่บล็อก, reset หลัง window
+**57 tests / 10 files** — mock LINE API ทุกจุด (**ไม่เรียก LINE production จริง**). วิธี mock ที่ใช้:
+LINE API ถูกดักที่ชั้น **`global.fetch`** (`vi.stubGlobal`) ให้ service จริงทำงานกับ response ปลอม —
+กันปัญหา module-instance ของ vitest (ESM import vs CJS require แยก instance กัน จึง `vi.mock`/`vi.spyOn`
+บน service ไม่ติด). สำหรับ callback ใช้ **cookie ที่ signed จริง** (verify ด้วย JWT_SECRET เดียวกัน).
 
-### Integration (mock fetch + DB ทดสอบ)
-- callback success (mock token+verify) → สร้าง identity + JWT
-- callback invalid state / token exchange fail / invalid id_token
-- status change → สร้าง status log + outbox row (ใน transaction เดียว)
-- public progress → outbox `COMPLAINT_PROGRESS_UPDATED`; internal note → ไม่มี outbox
-- worker: sent / preference off→cancelled / no identity→cancelled / retryable→retry+backoff / exhausted→failed
-- preference GET/PATCH (whitelist), complete-profile (consent required, email conflict)
+### Unit (`tests/*.test.js` — ไม่ใช้ DB)
+- `lineLoginService`: state token round-trip/tamper, authorize URL (scope %20, bot_prompt), verifyIdToken aud/iss/**nonce**/sub, token-exchange error
+- `lineMessagingService`: retry classification (429/5xx/network→retry, 4xx→ไม่), 409→success, retry-key UUID stable, X-Line-Retry-Key header, input guard
+- `lineMessageTemplate`: มีเลขเรื่อง+สถานะ+URL, **privacy-safe**, buildByEvent/unknown→null
+- `notificationOutboxJob.isEnabled`: preference gating + event→column map
+- `rateLimit`: เกิน max→429+Retry-After, per-IP, reset
 
-### Security
-- forged callback / state mismatch / missing code → error ที่เป็นมิตร
-- IDOR: citizen A เข้าถึงเรื่อง citizen B → 403
-- mass-assignment: PATCH preferences แนบ `is_provisional/id` → ถูกเมิน
-- ไม่มี secret/token ใน log
+### Integration (`tests/integration/*.integration.test.js` — ต้องมี DB)
+- `identity`: first login→provisional+identity+prefs, returning login ไม่ duplicate, disabled→reject
+- `outbox`: status change→status log+outbox ใน commit เดียว, CLOSED→COMPLAINT_CLOSED, no-owner→ไม่มี outbox, idempotency
+- `worker`: sent+log / preference off→cancelled / no identity→cancelled / retryable→retry+backoff / exhausted→failed / non-retryable→failed
+
+### Security (`tests/security/*.security.test.js`)
+- `lineCallback`: cancel, missing code, missing/forged state (CSRF, ไม่ exchange), token-exchange fail, invalid id token, **wrong nonce (replay)**, success→token fragment, disabled→error
+- `ownership`: **IDOR** — citizen อื่นเข้าถึงเรื่อง→403; mass-assignment — PATCH preferences แนบ `is_provisional/id`→ถูกเมิน
+
+### DB guard
+ไฟล์ integration/security ที่ใช้ DB จะ **skip อัตโนมัติ** เมื่อ DB ไม่พร้อม (top-level `dbAvailable()` → `describe.skip`)
+→ รัน unit-only ได้โดยไม่ต้องมี DB
+
+### CI setup
+1. spin up MySQL 8, โหลด schema+seed: `db/init/01-init.sql` แล้ว `db/init/02-line-notification.sql`
+2. set env: `DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME`
+3. `cd backend && npm ci && npm test`
+> tests ทั้งหมด clean-up fixtures ของตัวเอง (prefix `ITEST`) — ไม่ทิ้งขยะใน DB
 
 ---
 

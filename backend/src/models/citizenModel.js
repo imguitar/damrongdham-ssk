@@ -53,4 +53,19 @@ const updateProfile = async (id, { full_name, phone, id_card, address }) => {
   );
 };
 
-module.exports = { findByEmail, findById, create, getPasswordHash, updatePassword, updateLastLogin, updateProfile };
+// Provisional (LINE) account completes registration: fill profile, record consent,
+// and clear the provisional flag. Keeps existing email if none is provided.
+const completeProfile = async (id, { full_name, phone, id_card, address, email }) => {
+  await pool.query(
+    `UPDATE citizens
+     SET full_name = ?, phone = ?, id_card = ?, address = ?, email = COALESCE(?, email),
+         is_provisional = 0, consent_at = NOW(), updated_at = NOW()
+     WHERE id = ?`,
+    [full_name, phone || null, id_card || null, address || null, email || null, id]
+  );
+};
+
+module.exports = {
+  findByEmail, findById, create, getPasswordHash, updatePassword, updateLastLogin,
+  updateProfile, completeProfile,
+};

@@ -11,6 +11,11 @@ router.use(citizenAuthenticate);
 
 // Profile
 router.put('/profile', citizenController.updateProfile);
+router.post('/complete-profile', citizenController.completeProfile);
+
+// Notification preferences
+router.get('/notification-preferences', citizenController.getNotificationPreferences);
+router.patch('/notification-preferences', citizenController.updateNotificationPreferences);
 
 // Complaints
 router.post('/complaints', validateComplaint, citizenController.submitComplaint);

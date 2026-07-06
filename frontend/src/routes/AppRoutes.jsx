@@ -38,6 +38,8 @@ import CitizenComplaintListPage   from '../pages/citizen/CitizenComplaintListPag
 import CitizenComplaintCreatePage from '../pages/citizen/CitizenComplaintCreatePage';
 import CitizenComplaintDetailPage from '../pages/citizen/CitizenComplaintDetailPage';
 import CitizenProfilePage         from '../pages/citizen/CitizenProfilePage';
+import CitizenNotificationSettingsPage from '../pages/citizen/CitizenNotificationSettingsPage';
+import CitizenCompleteProfilePage  from '../pages/citizen/CitizenCompleteProfilePage';
 
 // ── Phase 11 pages ────────────────────────────────────────────────────────────
 import DashboardPage from '../pages/dashboard/DashboardPage';
@@ -78,11 +80,13 @@ const AppRoutes = () => (
 
       {/* Protected citizen pages */}
       <Route element={<CitizenProtectedRoute />}>
+        <Route path="/citizen/complete-profile"                    element={<CitizenCompleteProfilePage />} />
         <Route path="/citizen"                                     element={<Navigate to="/citizen/complaints" replace />} />
         <Route path="/citizen/complaints"                          element={<CitizenComplaintListPage />} />
         <Route path="/citizen/complaints/new"                      element={<CitizenComplaintCreatePage />} />
         <Route path="/citizen/complaints/:complaint_number"        element={<CitizenComplaintDetailPage />} />
         <Route path="/citizen/profile"                             element={<CitizenProfilePage />} />
+        <Route path="/citizen/notifications"                       element={<CitizenNotificationSettingsPage />} />
       </Route>
     </Route>
 

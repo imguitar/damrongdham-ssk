@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Alert from '@mui/material/Alert';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -149,6 +151,7 @@ const ComplaintDetailPage = () => {
   const [actionError, setActionError] = useState('');
   const [dialog, setDialog] = useState(null); // { type, title, fields, onConfirm }
   const [updateText, setUpdateText] = useState('');
+  const [updatePublic, setUpdatePublic] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [pendingFiles, setPendingFiles] = useState([]);
   const [deleteDialog, setDeleteDialog] = useState(false);
@@ -302,7 +305,13 @@ const ComplaintDetailPage = () => {
     setUpdateLoading(true);
     setActionError('');
     try {
-      await complaintApi.addUpdate(id, { content: updateText, update_type: 'NOTE' });
+      // Public update → PROGRESS (notifies citizen via LINE + resets escalation);
+      // otherwise an internal REVIEW_NOTE that is never sent to the citizen (§14)
+      await complaintApi.addUpdate(id, {
+        content: updateText,
+        update_type: updatePublic ? 'PROGRESS' : 'REVIEW_NOTE',
+        is_public: updatePublic,
+      });
 
       // Upload pending files
       if (pendingFiles.length) {
@@ -317,6 +326,7 @@ const ComplaintDetailPage = () => {
       }
 
       setUpdateText('');
+      setUpdatePublic(false);
       load();
     } catch (err) {
       setActionError(err?.response?.data?.error?.message || 'เกิดข้อผิดพลาด');
@@ -620,6 +630,24 @@ const ComplaintDetailPage = () => {
                     onRemove={(idx) => setPendingFiles((p) => p.filter((_, i) => i !== idx))}
                     disabled={updateLoading}
                   />
+                  <Box sx={{ mt: 1 }}>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={updatePublic}
+                          onChange={(e) => setUpdatePublic(e.target.checked)}
+                          disabled={updateLoading}
+                          color="success"
+                        />
+                      }
+                      label="แสดงต่อประชาชน และแจ้งเตือนผ่าน LINE"
+                    />
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      {updatePublic
+                        ? 'ประชาชนเจ้าของเรื่องจะเห็นข้อความนี้และได้รับการแจ้งเตือน'
+                        : 'บันทึกภายในเจ้าหน้าที่เท่านั้น ไม่ส่งถึงประชาชน'}
+                    </Typography>
+                  </Box>
                   <Button
                     variant="contained"
                     size="small"

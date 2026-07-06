@@ -3,6 +3,7 @@
 const complaintModel = require('../models/complaintModel');
 const attachmentModel = require('../models/attachmentModel');
 const citizenModel = require('../models/citizenModel');
+const prefModel = require('../models/notificationPrefModel');
 const { success, successList, error } = require('../utils/response');
 const { parsePagination, paginationMeta } = require('../utils/pagination');
 
@@ -134,4 +135,69 @@ const uploadAttachment = async (req, res, next) => {
   }
 };
 
-module.exports = { updateProfile, submitComplaint, listMyComplaints, getMyComplaint, uploadAttachment };
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// POST /api/citizen/complete-profile — provisional (LINE) account finishes registration
+const completeProfile = async (req, res, next) => {
+  try {
+    const { full_name, phone, email, id_card, address, consent } = req.body;
+
+    if (!full_name || !String(full_name).trim()) {
+      return error(res, 'VALIDATION_ERROR', 'กรุณาระบุชื่อ-นามสกุล', 400);
+    }
+    if (!phone || !String(phone).trim()) {
+      return error(res, 'VALIDATION_ERROR', 'กรุณาระบุเบอร์โทรศัพท์', 400);
+    }
+    if (consent !== true) {
+      return error(res, 'CONSENT_REQUIRED', 'กรุณายอมรับเงื่อนไขการเก็บและใช้ข้อมูลส่วนบุคคล', 400);
+    }
+    if (email) {
+      if (!EMAIL_REGEX.test(email)) {
+        return error(res, 'VALIDATION_ERROR', 'รูปแบบอีเมลไม่ถูกต้อง', 400);
+      }
+      const existing = await citizenModel.findByEmail(email);
+      if (existing && existing.id !== req.citizen.id) {
+        return error(res, 'EMAIL_EXISTS', 'อีเมลนี้ถูกใช้งานแล้ว', 409);
+      }
+    }
+
+    await citizenModel.completeProfile(req.citizen.id, {
+      full_name: full_name.trim(), phone, id_card, address, email,
+    });
+    const citizen = await citizenModel.findById(req.citizen.id);
+    return success(res, { citizen });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// GET /api/citizen/notification-preferences
+const getNotificationPreferences = async (req, res, next) => {
+  try {
+    let pref = await prefModel.getByCitizen(req.citizen.id);
+    if (!pref) {
+      await prefModel.createDefault(null, req.citizen.id);
+      pref = await prefModel.getByCitizen(req.citizen.id);
+    }
+    return success(res, { preferences: pref });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// PATCH /api/citizen/notification-preferences
+const updateNotificationPreferences = async (req, res, next) => {
+  try {
+    await prefModel.createDefault(null, req.citizen.id); // ensure row exists
+    await prefModel.update(req.citizen.id, req.body);    // whitelisted columns only
+    const pref = await prefModel.getByCitizen(req.citizen.id);
+    return success(res, { preferences: pref });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = {
+  updateProfile, completeProfile, submitComplaint, listMyComplaints, getMyComplaint, uploadAttachment,
+  getNotificationPreferences, updateNotificationPreferences,
+};

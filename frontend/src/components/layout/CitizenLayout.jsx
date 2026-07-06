@@ -76,6 +76,11 @@ const CitizenLayout = () => {
                 >
                   ข้อมูลส่วนตัว
                 </MenuItem>
+                <MenuItem
+                  onClick={() => { setAnchorEl(null); navigate('/citizen/notifications'); }}
+                >
+                  ตั้งค่าการแจ้งเตือน
+                </MenuItem>
                 <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
                   ออกจากระบบ
                 </MenuItem>

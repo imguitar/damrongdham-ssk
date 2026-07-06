@@ -37,6 +37,12 @@ export const changePassword = (current_password, new_password) =>
 
 // Profile
 export const updateProfile = (data) => citizenAxios.put('/profile', data);
+export const completeProfile = (data) => citizenAxios.post('/complete-profile', data);
+
+// Notification preferences
+export const getNotificationPreferences = () => citizenAxios.get('/notification-preferences');
+export const updateNotificationPreferences = (data) =>
+  citizenAxios.patch('/notification-preferences', data);
 
 // Complaints
 export const submitComplaint = (data) => citizenAxios.post('/complaints', data);

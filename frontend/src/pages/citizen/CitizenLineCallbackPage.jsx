@@ -19,6 +19,7 @@ const CitizenLineCallbackPage = () => {
     const hash = window.location.hash.replace(/^#/, '');
     const params = new URLSearchParams(hash);
     const token = params.get('token');
+    const isProvisional = params.get('provisional') === '1';
 
     if (!token) {
       navigate('/citizen/login?line_error=line_callback_failed', { replace: true });
@@ -29,7 +30,8 @@ const CitizenLineCallbackPage = () => {
       .then(() => {
         // strip token from the URL so it isn't kept in history
         window.history.replaceState(null, '', window.location.pathname);
-        navigate('/citizen/complaints', { replace: true });
+        // first-time LINE users complete their profile + consent before using the app
+        navigate(isProvisional ? '/citizen/complete-profile' : '/citizen/complaints', { replace: true });
       })
       .catch(() => {
         navigate('/citizen/login?line_error=line_callback_failed', { replace: true });

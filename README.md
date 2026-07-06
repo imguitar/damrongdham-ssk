@@ -122,6 +122,13 @@ damrongdham-ssk/
 ดู [`backend/.env.example`](backend/.env.example) สำหรับ backend standalone
 ดู [`frontend/.env.example`](frontend/.env.example) สำหรับ frontend
 
+## LINE Integration (Login + Notification)
+
+ประชาชนเข้าสู่ระบบด้วย LINE และรับแจ้งเตือนความคืบหน้าเรื่องร้องเรียนผ่าน LINE Official Account
+
+- การตั้งค่า/สถาปัตยกรรม/troubleshooting/secret rotation: [`docs/LINE_INTEGRATION.md`](docs/LINE_INTEGRATION.md)
+- วิธีทดสอบ (login + push): [`docs/LINE_TESTING.md`](docs/LINE_TESTING.md)
+
 ## Implementation Plan
 
 ดู [`docs/planning/10-implementation-plan.md`](docs/planning/10-implementation-plan.md) สำหรับแผนการพัฒนาทั้ง 16 Phases

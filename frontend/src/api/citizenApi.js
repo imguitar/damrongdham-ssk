@@ -44,6 +44,11 @@ export const getNotificationPreferences = () => citizenAxios.get('/notification-
 export const updateNotificationPreferences = (data) =>
   citizenAxios.patch('/notification-preferences', data);
 
+// LINE account linking
+export const getLineLinkStatus = () => citizenAxios.get('/line/link');
+export const lineLinkInit = () => citizenAxios.post('/line/link/init');
+export const unlinkLine = () => citizenAxios.delete('/line/link');
+
 // Complaints
 export const submitComplaint = (data) => citizenAxios.post('/complaints', data);
 export const listMyComplaints = (params) => citizenAxios.get('/complaints', { params });

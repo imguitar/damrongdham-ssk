@@ -13,9 +13,15 @@ const OAUTH_STATE_TTL = '10m';
 const generateSecret = (bytes = 32) => crypto.randomBytes(bytes).toString('hex');
 
 // Pack state+nonce into a short-lived signed token kept in an HttpOnly cookie
-// (stateless — no server-side session store required)
-const createOAuthStateToken = ({ state, nonce }) =>
-  jwt.sign({ state, nonce, purpose: 'line_oauth' }, JWT_SECRET, { expiresIn: OAUTH_STATE_TTL });
+// (stateless — no server-side session store required).
+// linkCitizenId (optional): set during an authenticated "link LINE to my account"
+// flow so the callback links instead of creating a new account — the account id is
+// bound server-side into the signed token and cannot be tampered with by the client.
+const createOAuthStateToken = ({ state, nonce, linkCitizenId }) => {
+  const payload = { state, nonce, purpose: 'line_oauth' };
+  if (linkCitizenId) payload.linkCitizenId = linkCitizenId;
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: OAUTH_STATE_TTL });
+};
 
 const readOAuthStateToken = (token) => {
   const payload = jwt.verify(token, JWT_SECRET);

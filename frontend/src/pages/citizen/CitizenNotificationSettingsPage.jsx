@@ -11,6 +11,7 @@ import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import * as citizenApi from '../../api/citizenApi';
+import LineLinkCard from '../../components/citizen/LineLinkCard';
 
 // event toggles shown only when LINE notifications are enabled
 const EVENT_TOGGLES = [
@@ -61,19 +62,27 @@ const CitizenNotificationSettingsPage = () => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" py={6}>
-        <CircularProgress />
-      </Box>
+      <>
+        <LineLinkCard />
+        <Box display="flex" justifyContent="center" py={6}><CircularProgress /></Box>
+      </>
     );
   }
 
   if (!prefs) {
-    return <Alert severity="error">{errorMsg || 'ไม่พบข้อมูลการตั้งค่า'}</Alert>;
+    return (
+      <>
+        <LineLinkCard />
+        <Alert severity="error" sx={{ maxWidth: 560, mx: 'auto' }}>{errorMsg || 'ไม่พบข้อมูลการตั้งค่า'}</Alert>
+      </>
+    );
   }
 
   const lineOn = Boolean(prefs.line_enabled);
 
   return (
+    <>
+    <LineLinkCard />
     <Paper elevation={0} sx={{ p: { xs: 2.5, sm: 4 }, maxWidth: 560, mx: 'auto', border: '1px solid', borderColor: 'divider' }}>
       <Box display="flex" alignItems="center" gap={1} mb={0.5}>
         <NotificationsActiveIcon color="success" />
@@ -116,6 +125,7 @@ const CitizenNotificationSettingsPage = () => {
         </Button>
       </Box>
     </Paper>
+    </>
   );
 };
 

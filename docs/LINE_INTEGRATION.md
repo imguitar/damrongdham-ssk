@@ -162,6 +162,41 @@ docker-compose ส่งค่าเหล่านี้เข้า backend co
 
 ---
 
+## 11b. Account Linking (ผูก LINE กับบัญชีเดิม)
+
+ผู้ใช้ที่สมัครด้วย email/password สามารถ**ผูกบัญชี LINE ภายหลัง**ได้ (Option C §9) แบบ explicit —
+ระบบ**ไม่ auto-merge** ด้วยชื่อ/อีเมล (PDPA)
+
+```
+ผู้ใช้ล็อกอิน email/password (มี citizen JWT)
+      │  กด "ผูกบัญชี LINE" ที่หน้า ตั้งค่าการแจ้งเตือน
+      ▼
+POST /api/citizen/line/link/init  (authenticated)
+      │  ฝัง citizen_id ลง signed state cookie (linkCitizenId)
+      │  → { authorizeUrl }
+      ▼
+frontend redirect → LINE → callback
+      │  state มี linkCitizenId → LINK MODE (ไม่สร้างบัญชีใหม่)
+      │  - sub ผูกกับคนอื่นแล้ว → line_identity_conflict
+      │  - บัญชีนี้ผูก LINE อื่นแล้ว → line_already_linked
+      │  - ว่าง → INSERT citizen_identities(citizen_id, 'line', sub)
+      ▼
+redirect → /citizen/notifications?line_linked=1
+```
+
+**ความปลอดภัย:** `citizen_id` ถูกผูกใน signed state cookie **ตอน init ที่ผ่าน auth แล้ว** — callback เชื่อค่าจาก
+token ที่ลงนาม ไม่ใช่จาก client → กัน account takeover. หนึ่งบัญชีผูกได้หนึ่ง LINE; ต้อง unlink ก่อนผูกใหม่
+
+Endpoints (ทั้งหมด authenticated ด้วย citizen JWT):
+```
+POST   /api/citizen/line/link/init   → { authorizeUrl } + set state cookie
+GET    /api/citizen/line/link        → { linked, displayName, linkedAt }
+DELETE /api/citizen/line/link        → unlink (audit: LINE_IDENTITY_UNLINKED)
+```
+Unlink ได้เสมอเพราะบัญชี email ยังล็อกอินด้วย password ได้ (ไม่ทำให้ล็อกอินไม่ได้)
+
+---
+
 ## 12. Troubleshooting
 
 | อาการ | สาเหตุ / วิธีแก้ |

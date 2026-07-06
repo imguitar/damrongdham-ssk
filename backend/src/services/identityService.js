@@ -59,4 +59,35 @@ const resolveLineIdentity = async ({ sub, displayName, pictureUrl }) => {
   }
 };
 
-module.exports = { PROVIDER_LINE, resolveLineIdentity };
+// Link a verified LINE identity to an EXISTING (already authenticated) citizen.
+// Never moves an identity between accounts automatically (§9 / account takeover).
+const linkLineToExisting = async ({ citizenId, sub, displayName, pictureUrl }) => {
+  const existing = await identityModel.findByProvider(PROVIDER_LINE, sub);
+  if (existing) {
+    if (existing.citizen_id === citizenId) {
+      identityModel.touchProfile(existing.id, { displayName, pictureUrl }).catch(() => {});
+      return { linked: true, already: true };
+    }
+    throw Object.assign(new Error('LINE already linked to another account'), { code: 'LINE_IDENTITY_CONFLICT' });
+  }
+
+  // one LINE identity per account — must unlink the old one first
+  const own = await identityModel.findByCitizen(citizenId, PROVIDER_LINE);
+  if (own) throw Object.assign(new Error('account already linked to LINE'), { code: 'LINE_ALREADY_LINKED' });
+
+  await identityModel.create(null, { citizenId, provider: PROVIDER_LINE, providerUserId: sub, displayName, pictureUrl });
+  await prefModel.createDefault(null, citizenId);
+  return { linked: true };
+};
+
+const getLineIdentity = (citizenId) => identityModel.findByCitizen(citizenId, PROVIDER_LINE);
+
+const unlinkLine = async (citizenId) => {
+  const [r] = await pool.query(
+    'DELETE FROM citizen_identities WHERE citizen_id = ? AND provider = ?',
+    [citizenId, PROVIDER_LINE]
+  );
+  return r.affectedRows > 0;
+};
+
+module.exports = { PROVIDER_LINE, resolveLineIdentity, linkLineToExisting, getLineIdentity, unlinkLine };

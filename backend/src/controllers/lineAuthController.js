@@ -5,7 +5,7 @@ const lineLoginService = require('../services/lineLoginService');
 const identityService = require('../services/identityService');
 const { isConfigured, config } = require('../config/line');
 const { writeAuditLog } = require('../middleware/auditLog');
-const { error } = require('../utils/response');
+const { success, error } = require('../utils/response');
 
 const OAUTH_COOKIE = 'line_oauth';
 const COOKIE_PATH = '/api/citizen/auth/line';
@@ -90,6 +90,28 @@ const lineCallback = async (req, res) => {
       clearCookie(); return redirectError(res, 'line_callback_failed');
     }
 
+    // 4b. LINK MODE — bound to an authenticated citizen at init time (§9).
+    // Link the verified LINE identity to that account instead of creating a new one.
+    if (saved.linkCitizenId) {
+      try {
+        await identityService.linkLineToExisting({
+          citizenId: saved.linkCitizenId, sub: profile.sub,
+          displayName: profile.name, pictureUrl: profile.picture,
+        });
+      } catch (e) {
+        const map = { LINE_IDENTITY_CONFLICT: 'line_identity_conflict', LINE_ALREADY_LINKED: 'line_already_linked' };
+        console.error('[LINE] link failed:', e.code || e.message);
+        clearCookie();
+        return res.redirect(`${config.frontendUrl}/citizen/notifications?line_error=${encodeURIComponent(map[e.code] || 'line_callback_failed')}`);
+      }
+      writeAuditLog({
+        userId: null, action: 'LINE_IDENTITY_LINKED', resource: 'citizen',
+        resourceId: saved.linkCitizenId, ipAddress: req.ip, userAgent: req.headers['user-agent'],
+      });
+      clearCookie();
+      return res.redirect(`${config.frontendUrl}/citizen/notifications?line_linked=1`);
+    }
+
     // 5. map LINE identity → internal citizen
     let result;
     try {
@@ -136,4 +158,50 @@ const lineCallback = async (req, res) => {
   }
 };
 
-module.exports = { lineLogin, lineCallback };
+// POST /api/citizen/line/link/init — authenticated: start linking LINE to current account
+const lineLinkInit = (req, res, next) => {
+  try {
+    if (!isConfigured()) {
+      return error(res, 'LINE_NOT_CONFIGURED', 'ระบบยังไม่ได้ตั้งค่าการเชื่อมต่อ LINE', 503);
+    }
+    const state = lineLoginService.generateSecret();
+    const nonce = lineLoginService.generateSecret();
+    const stateToken = lineLoginService.createOAuthStateToken({ state, nonce, linkCitizenId: req.citizen.id });
+    res.cookie(OAUTH_COOKIE, stateToken, cookieOptions());
+    return success(res, { authorizeUrl: lineLoginService.buildAuthorizationUrl({ state, nonce }) });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// GET /api/citizen/line/link — authenticated: current LINE link status
+const lineLinkStatus = async (req, res, next) => {
+  try {
+    const idn = await identityService.getLineIdentity(req.citizen.id);
+    return success(res, {
+      linked: Boolean(idn),
+      displayName: idn?.display_name || null,
+      linkedAt: idn?.linked_at || null,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// DELETE /api/citizen/line/link — authenticated: unlink LINE from current account
+const lineUnlink = async (req, res, next) => {
+  try {
+    const removed = await identityService.unlinkLine(req.citizen.id);
+    if (removed) {
+      writeAuditLog({
+        userId: null, action: 'LINE_IDENTITY_UNLINKED', resource: 'citizen',
+        resourceId: req.citizen.id, ipAddress: req.ip, userAgent: req.headers['user-agent'],
+      });
+    }
+    return success(res, { message: 'ยกเลิกการเชื่อมต่อ LINE แล้ว' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { lineLogin, lineCallback, lineLinkInit, lineLinkStatus, lineUnlink };

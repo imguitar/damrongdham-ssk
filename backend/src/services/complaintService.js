@@ -3,6 +3,7 @@
 const pool = require('../config/database');
 const { calculateDueDate } = require('./slaService');
 const notifSvc = require('./notificationService');
+const outboxSvc = require('./notificationOutboxService');
 
 const CENTER_ROLES = ['super_admin', 'admin', 'officer', 'chief'];
 const AGENCY_ROLES = ['agency_officer', 'agency_head'];
@@ -53,11 +54,31 @@ const changeStatus = async (conn, complaintId, fromStatus, toStatus, changedBy, 
   }
   values.push(complaintId);
   await conn.query(`UPDATE complaints SET ${setClauses.join(', ')} WHERE id = ?`, values);
-  await conn.query(
+  const [logResult] = await conn.query(
     `INSERT INTO complaint_status_logs (complaint_id, from_status, to_status, changed_by, note, created_at)
      VALUES (?, ?, ?, ?, ?, NOW())`,
     [complaintId, fromStatus, toStatus, changedBy, note || null]
   );
+
+  // Enqueue citizen LINE notification in the SAME transaction (§32) — only when
+  // the status actually changed and the complaint has a citizen owner.
+  if (fromStatus !== toStatus) {
+    const [[owner]] = await conn.query(
+      'SELECT citizen_id, complaint_number FROM complaints WHERE id = ?',
+      [complaintId]
+    );
+    if (owner?.citizen_id) {
+      const eventType = toStatus === 'CLOSED' ? 'COMPLAINT_CLOSED' : 'COMPLAINT_STATUS_CHANGED';
+      await outboxSvc.enqueue(conn, {
+        eventType,
+        citizenId: owner.citizen_id,
+        complaintId,
+        complaintNumber: owner.complaint_number,
+        status: toStatus,
+        idempotencyKey: `complaint:${complaintId}:status:${toStatus}:log:${logResult.insertId}`,
+      });
+    }
+  }
 };
 
 // For center-only transitions (screen, reject, review, close, sendBack) — handles own transaction

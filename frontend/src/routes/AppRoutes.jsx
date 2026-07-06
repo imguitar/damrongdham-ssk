@@ -32,6 +32,7 @@ import PublicSuccessPage   from '../pages/public/PublicSuccessPage';
 
 // ── Citizen pages ─────────────────────────────────────────────────────────────
 import CitizenLoginPage           from '../pages/citizen/CitizenLoginPage';
+import CitizenLineCallbackPage    from '../pages/citizen/CitizenLineCallbackPage';
 import CitizenRegisterPage        from '../pages/citizen/CitizenRegisterPage';
 import CitizenComplaintListPage   from '../pages/citizen/CitizenComplaintListPage';
 import CitizenComplaintCreatePage from '../pages/citizen/CitizenComplaintCreatePage';
@@ -61,6 +62,7 @@ const AppRoutes = () => (
     {/* ── Login — standalone ──────────────────────────────────────────── */}
     <Route path="/login"         element={<LoginPage />} />
     <Route path="/citizen/login" element={<CitizenLoginPage />} />
+    <Route path="/citizen/line/callback" element={<CitizenLineCallbackPage />} />
 
     {/* ── Public with AppBar + Footer ─────────────────────────────────── */}
     <Route element={<PublicLayout />}>

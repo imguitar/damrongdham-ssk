@@ -31,6 +31,23 @@ export const CitizenAuthProvider = ({ children }) => {
     return c;
   };
 
+  // Establish a session from a token issued by the backend (e.g. LINE Login callback)
+  const loginWithToken = async (token) => {
+    localStorage.setItem('dcms_citizen_token', token);
+    try {
+      const res = await citizenApi.me();
+      const c = res.data?.data?.citizen;
+      if (!c) throw new Error('ไม่พบข้อมูลสมาชิก');
+      localStorage.setItem('dcms_citizen_user', JSON.stringify(c));
+      setCitizen(c);
+      return c;
+    } catch (err) {
+      localStorage.removeItem('dcms_citizen_token');
+      localStorage.removeItem('dcms_citizen_user');
+      throw err;
+    }
+  };
+
   const logout = async () => {
     try { await citizenApi.logout(); } catch { /* ignore */ }
     localStorage.removeItem('dcms_citizen_token');
@@ -39,7 +56,7 @@ export const CitizenAuthProvider = ({ children }) => {
   };
 
   return (
-    <CitizenAuthContext.Provider value={{ citizen, isLoading, login, logout, setCitizen }}>
+    <CitizenAuthContext.Provider value={{ citizen, isLoading, login, loginWithToken, logout, setCitizen }}>
       {children}
     </CitizenAuthContext.Provider>
   );

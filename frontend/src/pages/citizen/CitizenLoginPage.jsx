@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Link as RouterLink, useNavigate, Navigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Container from '@mui/material/Container';
+import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import Link from '@mui/material/Link';
@@ -20,15 +21,34 @@ import { useCitizenAuth } from '../../contexts/CitizenAuthContext';
 import { AUTH_APPBAR_HEIGHT, AUTH_APPBAR_TITLE_FONT_SIZE, AUTH_CARD_MAX_WIDTH, AUTH_CARD_MIN_HEIGHT, AUTH_LOGIN_ICON_SIZE, AUTH_LOGIN_ICON_RADIUS } from '../../utils/constants';
 import appIcon from '../../components/icons/App-Icon-v2.png';
 
+// Friendly Thai messages for backend LINE error codes (details logged server-side)
+const LINE_ERROR_MESSAGES = {
+  line_login_cancelled: 'คุณยกเลิกการเข้าสู่ระบบด้วย LINE',
+  line_invalid_state: 'เซสชันหมดอายุ กรุณาลองเข้าสู่ระบบด้วย LINE ใหม่อีกครั้ง',
+  line_identity_conflict: 'พบปัญหาการเชื่อมบัญชี กรุณาติดต่อเจ้าหน้าที่',
+  line_account_disabled: 'บัญชีนี้ถูกระงับการใช้งาน กรุณาติดต่อเจ้าหน้าที่',
+};
+const getLineError = (code) =>
+  !code ? '' : (LINE_ERROR_MESSAGES[code] || 'ไม่สามารถเข้าสู่ระบบด้วย LINE ได้ กรุณาลองใหม่อีกครั้ง');
+
+// LINE Login must hit the backend origin directly so the OAuth state cookie is set
+// on the same origin the callback returns to. Empty in prod (single origin).
+const API_ORIGIN = import.meta.env.VITE_API_ORIGIN || '';
+
 const CitizenLoginPage = () => {
   const { citizen, login } = useCitizenAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState(() => getLineError(searchParams.get('line_error')));
 
   if (citizen) return <Navigate to="/citizen/complaints" replace />;
+
+  const handleLineLogin = () => {
+    window.location.href = `${API_ORIGIN}/api/citizen/auth/line`;
+  };
 
   const handleChange = (e) => {
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
@@ -183,6 +203,26 @@ const CitizenLoginPage = () => {
             {loading ? <CircularProgress size={22} color="inherit" /> : 'เข้าสู่ระบบ'}
           </Button>
         </Box>
+
+        <Divider sx={{ my: 2.5 }}>
+          <Typography variant="caption" color="text.secondary">หรือ</Typography>
+        </Divider>
+
+        <Button
+          onClick={handleLineLogin}
+          fullWidth
+          size="large"
+          disabled={loading}
+          aria-label="เข้าสู่ระบบด้วย LINE"
+          sx={{
+            bgcolor: '#06C755',
+            color: '#fff',
+            fontWeight: 700,
+            '&:hover': { bgcolor: '#05a948' },
+          }}
+        >
+          เข้าสู่ระบบด้วย LINE
+        </Button>
 
         <Box mt={3} textAlign="center">
           <Typography variant="body2">

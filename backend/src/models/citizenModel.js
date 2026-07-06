@@ -13,7 +13,7 @@ const findByEmail = async (email) => {
 const findById = async (id) => {
   const [rows] = await pool.query(
     `SELECT id, email, full_name, phone, id_card, address,
-            is_active, last_login_at, created_at, updated_at
+            is_active, is_provisional, consent_at, last_login_at, created_at, updated_at
      FROM citizens WHERE id = ? AND is_active = 1`,
     [id]
   );

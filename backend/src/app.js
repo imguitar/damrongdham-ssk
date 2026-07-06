@@ -25,6 +25,10 @@ const notificationRouter = require('./routes/notificationRoutes');
 
 const app = express();
 
+// Trust the Railway/reverse proxy so req.ip and req.secure reflect the real
+// client (needed for accurate rate limiting and secure-cookie detection)
+app.set('trust proxy', 1);
+
 // ============================================
 // Middleware
 // ============================================

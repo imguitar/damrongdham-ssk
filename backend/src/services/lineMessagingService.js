@@ -6,9 +6,42 @@ const { config } = require('../config/line');
 // Official LINE Messaging API push endpoint
 // ref: https://developers.line.biz/en/reference/messaging-api/#send-push-message
 const LINE_PUSH_URL = 'https://api.line.me/v2/bot/message/push';
+const LINE_REPLY_URL = 'https://api.line.me/v2/bot/message/reply';
 const MAX_TEXT_LENGTH = 5000; // LINE text message limit
 
 const isConfigured = () => Boolean(config.messagingAccessToken);
+
+// Verify an inbound webhook request: base64(HMAC-SHA256(rawBody, channelSecret)) === X-Line-Signature
+const verifyWebhookSignature = (rawBody, signature) => {
+  if (!config.messagingChannelSecret || !signature || !rawBody) return false;
+  const expected = crypto
+    .createHmac('sha256', config.messagingChannelSecret)
+    .update(rawBody)
+    .digest('base64');
+  try {
+    const a = Buffer.from(expected);
+    const b = Buffer.from(String(signature));
+    return a.length === b.length && crypto.timingSafeEqual(a, b);
+  } catch {
+    return false;
+  }
+};
+
+// Reply within a webhook event (uses the short-lived replyToken). Never throws.
+const replyText = async (replyToken, text) => {
+  if (!isConfigured() || !replyToken || !text) return { ok: false };
+  try {
+    const resp = await fetch(LINE_REPLY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.messagingAccessToken}` },
+      body: JSON.stringify({ replyToken, messages: [{ type: 'text', text: text.slice(0, MAX_TEXT_LENGTH) }] }),
+      signal: AbortSignal.timeout(10000),
+    });
+    return { ok: resp.ok, status: resp.status };
+  } catch {
+    return { ok: false };
+  }
+};
 
 // Derive a stable UUID-shaped retry key from our idempotency key so LINE also
 // dedupes duplicate pushes across worker retries of the same outbox row.
@@ -75,9 +108,12 @@ const pushText = async ({ to, text, idempotencyKey }) => {
 
 module.exports = {
   LINE_PUSH_URL,
+  LINE_REPLY_URL,
   MAX_TEXT_LENGTH,
   isConfigured,
   toRetryKey,
   isRetryableStatus,
   pushText,
+  verifyWebhookSignature,
+  replyText,
 };

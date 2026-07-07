@@ -12,6 +12,7 @@ const config = {
   channelSecret: process.env.LINE_LOGIN_CHANNEL_SECRET || '',
   callbackUrl: process.env.LINE_LOGIN_CALLBACK_URL || '',
   messagingAccessToken: process.env.LINE_MESSAGING_CHANNEL_ACCESS_TOKEN || '',
+  messagingChannelSecret: process.env.LINE_MESSAGING_CHANNEL_SECRET || '', // webhook signature
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
   backendUrl: process.env.BACKEND_URL || 'http://localhost:5001',
   // bot_prompt=aggressive → ชวน add friend OA ทันทีหลังยินยอม เพื่อให้ push แจ้งเตือนทำงาน

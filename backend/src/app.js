@@ -22,6 +22,8 @@ const dashboardRouter = require('./routes/dashboardRoutes');
 const reportRouter = require('./routes/reportRoutes');
 const auditLogRouter = require('./routes/auditLogRoutes');
 const notificationRouter = require('./routes/notificationRoutes');
+const lineWebhookRouter = require('./routes/lineWebhookRoutes');
+const lineGroupRouter = require('./routes/lineGroupRoutes');
 
 const app = express();
 
@@ -33,7 +35,8 @@ app.set('trust proxy', 1);
 // Middleware
 // ============================================
 app.use(cors(corsOptions));
-app.use(express.json());
+// capture the raw body so the LINE webhook can verify X-Line-Signature
+app.use(express.json({ verify: (req, res, buf) => { req.rawBody = buf; } }));
 app.use(express.urlencoded({ extended: true }));
 
 // ============================================
@@ -53,6 +56,8 @@ app.use('/api/dashboard', dashboardRouter);
 app.use('/api/reports', reportRouter);
 app.use('/api/audit-logs', auditLogRouter);
 app.use('/api/notifications', notificationRouter);
+app.use('/api/line', lineWebhookRouter);
+app.use('/api/admin/line-groups', lineGroupRouter);
 
 // ============================================
 // Serve Frontend (Production)

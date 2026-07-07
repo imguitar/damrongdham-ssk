@@ -14,6 +14,7 @@ export default defineConfig({
       LINE_LOGIN_CALLBACK_URL: 'http://localhost:5001/api/citizen/auth/line/callback',
       LINE_LOGIN_BOT_PROMPT: 'aggressive',
       LINE_MESSAGING_CHANNEL_ACCESS_TOKEN: 'test_messaging_token',
+      LINE_MESSAGING_CHANNEL_SECRET: 'test_messaging_secret',
       FRONTEND_URL: 'http://localhost:5173',
       BACKEND_URL: 'http://localhost:5001',
     },

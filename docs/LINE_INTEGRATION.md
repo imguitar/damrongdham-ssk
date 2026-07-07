@@ -195,6 +195,13 @@ DELETE /api/citizen/line/link        → unlink (audit: LINE_IDENTITY_UNLINKED)
 ```
 Unlink ได้เสมอเพราะบัญชี email ยังล็อกอินด้วย password ได้ (ไม่ทำให้ล็อกอินไม่ได้)
 
+### Staff notifications (Hybrid: กลุ่ม + รายคน)
+- **กลุ่ม**: bind กลุ่ม LINE ต่อหน่วยงานด้วย pairing code (webhook) → รับแจ้งเตือน เรื่องใหม่/ส่งต่อ/SLA/escalation
+- **รายคน**: เจ้าหน้าที่ผูก LINE ส่วนตัวที่หน้า Profile → รับ DM งานที่เกี่ยวข้อง (คุม on/off รายเหตุการณ์)
+  - `POST /api/auth/line/link/init` · `GET/DELETE /api/auth/line/link` · `GET/PATCH /api/auth/line/preferences` (staff auth)
+  - callback ตัวเดียวกันจับ mode จาก signed state: `linkUserId` (staff) / `linkCitizenId` (citizen) / login
+  - DM ส่งได้เฉพาะเจ้าหน้าที่ที่ผูก LINE + add friend OA + เปิด preference; ข้อความใช้ template เดียวกับกลุ่ม (ไม่มี PII)
+
 ### Credential management (บัญชี citizen)
 - บัญชี email/password: เปลี่ยนรหัสผ่าน — `PUT /api/citizen/auth/change-password` (ต้องมีรหัสผ่านปัจจุบัน)
 - บัญชี LINE ที่ยังไม่มีอีเมล/รหัสผ่าน: เพิ่มอีเมล+รหัสผ่านเพื่อเปิดใช้ email login (สำรอง) —

@@ -37,4 +37,17 @@ const enqueueGroup = async (conn, { eventType, groupId, complaintId, payload, id
   );
 };
 
-module.exports = { enqueue, enqueueGroup };
+// Enqueue a personal DM to a staff user. Idempotent; no-op without a userId.
+const enqueueUser = async (conn, { eventType, userId, complaintId, payload, idempotencyKey }) => {
+  if (!userId) return;
+  const q = conn || pool;
+  await q.query(
+    `INSERT INTO notification_outbox
+       (event_type, recipient_type, citizen_id, recipient_user_id, complaint_id, channel, payload, idempotency_key)
+     VALUES (?, 'user', NULL, ?, ?, 'line', ?, ?)
+     ON DUPLICATE KEY UPDATE id = id`,
+    [eventType, userId, complaintId || null, JSON.stringify(payload || {}), idempotencyKey]
+  );
+};
+
+module.exports = { enqueue, enqueueGroup, enqueueUser };

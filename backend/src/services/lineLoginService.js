@@ -17,9 +17,10 @@ const generateSecret = (bytes = 32) => crypto.randomBytes(bytes).toString('hex')
 // linkCitizenId (optional): set during an authenticated "link LINE to my account"
 // flow so the callback links instead of creating a new account — the account id is
 // bound server-side into the signed token and cannot be tampered with by the client.
-const createOAuthStateToken = ({ state, nonce, linkCitizenId }) => {
+const createOAuthStateToken = ({ state, nonce, linkCitizenId, linkUserId }) => {
   const payload = { state, nonce, purpose: 'line_oauth' };
   if (linkCitizenId) payload.linkCitizenId = linkCitizenId;
+  if (linkUserId) payload.linkUserId = linkUserId; // staff personal-link flow
   return jwt.sign(payload, JWT_SECRET, { expiresIn: OAUTH_STATE_TTL });
 };
 

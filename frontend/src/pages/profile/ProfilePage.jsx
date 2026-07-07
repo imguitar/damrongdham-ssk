@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatDateTime } from '../../utils/formatters';
+import StaffLineNotifyCard from '../../components/common/StaffLineNotifyCard';
 
 const InfoRow = ({ label, value }) => (
   <Box display="flex" py={1.2}>
@@ -84,6 +85,8 @@ const ProfilePage = () => {
             value={user?.last_login_at ? formatDateTime(user.last_login_at) : '-'} />
         </CardContent>
       </Card>
+
+      <StaffLineNotifyCard />
     </Box>
   );
 };

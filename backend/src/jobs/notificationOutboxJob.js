@@ -6,6 +6,8 @@ const logModel = require('../models/notificationLogModel');
 const identityModel = require('../models/citizenIdentityModel');
 const prefModel = require('../models/notificationPrefModel');
 const lineGroupModel = require('../models/lineGroupModel');
+const userIdentityModel = require('../models/userIdentityModel');
+const userPrefModel = require('../models/userNotificationPrefModel');
 const messaging = require('../services/lineMessagingService');
 const tpl = require('../utils/lineMessageTemplate');
 
@@ -29,6 +31,22 @@ const isEnabled = (pref, eventType) => {
   if (!pref) return true;
   if (!pref.line_enabled) return false;
   const col = EVENT_PREF_MAP[eventType];
+  if (col && pref[col] === 0) return false;
+  return true;
+};
+
+// staff DM event_type → user preference column
+const USER_EVENT_PREF_MAP = {
+  STAFF_NEW_COMPLAINT: 'notify_new',
+  STAFF_FORWARDED:     'notify_forwarded',
+  STAFF_SLA_DUE:       'notify_sla',
+  STAFF_SLA_OVERDUE:   'notify_sla',
+  STAFF_ESCALATION:    'notify_escalation',
+};
+const isUserEnabled = (pref, eventType) => {
+  if (!pref) return true;
+  if (!pref.line_enabled) return false;
+  const col = USER_EVENT_PREF_MAP[eventType];
   if (col && pref[col] === 0) return false;
   return true;
 };
@@ -107,9 +125,34 @@ const processCitizenRow = async (row) => {
   return deliver(row, identity.provider_user_id, text, logBase);
 };
 
+// Staff personal DM (individual notification)
+const processUserRow = async (row) => {
+  const identity = await userIdentityModel.findByUser(row.recipient_user_id, 'line');
+  if (!identity?.provider_user_id) {
+    await outboxModel.markCancelled(row.id, 'no_line_identity');
+    return 'cancelled';
+  }
+  const pref = await userPrefModel.getByUser(row.recipient_user_id);
+  if (!isUserEnabled(pref, row.event_type)) {
+    await outboxModel.markCancelled(row.id, 'preference_disabled');
+    return 'cancelled';
+  }
+  const text = tpl.buildStaffByEvent(row.event_type, parsePayload(row.payload));
+  if (!text) {
+    await outboxModel.markFailed(row.id, 'no_template');
+    return 'failed';
+  }
+  const logBase = {
+    outboxId: row.id, recipientType: 'user', recipientUserId: row.recipient_user_id,
+    complaintId: row.complaint_id, channel: 'line', eventType: row.event_type,
+  };
+  return deliver(row, identity.provider_user_id, text, logBase);
+};
+
 // Process a single claimed outbox row. Returns an outcome tag for tallying.
 const processRow = async (row) => {
   if (row.recipient_type === 'line_group') return processGroupRow(row);
+  if (row.recipient_type === 'user') return processUserRow(row);
   return processCitizenRow(row);
 };
 

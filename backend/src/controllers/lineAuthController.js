@@ -3,6 +3,7 @@
 const authService = require('../services/authService');
 const lineLoginService = require('../services/lineLoginService');
 const identityService = require('../services/identityService');
+const userPrefModel = require('../models/userNotificationPrefModel');
 const { isConfigured, config } = require('../config/line');
 const { writeAuditLog } = require('../middleware/auditLog');
 const { success, error } = require('../utils/response');
@@ -88,6 +89,28 @@ const lineCallback = async (req, res) => {
     } catch (e) {
       console.error('[LINE] id token verify failed:', e.code, e.status || '');
       clearCookie(); return redirectError(res, 'line_callback_failed');
+    }
+
+    // 4a. STAFF LINK MODE — bound to an authenticated staff user at init time
+    if (saved.linkUserId) {
+      const staffSettings = `${config.frontendUrl}/profile`;
+      try {
+        await identityService.linkLineToUser({
+          userId: saved.linkUserId, sub: profile.sub,
+          displayName: profile.name, pictureUrl: profile.picture,
+        });
+      } catch (e) {
+        const map = { LINE_IDENTITY_CONFLICT: 'line_identity_conflict', LINE_ALREADY_LINKED: 'line_already_linked' };
+        console.error('[LINE] staff link failed:', e.code || e.message);
+        clearCookie();
+        return res.redirect(`${staffSettings}?line_error=${encodeURIComponent(map[e.code] || 'line_callback_failed')}`);
+      }
+      writeAuditLog({
+        userId: saved.linkUserId, action: 'USER_IDENTITY_LINKED', resource: 'user',
+        resourceId: saved.linkUserId, ipAddress: req.ip, userAgent: req.headers['user-agent'],
+      });
+      clearCookie();
+      return res.redirect(`${staffSettings}?line_linked=1`);
     }
 
     // 4b. LINK MODE — bound to an authenticated citizen at init time (§9).
@@ -204,4 +227,77 @@ const lineUnlink = async (req, res, next) => {
   }
 };
 
-module.exports = { lineLogin, lineCallback, lineLinkInit, lineLinkStatus, lineUnlink };
+// ── Staff personal LINE link (staff-authenticated) ────────────────────────────
+// POST /api/auth/line/link/init
+const staffLineLinkInit = (req, res, next) => {
+  try {
+    if (!isConfigured()) {
+      return error(res, 'LINE_NOT_CONFIGURED', 'ระบบยังไม่ได้ตั้งค่าการเชื่อมต่อ LINE', 503);
+    }
+    const state = lineLoginService.generateSecret();
+    const nonce = lineLoginService.generateSecret();
+    const stateToken = lineLoginService.createOAuthStateToken({ state, nonce, linkUserId: req.user.id });
+    res.cookie(OAUTH_COOKIE, stateToken, cookieOptions());
+    return success(res, { authorizeUrl: lineLoginService.buildAuthorizationUrl({ state, nonce }) });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// GET /api/auth/line/link
+const staffLineLinkStatus = async (req, res, next) => {
+  try {
+    const idn = await identityService.getUserLineIdentity(req.user.id);
+    return success(res, { linked: Boolean(idn), displayName: idn?.display_name || null, linkedAt: idn?.linked_at || null });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// DELETE /api/auth/line/link
+const staffLineUnlink = async (req, res, next) => {
+  try {
+    const removed = await identityService.unlinkLineUser(req.user.id);
+    if (removed) {
+      writeAuditLog({
+        userId: req.user.id, action: 'USER_IDENTITY_UNLINKED', resource: 'user',
+        resourceId: req.user.id, ipAddress: req.ip, userAgent: req.headers['user-agent'],
+      });
+    }
+    return success(res, { message: 'ยกเลิกการเชื่อมต่อ LINE แล้ว' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// GET /api/auth/line/preferences — staff DM notification preferences
+const getUserNotificationPreferences = async (req, res, next) => {
+  try {
+    let pref = await userPrefModel.getByUser(req.user.id);
+    if (!pref) {
+      await userPrefModel.createDefault(null, req.user.id);
+      pref = await userPrefModel.getByUser(req.user.id);
+    }
+    return success(res, { preferences: pref });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// PATCH /api/auth/line/preferences
+const updateUserNotificationPreferences = async (req, res, next) => {
+  try {
+    await userPrefModel.createDefault(null, req.user.id);
+    await userPrefModel.update(req.user.id, req.body); // whitelisted columns only
+    const pref = await userPrefModel.getByUser(req.user.id);
+    return success(res, { preferences: pref });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = {
+  lineLogin, lineCallback, lineLinkInit, lineLinkStatus, lineUnlink,
+  staffLineLinkInit, staffLineLinkStatus, staffLineUnlink,
+  getUserNotificationPreferences, updateUserNotificationPreferences,
+};

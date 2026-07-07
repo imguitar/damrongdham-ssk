@@ -82,6 +82,23 @@ export const cleanupComplaint = async (complaintId) => {
   await pool.query('DELETE FROM complaints WHERE id = ?', [complaintId]);
 };
 
+export const createStaffUser = async ({ roleId = 1, agencyId = null } = {}) => {
+  const [r] = await pool.query(
+    'INSERT INTO users (username, password_hash, full_name, role_id, agency_id, is_active) VALUES (?, ?, ?, ?, ?, 1)',
+    [`ituser_${uniqSuffix()}`, 'x', 'ITEST staff', roleId, agencyId]
+  );
+  return r.insertId;
+};
+
+export const cleanupUser = async (userId) => {
+  await pool.query('DELETE FROM notification_logs WHERE recipient_user_id = ?', [userId]);
+  await pool.query('DELETE FROM notification_outbox WHERE recipient_user_id = ?', [userId]);
+  await pool.query('DELETE FROM user_identities WHERE user_id = ?', [userId]);
+  await pool.query('DELETE FROM user_notification_preferences WHERE user_id = ?', [userId]);
+  await pool.query('DELETE FROM audit_logs WHERE user_id = ?', [userId]);
+  await pool.query('DELETE FROM users WHERE id = ?', [userId]);
+};
+
 export const cleanupCitizen = async (citizenId) => {
   const [cs] = await pool.query('SELECT id FROM complaints WHERE citizen_id = ?', [citizenId]);
   for (const c of cs) await cleanupComplaint(c.id);

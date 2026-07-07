@@ -3,6 +3,8 @@
 const pool = require('../config/database');
 const identityModel = require('../models/citizenIdentityModel');
 const prefModel = require('../models/notificationPrefModel');
+const userIdentityModel = require('../models/userIdentityModel');
+const userPrefModel = require('../models/userNotificationPrefModel');
 
 const PROVIDER_LINE = 'line';
 
@@ -90,4 +92,28 @@ const unlinkLine = async (citizenId) => {
   return r.affectedRows > 0;
 };
 
-module.exports = { PROVIDER_LINE, resolveLineIdentity, linkLineToExisting, getLineIdentity, unlinkLine };
+// ── Staff (users) personal LINE link ──────────────────────────────────────────
+const linkLineToUser = async ({ userId, sub, displayName, pictureUrl }) => {
+  const existing = await userIdentityModel.findByProvider(PROVIDER_LINE, sub);
+  if (existing) {
+    if (existing.user_id === userId) {
+      userIdentityModel.touchProfile(existing.id, { displayName, pictureUrl }).catch(() => {});
+      return { linked: true, already: true };
+    }
+    throw Object.assign(new Error('LINE already linked to another staff account'), { code: 'LINE_IDENTITY_CONFLICT' });
+  }
+  const own = await userIdentityModel.findByUser(userId, PROVIDER_LINE);
+  if (own) throw Object.assign(new Error('staff account already linked to LINE'), { code: 'LINE_ALREADY_LINKED' });
+
+  await userIdentityModel.create(null, { userId, provider: PROVIDER_LINE, providerUserId: sub, displayName, pictureUrl });
+  await userPrefModel.createDefault(null, userId);
+  return { linked: true };
+};
+
+const getUserLineIdentity = (userId) => userIdentityModel.findByUser(userId, PROVIDER_LINE);
+const unlinkLineUser = (userId) => userIdentityModel.deleteByUser(userId, PROVIDER_LINE);
+
+module.exports = {
+  PROVIDER_LINE, resolveLineIdentity, linkLineToExisting, getLineIdentity, unlinkLine,
+  linkLineToUser, getUserLineIdentity, unlinkLineUser,
+};

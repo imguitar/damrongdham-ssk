@@ -12,6 +12,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import { useCitizenAuth } from '../../contexts/CitizenAuthContext';
 import * as citizenApi from '../../api/citizenApi';
+import CitizenCredentialsCard from '../../components/citizen/CitizenCredentialsCard';
 
 const CitizenProfilePage = () => {
   const { citizen, setCitizen } = useCitizenAuth();
@@ -65,8 +66,9 @@ const CitizenProfilePage = () => {
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <TextField
-                fullWidth label="อีเมล" value={citizen?.email || ''}
-                disabled size="small" helperText="ไม่สามารถแก้ไขอีเมล"
+                fullWidth label="อีเมล" value={citizen?.email || '— ยังไม่ได้ระบุ —'}
+                disabled size="small"
+                helperText={citizen?.email ? 'ไม่สามารถแก้ไขอีเมล' : 'เพิ่มอีเมลได้ที่ส่วนด้านล่าง'}
               />
             </Grid>
             <Grid item xs={12}>
@@ -96,6 +98,8 @@ const CitizenProfilePage = () => {
           </Button>
         </CardContent>
       </Card>
+
+      <CitizenCredentialsCard />
     </Box>
   );
 };

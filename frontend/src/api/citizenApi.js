@@ -34,6 +34,8 @@ export const logout = () => citizenAxios.post('/auth/logout');
 export const me = () => citizenAxios.get('/auth/me');
 export const changePassword = (current_password, new_password) =>
   citizenAxios.put('/auth/change-password', { current_password, new_password });
+export const setCredentials = (email, password) =>
+  citizenAxios.post('/auth/set-credentials', { email, password });
 
 // Profile
 export const updateProfile = (data) => citizenAxios.put('/profile', data);

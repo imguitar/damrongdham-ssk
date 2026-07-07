@@ -13,7 +13,8 @@ const findByEmail = async (email) => {
 const findById = async (id) => {
   const [rows] = await pool.query(
     `SELECT id, email, full_name, phone, id_card, address,
-            is_active, is_provisional, consent_at, last_login_at, created_at, updated_at
+            is_active, is_provisional, consent_at, last_login_at, created_at, updated_at,
+            (password_hash IS NOT NULL) AS has_password
      FROM citizens WHERE id = ? AND is_active = 1`,
     [id]
   );
@@ -53,6 +54,14 @@ const updateProfile = async (id, { full_name, phone, id_card, address }) => {
   );
 };
 
+// Add email + password to an account that has none (LINE-only) → enables email login
+const setCredentials = async (id, { email, passwordHash }) => {
+  await pool.query(
+    'UPDATE citizens SET email = ?, password_hash = ?, updated_at = NOW() WHERE id = ?',
+    [email, passwordHash, id]
+  );
+};
+
 // Provisional (LINE) account completes registration: fill profile, record consent,
 // and clear the provisional flag. Keeps existing email if none is provided.
 const completeProfile = async (id, { full_name, phone, id_card, address, email }) => {
@@ -67,5 +76,5 @@ const completeProfile = async (id, { full_name, phone, id_card, address, email }
 
 module.exports = {
   findByEmail, findById, create, getPasswordHash, updatePassword, updateLastLogin,
-  updateProfile, completeProfile,
+  updateProfile, completeProfile, setCredentials,
 };

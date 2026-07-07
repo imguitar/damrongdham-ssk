@@ -195,6 +195,12 @@ DELETE /api/citizen/line/link        → unlink (audit: LINE_IDENTITY_UNLINKED)
 ```
 Unlink ได้เสมอเพราะบัญชี email ยังล็อกอินด้วย password ได้ (ไม่ทำให้ล็อกอินไม่ได้)
 
+### Credential management (บัญชี citizen)
+- บัญชี email/password: เปลี่ยนรหัสผ่าน — `PUT /api/citizen/auth/change-password` (ต้องมีรหัสผ่านปัจจุบัน)
+- บัญชี LINE ที่ยังไม่มีอีเมล/รหัสผ่าน: เพิ่มอีเมล+รหัสผ่านเพื่อเปิดใช้ email login (สำรอง) —
+  `POST /api/citizen/auth/set-credentials` (เฉพาะบัญชีที่ยังไม่มีรหัสผ่าน, กันอีเมลซ้ำ)
+- `GET /me` คืน `has_password` เพื่อให้ frontend เลือกฟอร์มที่ถูก (เปลี่ยน vs เพิ่ม); UI อยู่หน้า Profile
+
 ---
 
 ## 12. Troubleshooting

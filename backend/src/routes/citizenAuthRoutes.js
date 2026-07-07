@@ -21,5 +21,6 @@ router.get('/line/callback', lineLimiter, lineAuthController.lineCallback);
 router.post('/logout', citizenAuthenticate, citizenAuthController.logout);
 router.get('/me', citizenAuthenticate, citizenAuthController.me);
 router.put('/change-password', citizenAuthenticate, citizenAuthController.changePassword);
+router.post('/set-credentials', citizenAuthenticate, citizenAuthController.setCredentials);
 
 module.exports = router;

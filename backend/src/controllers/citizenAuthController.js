@@ -113,6 +113,42 @@ const changePassword = async (req, res, next) => {
   }
 };
 
+// POST /api/citizen/auth/set-credentials — add email + password to a LINE-only account
+const setCredentials = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return error(res, 'VALIDATION_ERROR', 'กรุณาระบุอีเมลและรหัสผ่าน', 400);
+    }
+    if (!EMAIL_REGEX.test(email)) {
+      return error(res, 'VALIDATION_ERROR', 'รูปแบบอีเมลไม่ถูกต้อง', 400);
+    }
+    if (password.length < 6) {
+      return error(res, 'VALIDATION_ERROR', 'รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร', 400);
+    }
+
+    // Only for accounts without a password yet; existing-password users use change-password
+    const currentHash = await citizenModel.getPasswordHash(req.citizen.id);
+    if (currentHash) {
+      return error(res, 'PASSWORD_ALREADY_SET', 'บัญชีนี้มีรหัสผ่านอยู่แล้ว กรุณาใช้เมนูเปลี่ยนรหัสผ่าน', 400);
+    }
+
+    const existing = await citizenModel.findByEmail(email);
+    if (existing && existing.id !== req.citizen.id) {
+      return error(res, 'EMAIL_EXISTS', 'อีเมลนี้ถูกใช้งานแล้ว', 409);
+    }
+
+    const passwordHash = await authService.hashPassword(password);
+    await citizenModel.setCredentials(req.citizen.id, { email, passwordHash });
+
+    const citizen = await citizenModel.findById(req.citizen.id);
+    return success(res, { citizen });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const logout = (req, res) => success(res, { message: 'ออกจากระบบสำเร็จ' });
 
-module.exports = { register, login, me, changePassword, logout };
+module.exports = { register, login, me, changePassword, setCredentials, logout };

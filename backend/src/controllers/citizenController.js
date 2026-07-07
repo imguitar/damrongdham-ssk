@@ -4,6 +4,7 @@ const complaintModel = require('../models/complaintModel');
 const attachmentModel = require('../models/attachmentModel');
 const citizenModel = require('../models/citizenModel');
 const prefModel = require('../models/notificationPrefModel');
+const staffNotifier = require('../services/staffLineNotifier');
 const { success, successList, error } = require('../utils/response');
 const { parsePagination, paginationMeta } = require('../utils/pagination');
 
@@ -63,6 +64,7 @@ const submitComplaint = async (req, res, next) => {
       receivedBy: null,
     });
 
+    staffNotifier.notifyNewComplaint(id); // staff LINE group (center)
     const complaint = await complaintModel.findById(id);
     return success(res, { complaint }, 201);
   } catch (err) {

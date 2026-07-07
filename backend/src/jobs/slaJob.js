@@ -3,6 +3,7 @@
 const cron = require('node-cron');
 const pool = require('../config/database');
 const notifSvc = require('../services/notificationService');
+const staffNotifier = require('../services/staffLineNotifier');
 
 const runSlaCheck = async () => {
   try {
@@ -32,6 +33,7 @@ const runSlaCheck = async () => {
           title: notifSvc.NOTIFICATION_TEMPLATES.SLA_OVERDUE.title,
           message: notifSvc.NOTIFICATION_TEMPLATES.SLA_OVERDUE.message(c.complaint_number),
         }).catch((err) => console.error('[SlaJob] overdue notify error:', err.message));
+        staffNotifier.notifySla(c.id, 'overdue'); // staff LINE group
       }
 
       console.log(`[SlaJob] Marked ${newlyOverdue.length} complaint(s) overdue`);
@@ -53,6 +55,7 @@ const runSlaCheck = async () => {
         title: notifSvc.NOTIFICATION_TEMPLATES.SLA_NEAR_DUE.title,
         message: notifSvc.NOTIFICATION_TEMPLATES.SLA_NEAR_DUE.message(c.complaint_number),
       }).catch((err) => console.error('[SlaJob] near-due notify error:', err.message));
+      staffNotifier.notifySla(c.id, 'due'); // staff LINE group
     }
 
     if (nearDue.length) {

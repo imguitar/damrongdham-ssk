@@ -3,6 +3,7 @@
 const complaintModel = require('../models/complaintModel');
 const attachmentModel = require('../models/attachmentModel');
 const masterDataModel = require('../models/masterDataModel');
+const staffNotifier = require('../services/staffLineNotifier');
 const { success, error } = require('../utils/response');
 
 // POST /api/public/complaints — Guest submit complaint
@@ -42,6 +43,8 @@ const submitComplaint = async (req, res, next) => {
       source: 'PUBLIC',
       receivedBy: null,
     });
+
+    staffNotifier.notifyNewComplaint(id); // staff LINE group (center)
 
     const complaint = await complaintModel.findByNumberForTracking(
       (await complaintModel.findById(id)).complaint_number

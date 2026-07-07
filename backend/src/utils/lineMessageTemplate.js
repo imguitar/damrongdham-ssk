@@ -47,6 +47,34 @@ const buildComplaintClosedMessage = ({ complaintNumber }) =>
   `🔔 ปิดเรื่องร้องเรียน\n\nเลขที่เรื่อง: ${complaintNumber}\nเรื่องของท่านได้รับการปิดเรียบร้อยแล้ว ขอบคุณที่ใช้บริการ` +
   footer(complaintNumber);
 
+// ── Staff (group) messages ────────────────────────────────────────────────────
+// Internal — may include reference/category/agency/due, but NEVER citizen PII
+// (name / id card), because staff groups can contain people outside the team.
+const staffDetailUrl = (complaintId) => `${config.frontendUrl}/complaints/${complaintId}`;
+const staffFooter = (complaintId) =>
+  complaintId ? `\n\nดูรายละเอียด (เจ้าหน้าที่):\n${staffDetailUrl(complaintId)}` : '';
+
+const line = (label, val) => (val ? `\n${label}: ${val}` : '');
+
+const buildStaffByEvent = (eventType, d = {}) => {
+  const num = d.complaintNumber || '-';
+  const foot = staffFooter(d.complaintId);
+  switch (eventType) {
+    case 'STAFF_NEW_COMPLAINT':
+      return `📥 เรื่องร้องเรียนใหม่\n\nเลขที่เรื่อง: ${num}${line('ประเภท', d.category)}\nกรุณาตรวจสอบและคัดกรอง` + foot;
+    case 'STAFF_FORWARDED':
+      return `📨 มีเรื่องส่งมายังหน่วยงานของท่าน\n\nเลขที่เรื่อง: ${num}${line('ประเภท', d.category)}${line('กำหนดแล้วเสร็จ', d.dueDate)}\nกรุณารับเรื่องและดำเนินการ` + foot;
+    case 'STAFF_SLA_DUE':
+      return `⏰ ใกล้ครบกำหนด (อีก 3 วัน)\n\nเลขที่เรื่อง: ${num}${line('กำหนดแล้วเสร็จ', d.dueDate)}` + foot;
+    case 'STAFF_SLA_OVERDUE':
+      return `🚨 เกินกำหนดดำเนินการ\n\nเลขที่เรื่อง: ${num}${line('กำหนดแล้วเสร็จ', d.dueDate)}\nกรุณาเร่งรัดดำเนินการ` + foot;
+    case 'STAFF_ESCALATION':
+      return `🔺 เร่งรัด (ระดับ ${d.level || '-'})\n\nเลขที่เรื่อง: ${num}\nไม่มีการอัปเดตความคืบหน้าเป็นเวลานาน กรุณาดำเนินการ` + foot;
+    default:
+      return null;
+  }
+};
+
 // Map outbox event_type → message builder. Returns null for unknown events.
 const buildByEvent = (eventType, data) => {
   switch (eventType) {
@@ -64,6 +92,7 @@ module.exports = {
   statusLabel,
   detailUrl,
   buildByEvent,
+  buildStaffByEvent,
   buildComplaintStatusMessage,
   buildComplaintProgressMessage,
   buildComplaintMoreInfoMessage,

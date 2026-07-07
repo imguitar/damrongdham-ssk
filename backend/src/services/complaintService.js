@@ -4,6 +4,7 @@ const pool = require('../config/database');
 const { calculateDueDate } = require('./slaService');
 const notifSvc = require('./notificationService');
 const outboxSvc = require('./notificationOutboxService');
+const staffNotifier = require('./staffLineNotifier');
 
 const CENTER_ROLES = ['super_admin', 'admin', 'officer', 'chief'];
 const AGENCY_ROLES = ['agency_officer', 'agency_head'];
@@ -168,6 +169,8 @@ const executeAssign = async (complaint, userId, role, { agencyId, note } = {}) =
     complaint_number: complaint.complaint_number,
     agencyId,
   });
+  // Staff LINE group: forwarded to this agency
+  staffNotifier.notifyForwarded(complaint.id, agencyId);
 
   return { to, dueDate, assignmentId };
 };

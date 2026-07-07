@@ -5,6 +5,7 @@ const outboxModel = require('../models/outboxModel');
 const logModel = require('../models/notificationLogModel');
 const identityModel = require('../models/citizenIdentityModel');
 const prefModel = require('../models/notificationPrefModel');
+const lineGroupModel = require('../models/lineGroupModel');
 const messaging = require('../services/lineMessagingService');
 const tpl = require('../utils/lineMessageTemplate');
 
@@ -38,44 +39,9 @@ const parsePayload = (payload) => {
   catch { return {}; }
 };
 
-// Process a single claimed outbox row. Returns an outcome tag for tallying.
-const processRow = async (row) => {
-  // 1. must have a LINE identity to receive a push
-  const identity = await identityModel.findByCitizen(row.citizen_id, 'line');
-  if (!identity?.provider_user_id) {
-    await outboxModel.markCancelled(row.id, 'no_line_identity');
-    return 'cancelled';
-  }
-
-  // 2. respect notification preferences
-  const pref = await prefModel.getByCitizen(row.citizen_id);
-  if (!isEnabled(pref, row.event_type)) {
-    await outboxModel.markCancelled(row.id, 'preference_disabled');
-    return 'cancelled';
-  }
-
-  // 3. build privacy-safe message
-  const payload = parsePayload(row.payload);
-  const text = tpl.buildByEvent(row.event_type, {
-    complaintNumber: payload.complaintNumber,
-    status: payload.status,
-  });
-  if (!text) {
-    await outboxModel.markFailed(row.id, 'no_template');
-    return 'failed';
-  }
-
-  // 4. send (idempotency_key → X-Line-Retry-Key inside the service)
-  const res = await messaging.pushText({
-    to: identity.provider_user_id,
-    text,
-    idempotencyKey: row.idempotency_key,
-  });
-
-  const logBase = {
-    outboxId: row.id, citizenId: row.citizen_id, complaintId: row.complaint_id,
-    channel: 'line', eventType: row.event_type,
-  };
+// Shared delivery: push + mark outbox + write log + retry classification.
+const deliver = async (row, to, text, logBase) => {
+  const res = await messaging.pushText({ to, text, idempotencyKey: row.idempotency_key });
 
   if (res.ok) {
     await outboxModel.markSent(row.id);
@@ -92,10 +58,59 @@ const processRow = async (row) => {
     return 'retried';
   }
 
-  // non-retryable, or retries exhausted → dead-letter + log
   await outboxModel.markFailed(row.id, detail);
   await logModel.create({ ...logBase, status: 'failed', errorCode: res.errorCode, errorMessage: res.errorMessage });
   return 'failed';
+};
+
+// Staff LINE-group notification (situational alerts for a unit)
+const processGroupRow = async (row) => {
+  const target = await lineGroupModel.findTargetByGroup(row.line_group_id);
+  if (!target || !target.is_active) {
+    await outboxModel.markCancelled(row.id, 'group_inactive');
+    return 'cancelled';
+  }
+  const text = tpl.buildStaffByEvent(row.event_type, parsePayload(row.payload));
+  if (!text) {
+    await outboxModel.markFailed(row.id, 'no_template');
+    return 'failed';
+  }
+  const logBase = {
+    outboxId: row.id, recipientType: 'line_group', lineGroupId: row.line_group_id,
+    complaintId: row.complaint_id, channel: 'line', eventType: row.event_type,
+  };
+  return deliver(row, row.line_group_id, text, logBase);
+};
+
+// Citizen notification (personal push)
+const processCitizenRow = async (row) => {
+  const identity = await identityModel.findByCitizen(row.citizen_id, 'line');
+  if (!identity?.provider_user_id) {
+    await outboxModel.markCancelled(row.id, 'no_line_identity');
+    return 'cancelled';
+  }
+  const pref = await prefModel.getByCitizen(row.citizen_id);
+  if (!isEnabled(pref, row.event_type)) {
+    await outboxModel.markCancelled(row.id, 'preference_disabled');
+    return 'cancelled';
+  }
+  const payload = parsePayload(row.payload);
+  const text = tpl.buildByEvent(row.event_type, { complaintNumber: payload.complaintNumber, status: payload.status });
+  if (!text) {
+    await outboxModel.markFailed(row.id, 'no_template');
+    return 'failed';
+  }
+  const logBase = {
+    outboxId: row.id, recipientType: 'citizen', citizenId: row.citizen_id,
+    complaintId: row.complaint_id, channel: 'line', eventType: row.event_type,
+  };
+  return deliver(row, identity.provider_user_id, text, logBase);
+};
+
+// Process a single claimed outbox row. Returns an outcome tag for tallying.
+const processRow = async (row) => {
+  if (row.recipient_type === 'line_group') return processGroupRow(row);
+  return processCitizenRow(row);
 };
 
 const runOnce = async () => {

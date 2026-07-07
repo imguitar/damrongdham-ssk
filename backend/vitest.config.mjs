@@ -6,6 +6,9 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['tests/**/*.test.js'],
+    // DB-backed integration tests share one database → run test files sequentially
+    // for determinism (avoids cross-file contamination on shared tables).
+    fileParallelism: false,
     env: {
       NODE_ENV: 'test',
       JWT_SECRET: 'test_jwt_secret',

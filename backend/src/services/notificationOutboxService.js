@@ -23,4 +23,18 @@ const enqueue = async (conn, { eventType, citizenId, complaintId, complaintNumbe
   );
 };
 
-module.exports = { enqueue };
+// Enqueue a notification to a LINE group (staff situational alerts).
+// Idempotent on idempotency_key; no-op without a groupId.
+const enqueueGroup = async (conn, { eventType, groupId, complaintId, payload, idempotencyKey }) => {
+  if (!groupId) return;
+  const q = conn || pool;
+  await q.query(
+    `INSERT INTO notification_outbox
+       (event_type, recipient_type, citizen_id, line_group_id, complaint_id, channel, payload, idempotency_key)
+     VALUES (?, 'line_group', NULL, ?, ?, 'line', ?, ?)
+     ON DUPLICATE KEY UPDATE id = id`,
+    [eventType, groupId, complaintId || null, JSON.stringify(payload || {}), idempotencyKey]
+  );
+};
+
+module.exports = { enqueue, enqueueGroup };

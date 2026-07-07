@@ -3,6 +3,7 @@
 const cron = require('node-cron');
 const pool = require('../config/database');
 const notifSvc = require('../services/notificationService');
+const staffNotifier = require('../services/staffLineNotifier');
 
 const ACTIVE_STATUSES = ['ASSIGNED', 'ACCEPTED', 'IN_PROGRESS'];
 const STATUS_IN = ACTIVE_STATUSES.map(() => '?').join(',');
@@ -34,6 +35,7 @@ const runEscalationCheck = async () => {
       if (agencyId) {
         notifSvc.createForAgencyUsers(agencyId, notifData).catch((err) => console.error('[EscalationJob] L1 agency error:', err.message));
       }
+      staffNotifier.notifyEscalation(c.id, agencyId, 1); // staff LINE group
     }
 
     if (l0.length) console.log(`[EscalationJob] L1 escalated: ${l0.length}`);
@@ -63,6 +65,7 @@ const runEscalationCheck = async () => {
       if (agencyId) {
         notifSvc.createForAgencyUsers(agencyId, notifData).catch((err) => console.error('[EscalationJob] L2 agency error:', err.message));
       }
+      staffNotifier.notifyEscalation(c.id, agencyId, 2); // staff LINE group
     }
 
     if (l1.length) console.log(`[EscalationJob] L2 escalated: ${l1.length}`);
@@ -92,6 +95,7 @@ const runEscalationCheck = async () => {
       if (agencyId) {
         notifSvc.createForAgencyUsers(agencyId, notifData).catch((err) => console.error('[EscalationJob] L3 agency error:', err.message));
       }
+      staffNotifier.notifyEscalation(c.id, agencyId, 3); // staff LINE group
     }
 
     if (l2.length) console.log(`[EscalationJob] L3 escalated: ${l2.length}`);

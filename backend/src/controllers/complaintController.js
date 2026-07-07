@@ -5,6 +5,7 @@ const anonymousRevealModel = require('../models/anonymousRevealModel');
 const agencyModel = require('../models/agencyModel');
 const { executeTransition, executeAssign, executeSelfHandle } = require('../services/complaintService');
 const notifSvc = require('../services/notificationService');
+const staffNotifier = require('../services/staffLineNotifier');
 const { writeAuditLog } = require('../middleware/auditLog');
 const { success, successList, error } = require('../utils/response');
 const { parsePagination, paginationMeta } = require('../utils/pagination');
@@ -85,6 +86,7 @@ const create = async (req, res, next) => {
     });
 
     const complaint = await complaintModel.findById(id);
+    staffNotifier.notifyNewComplaint(id); // staff LINE group (center)
 
     writeAuditLog({
       userId: req.user.id,

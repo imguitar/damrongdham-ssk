@@ -93,7 +93,7 @@ const lineCallback = async (req, res) => {
 
     // 4a. STAFF LINK MODE — bound to an authenticated staff user at init time
     if (saved.linkUserId) {
-      const staffSettings = `${config.frontendUrl}/profile`;
+      const staffSettings = `${config.frontendUrl}/line-notifications`;
       try {
         await identityService.linkLineToUser({
           userId: saved.linkUserId, sub: profile.sub,

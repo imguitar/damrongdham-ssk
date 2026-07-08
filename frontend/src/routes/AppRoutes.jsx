@@ -24,6 +24,7 @@ import UserListPage  from '../pages/users/UserListPage';
 import UserFormPage  from '../pages/users/UserFormPage';
 import AgencyListPage from '../pages/agencies/AgencyListPage';
 import SettingsPage   from '../pages/settings/SettingsPage';
+import LineNotificationPage from '../pages/settings/LineNotificationPage';
 
 // ── Public pages ──────────────────────────────────────────────────────────────
 import PublicComplaintPage from '../pages/public/PublicComplaintPage';
@@ -126,8 +127,9 @@ const AppRoutes = () => (
         </Route>
 
         {/* All authenticated */}
-        <Route path="/profile"         element={<ProfilePage />} />
-        <Route path="/change-password" element={<ChangePasswordPage />} />
+        <Route path="/profile"            element={<ProfilePage />} />
+        <Route path="/line-notifications" element={<LineNotificationPage />} />
+        <Route path="/change-password"    element={<ChangePasswordPage />} />
       </Route>
     </Route>
 

@@ -37,7 +37,7 @@ const users = [];
     while (users.length) await cleanupUser(users.pop());
   });
 
-  it('links the LINE id to the bound staff user and redirects to /profile', async () => {
+  it('links the LINE id to the bound staff user and redirects to the LINE settings page', async () => {
     const uid = await createStaffUser({ roleId: 1 }); users.push(uid);
     const sub = `Uslk_${Date.now()}`;
     routeFetch({
@@ -47,7 +47,7 @@ const users = [];
     const res = mkRes();
     await controller.lineCallback(mkReq({ code: 'c', state: 'S' }, userLinkCookie('S', 'N', uid)), res);
 
-    expect(res._s.redirectUrl).toContain('/profile?line_linked=1');
+    expect(res._s.redirectUrl).toContain('/line-notifications?line_linked=1');
     const [[idn]] = await pool.query('SELECT user_id FROM user_identities WHERE provider="line" AND provider_user_id=?', [sub]);
     expect(idn.user_id).toBe(uid);
   });
@@ -65,7 +65,7 @@ const users = [];
     });
     const res = mkRes();
     await controller.lineCallback(mkReq({ code: 'c', state: 'S' }, userLinkCookie('S', 'N', other)), res);
-    expect(res._s.redirectUrl).toContain('/profile?line_error=line_identity_conflict');
+    expect(res._s.redirectUrl).toContain('/line-notifications?line_error=line_identity_conflict');
   });
 });
 

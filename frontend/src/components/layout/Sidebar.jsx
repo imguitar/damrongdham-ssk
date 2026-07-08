@@ -14,6 +14,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import ChatIcon from '@mui/icons-material/Chat';
 import PeopleIcon from '@mui/icons-material/People';
 import BusinessIcon from '@mui/icons-material/Business';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -58,6 +59,13 @@ const MENU_ITEMS = [
     icon: <NotificationsIcon />,
     path: '/notifications',
     roles: CENTER_ROLES,
+  },
+  {
+    id: 'line-notifications',
+    label: 'การแจ้งเตือน LINE',
+    icon: <ChatIcon />,
+    path: '/line-notifications',
+    roles: ALL_STAFF,
   },
 ];
 

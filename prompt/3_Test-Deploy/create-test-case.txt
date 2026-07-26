@@ -1,0 +1,42 @@
+คุณคือ Senior QA Engineer
+
+ตอนนี้เข้าสู่ช่วง Testing & Deployment
+ห้ามเพิ่ม feature ใหม่
+ห้ามแก้ architecture
+ให้สร้างเอกสาร Test Case Matrix แบบละเอียดสำหรับ UAT
+
+อ้างอิงจาก:
+- docs/testing/UAT_PLAN.md
+- docs/planning/PROJECT_CONTEXT.md
+- docs/planning/04-complaint-workflow.md
+- docs/planning/06-api-contract.md
+- docs/planning/03-roles-permissions.md
+- README.md
+
+งานที่ต้องการ:
+สร้างไฟล์ใหม่ docs/testing/UAT_TEST_CASES.md
+
+รูปแบบแต่ละ test case ต้องมี:
+- TC-ID
+- Module
+- Scenario
+- Preconditions
+- Test Data
+- Steps
+- Expected Result
+- Actual Result
+- Status
+- Severity
+
+ข้อกำหนด:
+- ครอบคลุม workflow T-01 ถึง T-14
+- ครอบคลุม Public, Citizen, Staff, Agency, Executive
+- ครอบคลุม Anonymous complaint และการเปิดเผยตัวตนโดย super_admin
+- ครอบคลุม Dashboard, Report, Export Excel
+- ครอบคลุม Notification, SLA, Escalation
+- ครอบคลุม Security/Permission
+- แยก Severity เป็น Blocker, Major, Minor
+- Actual Result และ Status ให้เว้นว่างไว้สำหรับผู้ทดสอบกรอก
+- ใช้ภาษาไทย
+- ไม่ต้องแก้โค้ด
+- หลังสร้างไฟล์ ให้สรุปจำนวน test cases แยกตาม module

@@ -15,7 +15,7 @@ AI **ต้องอ่านไฟล์นี้ทุกครั้งก่
 
 ## 2. Project Working Principles
 
-* **Tech Stack**: React 18 + Vite 5 + MUI 5 (Frontend), Node.js 20 LTS + Express 4 (Backend), MySQL 8 (Database), Docker Compose (Dev) → Prod 2 targets: **Railway** (primary) + **On-premise/Ubuntu** (`docker-compose.prod.yml` + Nginx) — ใช้ root `Dockerfile` ตัวเดียวกัน
+* **Tech Stack**: React 18 + Vite 5 + MUI 5 (Frontend), Node.js 20 LTS + Express 4 (Backend), MySQL 8 (Database), Docker Compose (Dev) → Prod 2 targets: **On-premise/Ubuntu Docker** (`docker-compose.prod.yml` + Nginx, ใช้ root `Dockerfile`) และ **Shared Server (pm2 + nginx subpath)** — production จริงปัจจุบันรันแบบหลัง บน `thaidevhub.site/damrongdham-ssk/`
 * **Scope**: ศูนย์ดำรงธรรม **จังหวัดศรีสะเกษ** — Master Data (อำเภอ/ตำบล/ประเภทเรื่อง/หน่วยงาน) ตาม `docs/planning/05-database-design.md` §8
 * **Architecture**: 3-Layer Architecture สำหรับ Backend (Route → Controller → Service → Model)
 * **Workflow**: ทำงานเป็น Phase ตามที่กำหนดใน `docs/planning/10-implementation-plan.md`
@@ -125,13 +125,13 @@ AI **ต้องอ่านไฟล์นี้ทุกครั้งก่
 ## 10. Docker Development Rules
 
 1.  **Dev Environment**: ใช้ `docker-compose.yml` (Frontend, Backend, DB, phpMyAdmin) — ports: frontend `5173`, backend `5001`, MySQL host `3307`→`3306`, phpMyAdmin `8081`→`80`
-2.  **Prod Environment — 2 targets (ใช้ root `Dockerfile` ตัวเดียวกัน):**
-    *   **Railway (Primary)**: build จาก `Dockerfile` + `railway.toml` (single-container, health check `/api/health`). Railway จัดการ SSL/Domain — ไม่ใช้ Nginx
-    *   **On-premise/Ubuntu (Alternative)**: `docker-compose.prod.yml` รัน `app` (image เดียวกัน) + `db` (MySQL) + `nginx` (`nginx/default.conf` ทำ SSL + reverse proxy → app:5001). env จาก `.env.production`
-    *   ⚠️ ถ้าแก้โครงสร้าง/พฤติกรรมของแอป ต้องทำใน `Dockerfile`/โค้ดให้ใช้ได้ **ทั้งสอง target** ไม่ผูกกับ target ใด target หนึ่ง
-3.  **Volumes**: Dev — Map Volume สำหรับ Source Code (Hot Reload) + `db/init`. Uploads: On-premise ใช้ Docker volume `app_uploads` (ถาวร); ⚠️ Railway filesystem ephemeral — ต้องใช้ Railway Volume หรือ Object Storage
-4.  **Networking**: Service ต้องสื่อสารผ่าน Docker Internal Network ไม่ใช่ `localhost` (ยกเว้นเข้าจาก Host Machine)
-5.  **Environment Variables**: ห้ามใส่ Secret หรือ Config ในโค้ดโดยตรง ให้ใช้ไฟล์ `.env` (ตัวอย่างเก็บใน `.env.example`); Prod ตั้งค่า env vars บน Railway
+2.  **Prod Environment — 2 targets:**
+    *   **Target A — On-premise/Ubuntu Docker**: `docker-compose.prod.yml` รัน `app` (build จากroot `Dockerfile`) + `db` (MySQL) + `nginx` (`nginx/default.conf` ทำ SSL + reverse proxy → app:5001). env จาก `.env.production`
+    *   **Target B — Shared Server (pm2 + nginx subpath)**: ไม่ใช้ Docker/container เลย — รันตรงบน host ด้วย `pm2` ต่อกับ MySQL ที่ติดตั้งบนเครื่อง, frontend build เป็น static วางใต้ `/var/www/html/<app>/`, nginx ที่ใช้ร่วมกับแอปอื่นบนเครื่องทำ subpath routing (`location /<subpath>/` และ `/<subpath>/api/`). ดูขั้นตอนเต็มที่ `docs/deployment/DEPLOYMENT.md` Target B
+    *   ⚠️ ถ้าแก้โครงสร้าง/พฤติกรรมของแอปที่กระทบ deploy (เช่น path ที่ hardcode, base URL) ต้องเช็คว่าไม่พังทั้งสอง target — โดยเฉพาะ Target B ที่ frontend ต้องรองรับ subpath ผ่าน `import.meta.env.BASE_URL` และ `VITE_API_BASE_URL` (ดู `frontend/vite.config.js`, `frontend/src/main.jsx`)
+3.  **Volumes/Storage**: Dev — Map Volume สำหรับ Source Code (Hot Reload) + `db/init`. Target A ใช้ Docker volume `app_uploads` (ถาวร); Target B ใช้ `backend/uploads/` ตรงบน filesystem ของ host
+4.  **Networking**: Target A — Service สื่อสารผ่าน Docker Internal Network ไม่ใช่ `localhost`. Target B — backend ฟัง `localhost:<port>` บน host แล้วให้ nginx proxy เข้ามา ไม่เปิด port นั้นสู่ public โดยตรง
+5.  **Environment Variables**: ห้ามใส่ Secret หรือ Config ในโค้ดโดยตรง ให้ใช้ไฟล์ `.env` (ตัวอย่างเก็บใน `.env.example`); Target A ตั้งค่าใน `.env.production`, Target B ตั้งค่าใน `backend/.env` + `frontend/.env.production` โดยตรงบนเครื่อง server
 
 ---
 

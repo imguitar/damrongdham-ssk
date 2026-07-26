@@ -111,8 +111,7 @@ damrongdham-ssk/
 ├── nginx/                  # On-premise prod เท่านั้น
 ├── Dockerfile              # Production multi-stage image
 ├── docker-compose.yml      # Development environment
-├── docker-compose.prod.yml # On-premise production
-├── railway.toml            # Railway deployment config
+├── docker-compose.prod.yml # On-premise production (Docker)
 └── .env.example            # Environment variables template
 ```
 

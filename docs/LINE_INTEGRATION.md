@@ -92,7 +92,7 @@ LINE Messaging API (/v2/bot/message/push) → ประชาชนได้ร�
 
 ## 7. Environment Variables
 
-ตั้งใน `.env` (root — gitignored) หรือ Railway env. **ห้าม commit ค่าจริง / ห้าม expose ด้วย `VITE_` ยกเว้น origin สาธารณะ**
+ตั้งใน `.env` / `.env.production` (Target A) หรือ `backend/.env` (Target B) — ทุกกรณี gitignored. **ห้าม commit ค่าจริง / ห้าม expose ด้วย `VITE_` ยกเว้น origin สาธารณะ**
 
 ```dotenv
 # LINE Login channel
@@ -133,13 +133,24 @@ docker-compose ส่งค่าเหล่านี้เข้า backend co
 
 ---
 
-## 9. Production Deployment (Railway)
+## 9. Production Deployment
 
-1. ตั้ง LINE env vars ทั้งหมดบน Railway (ไม่ใช้ `.env` ไฟล์)
+### Target A — On-premise Docker
+1. ตั้ง LINE env vars ทั้งหมดใน `.env.production` (ไม่ commit ใน git)
 2. `LINE_LOGIN_CALLBACK_URL` / `FRONTEND_URL` / `BACKEND_URL` = โดเมนจริง (https)
 3. `VITE_API_ORIGIN` **เว้นว่าง** (frontend + backend เสิร์ฟจาก origin เดียวกันใน single container)
 4. ลงทะเบียน production Callback URL ใน LINE Console
 5. cookie `secure` เปิดอัตโนมัติเมื่อ `NODE_ENV=production` (+ `trust proxy` ตั้งไว้แล้ว)
+
+### Target B — Shared Server (pm2 + nginx subpath)
+1. ตั้ง LINE env vars ใน `backend/.env` (ไม่ commit ใน git)
+2. `LINE_LOGIN_CALLBACK_URL` / `FRONTEND_URL` / `BACKEND_URL` ต้องรวม subpath ด้วย เช่น
+   `https://thaidevhub.site/damrongdham-ssk/api/citizen/auth/line/callback`
+   (เพราะ backend proxy อยู่ใต้ `/<subpath>/api/` ไม่ใช่ root ของ domain)
+3. `VITE_API_ORIGIN` **เว้นว่าง** ใน `frontend/.env.production` — ยังเป็น same-origin เพราะ frontend/backend
+   อยู่ใต้ domain เดียวกัน (`thaidevhub.site`) ต่างกันแค่ path prefix ผ่าน nginx
+4. ลงทะเบียน production Callback URL (ที่รวม subpath) ใน LINE Console
+5. cookie `secure` เปิดอัตโนมัติเมื่อ `NODE_ENV=production` (+ `trust proxy` ตั้งไว้แล้วใน `app.js`)
 
 ---
 
@@ -244,7 +255,7 @@ Unlink ได้เสมอเพราะบัญชี email ยังล็
 
 1. LINE Console → channel → **Basic settings → Channel secret → Issue/Reissue** (ค่าเก่าใช้ไม่ได้ทันที)
 2. อัปเดตค่าใหม่ใน `.env` (`LINE_LOGIN_CHANNEL_SECRET` และ/หรือ `LINE_MESSAGING_CHANNEL_SECRET`)
-3. `docker compose up -d --force-recreate backend` (หรืออัปเดตบน Railway)
+3. Target A: `docker compose up -d --force-recreate backend` / Target B: อัปเดต `backend/.env` แล้ว `pm2 restart damrongdham-ssk-backend`
 4. Channel access token (Messaging) rotate แยก: แท็บ **Messaging API → Revoke** เก่า → **Issue** ใหม่ → อัปเดต `LINE_MESSAGING_CHANNEL_ACCESS_TOKEN` + recreate
 5. ⚠️ ทำตอนพร้อมอัปเดต env ทันที เพื่อลด downtime ของ login/verify
 

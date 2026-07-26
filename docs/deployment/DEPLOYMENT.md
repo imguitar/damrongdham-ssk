@@ -1,96 +1,19 @@
 # Deployment Guide — ระบบร้องเรียนศูนย์ดำรงธรรมจังหวัด (DCMS)
 
-> อัปเดตล่าสุด: 2026-06-20 | Phase 15
+> อัปเดตล่าสุด: 2026-07-26 | Phase 15
 
-ระบบรองรับ 2 deployment target จาก **image เดียวกัน** (root `Dockerfile`):
+ระบบรองรับ 2 deployment target:
 
-| Target | เหมาะสำหรับ | SSL | DB |
-|--------|------------|-----|-----|
-| **A — Railway** | Cloud, ทดสอบเร็ว, ไม่มี server เอง | Railway จัดการ | Railway Plugin / External |
-| **B — On-premise Ubuntu** | Server ของหน่วยงาน, ข้อมูลอยู่ภายใน | nginx + Certbot | MySQL container ใน compose |
+| Target | เหมาะสำหรับ | SSL | DB | Process manager |
+|--------|------------|-----|-----|-----|
+| **A — On-premise Docker** | Server ของหน่วยงานที่มีเครื่องแยกให้ทั้งระบบ | nginx + Certbot (ใน compose) | MySQL container | Docker |
+| **B — Shared Server (pm2 + nginx subpath)** | เครื่อง server ที่มีแอปอื่นรันอยู่ร่วมกัน แชร์ nginx/MySQL ตัวเดียว | nginx ของ host (ตัวเดียวกับแอปอื่น) | MySQL บนเครื่อง host | pm2 |
 
----
-
-## Target A — Railway (Primary / Cloud)
-
-### Prerequisites
-- บัญชี [Railway](https://railway.app) (free tier ได้ แต่ production ควรใช้ Hobby/Pro)
-- Railway CLI (optional แต่แนะนำ): `npm install -g @railway/cli`
-- Git repository บน GitHub / GitLab
-
-### ขั้นตอน Deploy
-
-#### 1. สร้าง Project ใน Railway
-```
-railway login
-railway init   # เลือก "Empty Project"
-```
-หรือเปิด railway.app → New Project → Deploy from GitHub repo
-
-#### 2. ตั้ง Environment Variables ใน Railway Dashboard
-ไปที่ Service → Variables → Add ตามนี้ทุกตัว:
-
-```
-NODE_ENV=production
-PORT=5001
-MYSQL_HOST=<railway-mysql-host>
-MYSQL_PORT=<railway-mysql-port>
-MYSQL_DATABASE=damrongdham_db
-MYSQL_USER=damrongdham_user
-MYSQL_PASSWORD=<strong-password>
-JWT_SECRET=<random-64-chars>
-JWT_EXPIRES_IN=8h
-CORS_ORIGIN=https://<your-railway-domain>.up.railway.app
-```
-
-> สร้าง JWT_SECRET แบบ random:
-> ```bash
-> node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-> ```
-
-#### 3. เพิ่ม MySQL Plugin
-Railway Dashboard → New → Database → MySQL → เชื่อมกับ Service
-
-Railway จะ inject `MYSQLHOST`, `MYSQLPORT`, `MYSQLUSER`, `MYSQLPASSWORD`, `MYSQLDATABASE` ให้อัตโนมัติ **หรือ** ใส่ค่าเอง (ตามข้อ 2)
-
-> ⚠️ ตรวจสอบชื่อ env var ที่ Railway inject ให้ตรงกับ `backend/src/config/db.js`
-> ปัจจุบัน backend ใช้: `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
-
-ถ้า Railway ใช้ชื่อต่างกัน ให้ map ใน Variables:
-```
-DB_HOST=${{MySQL.MYSQLHOST}}
-DB_PORT=${{MySQL.MYSQLPORT}}
-DB_USER=${{MySQL.MYSQLUSER}}
-DB_PASSWORD=${{MySQL.MYSQLPASSWORD}}
-DB_NAME=${{MySQL.MYSQLDATABASE}}
-```
-
-#### 4. Deploy
-```bash
-# ผ่าน Git push (Railway CI auto-build)
-git push origin main
-
-# หรือ ผ่าน CLI
-railway up
-```
-
-#### 5. ตรวจสอบ
-```bash
-# Health check
-curl https://<your-domain>.up.railway.app/api/health
-
-# Logs
-railway logs
-```
-
-### ⚠️ ข้อจำกัด Railway
-- **Ephemeral filesystem** — ไฟล์แนบใน `/app/uploads` หายเมื่อ redeploy
-- แก้ไข: ใช้ **Railway Volume** (mount ที่ `/app/uploads`) หรือย้ายไป S3/Object Storage ภายหลัง
-- ไม่มี `docker-compose.prod.yml` บน Railway — Railway ใช้ `Dockerfile` + `railway.toml` โดยตรง
+Target B คือรูปแบบที่ใช้ deploy จริงบน production server ปัจจุบัน (`thaidevhub.site` ที่ path `/damrongdham-ssk/`) — รูปแบบเดียวกับที่ใช้ deploy `simple-pos` บนเครื่องเดียวกัน
 
 ---
 
-## Target B — On-premise / Ubuntu Server
+## Target A — On-premise Docker (เครื่องแยกทั้งระบบ)
 
 ### Prerequisites
 - Ubuntu 22.04 LTS (หรือ 20.04+)
@@ -115,7 +38,7 @@ docker compose version
 #### 2. Clone Repository
 ```bash
 cd /opt
-sudo git clone https://github.com/<your-repo>/damrongdham-ssk.git
+sudo git clone https://github.com/imguitar/damrongdham-ssk.git
 sudo chown -R $USER:$USER /opt/damrongdham-ssk
 cd /opt/damrongdham-ssk
 ```
@@ -186,7 +109,7 @@ sudo crontab -e
 0 3 1 * * certbot renew --quiet && cp /etc/letsencrypt/live/damrongdham.sisaket.go.th/fullchain.pem /opt/damrongdham-ssk/nginx/ssl/cert.pem && cp /etc/letsencrypt/live/damrongdham.sisaket.go.th/privkey.pem /opt/damrongdham-ssk/nginx/ssl/key.pem && docker compose -f /opt/damrongdham-ssk/docker-compose.prod.yml restart nginx
 ```
 
-### คำสั่ง On-premise ที่ใช้บ่อย
+### คำสั่ง Target A ที่ใช้บ่อย
 
 ```bash
 cd /opt/damrongdham-ssk
@@ -211,18 +134,158 @@ docker exec -it damrongdham-db-prod mysql -u damrongdham_user -p damrongdham_db
 
 ---
 
+## Target B — Shared Server (pm2 + nginx subpath)
+
+ใช้เมื่อ server มีแอปอื่นรันอยู่ร่วมกันแล้ว (nginx / MySQL ตัวเดียวใช้ร่วมกันหลายโปรเจกต์) ไม่ containerize —
+รันตรงบน host ด้วย pm2 เหมือนโปรเจกต์ `simple-pos` บนเครื่องเดียวกัน
+
+โครงสร้างที่ได้:
+- Backend รันด้วย pm2 (fork mode) ต่อกับ MySQL ที่ติดตั้งบนเครื่อง host โดยตรง (ไม่ใช่ container)
+- Frontend build เป็น static files วางไว้ใต้ `/var/www/html/<app-name>/`
+- nginx (ตัวที่ระบบใช้ร่วมกันทั้งเครื่อง — `/etc/nginx/sites-available/default`) เป็นคนเดียวที่เปิด port 80/443 ทำ subpath routing ไปแต่ละแอป
+
+### Prerequisites
+- Node.js 20+ และ npm ติดตั้งบนเครื่อง (ไม่ใช้ Docker)
+- MySQL 8.0 รันเป็น system service อยู่แล้วบนเครื่อง (`systemctl status mysql`)
+- pm2 ติดตั้ง global (`npm install -g pm2`) และตั้ง `pm2 startup` ไว้แล้ว
+- nginx ติดตั้งเป็น system service ใช้ร่วมกับแอปอื่น ๆ บนเครื่อง
+
+### ขั้นตอน Deploy
+
+#### 1. Clone Repository
+```bash
+cd /home/<user>/Documents   # หรือ path ที่ใช้เก็บโปรเจกต์อื่นบนเครื่องนี้
+git clone https://github.com/imguitar/damrongdham-ssk.git
+cd damrongdham-ssk
+```
+
+#### 2. สร้าง MySQL database + user (บน MySQL ของเครื่อง host)
+```sql
+CREATE DATABASE damrongdham_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'damrongdham_user'@'localhost' IDENTIFIED BY '<strong-password>';
+GRANT ALL PRIVILEGES ON damrongdham_db.* TO 'damrongdham_user'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+```bash
+mysql -u damrongdham_user -p damrongdham_db < db/init/01-init.sql
+mysql -u damrongdham_user -p damrongdham_db < db/init/02-line-notification.sql
+mysql -u damrongdham_user -p damrongdham_db < db/init/03-staff-line.sql
+```
+
+#### 3. Backend — ตั้งค่าและรันด้วย pm2
+เลือก port ว่างบนเครื่อง (เช็คด้วย `ss -ltnp`) แล้วสร้าง `backend/.env`:
+```env
+NODE_ENV=production
+PORT=<เลือก port ว่าง เช่น 4020>
+
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_USER=damrongdham_user
+DB_PASSWORD=<password ที่สร้างไว้ข้างบน>
+DB_NAME=damrongdham_db
+
+JWT_SECRET=<random 64 chars>
+JWT_EXPIRES_IN=8h
+
+UPLOAD_DIR=./uploads
+UPLOAD_MAX_SIZE=10485760
+
+CORS_ORIGIN=https://<domain>
+```
+
+```bash
+cd backend
+npm install --omit=dev
+pm2 start src/server.js --name damrongdham-ssk-backend
+pm2 save
+```
+
+#### 4. Frontend — build เป็น static แล้ว deploy ใต้ subpath
+ต้อง build ด้วย `base` ตรงกับ subpath ที่จะ mount (เช่น `/damrongdham-ssk/`) — ดูตัวอย่างการตั้งค่าที่ `frontend/vite.config.js` (`base: command === 'build' ? '/damrongdham-ssk/' : '/'`)
+และ `frontend/src/main.jsx` (`<BrowserRouter basename={import.meta.env.BASE_URL}>`)
+
+สร้าง `frontend/.env.production`:
+```env
+VITE_API_BASE_URL=/damrongdham-ssk/api
+VITE_APP_TITLE=ศูนย์ดำรงธรรมจังหวัดศรีสะเกษ
+VITE_API_ORIGIN=
+```
+
+```bash
+cd frontend
+npm install
+npm run build
+mkdir -p /var/www/html/damrongdham-ssk
+cp -r dist/* /var/www/html/damrongdham-ssk/
+```
+
+> หมายเหตุ ARM64: ถ้า build fail ด้วย `Cannot find module @rollup/rollup-linux-*` ให้ลบ `node_modules` + `package-lock.json` แล้ว `npm install` ใหม่ (npm optional-dependency bug กับ rollup)
+
+#### 5. nginx — เพิ่ม subpath routing
+เพิ่มใน `location` block ของไฟล์ nginx config ที่ใช้ร่วมกันทั้งเครื่อง (เช่น `/etc/nginx/sites-available/default`):
+```nginx
+location /damrongdham-ssk/ {
+    root /var/www/html;
+    index index.html;
+    try_files $uri $uri/ /damrongdham-ssk/index.html;
+}
+
+location /damrongdham-ssk/api/ {
+    proxy_pass http://localhost:4020/api/;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
+```bash
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+### คำสั่ง Target B ที่ใช้บ่อย
+
+```bash
+# ดู logs
+pm2 logs damrongdham-ssk-backend
+
+# Restart backend
+pm2 restart damrongdham-ssk-backend
+
+# Update โค้ด
+cd damrongdham-ssk
+git pull origin main
+cd backend && npm install --omit=dev && pm2 restart damrongdham-ssk-backend
+cd ../frontend && npm install && npm run build && cp -r dist/* /var/www/html/damrongdham-ssk/
+
+# หยุด backend
+pm2 stop damrongdham-ssk-backend
+
+# เข้า MySQL shell
+mysql -u damrongdham_user -p damrongdham_db
+```
+
+---
+
 ## ตรวจสอบหลัง Deploy (ทั้ง 2 Target)
 
 ```bash
 # 1. Health check
 GET /api/health → {"status":"ok","db":"connected"}
+# Target B: GET /<subpath>/api/health
 
 # 2. Login ทดสอบ
 POST /api/auth/login
 {"username":"admin","password":"<set-in-seed>"}
 
 # 3. ตรวจ SLA Cron
-docker logs <app-container> | grep "SLA"
+docker logs <app-container> | grep "SLA"      # Target A
+pm2 logs damrongdham-ssk-backend | grep "SLA"  # Target B
 # ต้องเห็น: "SLA check scheduled: daily 08:00 Asia/Bangkok"
 ```
 
@@ -233,8 +296,8 @@ docker logs <app-container> | grep "SLA"
 | Variable | Required | Description | ตัวอย่าง |
 |----------|----------|-------------|---------|
 | `NODE_ENV` | ✅ | Environment | `production` |
-| `PORT` | ✅ | Backend port | `5001` |
-| `DB_HOST` | ✅ | MySQL host | `db` (compose) |
+| `PORT` | ✅ | Backend port | `5001` (Target A) / port ว่างบนเครื่อง (Target B) |
+| `DB_HOST` | ✅ | MySQL host | `db` (Target A compose) / `127.0.0.1` (Target B) |
 | `DB_PORT` | ✅ | MySQL port | `3306` |
 | `DB_USER` | ✅ | MySQL user | `damrongdham_user` |
 | `DB_PASSWORD` | ✅ | MySQL password | *(strong password)* |
@@ -242,7 +305,8 @@ docker logs <app-container> | grep "SLA"
 | `JWT_SECRET` | ✅ | JWT signing key | *(64 chars random)* |
 | `JWT_EXPIRES_IN` | — | Token expiry | `8h` |
 | `CORS_ORIGIN` | — | Allowed origin | `https://domain.go.th` |
-| `MYSQL_ROOT_PASSWORD` | ✅ (compose) | MySQL root pw | *(strong password)* |
-| `MYSQL_DATABASE` | ✅ (compose) | DB name | `damrongdham_db` |
-| `MYSQL_USER` | ✅ (compose) | DB user | `damrongdham_user` |
-| `MYSQL_PASSWORD` | ✅ (compose) | DB password | *(strong password)* |
+| `MYSQL_ROOT_PASSWORD` | ✅ (Target A) | MySQL root pw | *(strong password)* |
+| `MYSQL_DATABASE` | ✅ (Target A) | DB name | `damrongdham_db` |
+| `MYSQL_USER` | ✅ (Target A) | DB user | `damrongdham_user` |
+| `MYSQL_PASSWORD` | ✅ (Target A) | DB password | *(strong password)* |
+| `VITE_API_BASE_URL` | — (Target B) | Frontend API base path | `/damrongdham-ssk/api` |

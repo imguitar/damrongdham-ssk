@@ -8,7 +8,8 @@
 
 ```bash
 # ตรวจสอบสถานะระบบ (App + DB)
-GET /api/health
+GET /api/health                        # Target A
+GET /<subpath>/api/health              # Target B เช่น /damrongdham-ssk/api/health
 → {"status":"ok","db":"connected","timestamp":"..."}
 
 # ตรวจสอบ uptime ผ่าน curl
@@ -45,13 +46,21 @@ docker compose -f docker-compose.prod.yml logs app 2>&1 | grep -i error
 docker compose -f docker-compose.prod.yml logs app 2>&1 | grep -i "SLA"
 ```
 
-### Railway
+### Target B (pm2 + nginx subpath)
 
 ```bash
-# ผ่าน CLI
-railway logs
+# ดู logs backend แบบ real-time
+pm2 logs damrongdham-ssk-backend
 
-# ผ่าน Dashboard: Project → Service → Logs tab
+# ดู 100 บรรทัดล่าสุด
+pm2 logs damrongdham-ssk-backend --lines 100 --nostream
+
+# ค้นหา error / SLA cron
+pm2 logs damrongdham-ssk-backend --nostream | grep -i error
+pm2 logs damrongdham-ssk-backend --nostream | grep -i "SLA"
+
+# สถานะ process
+pm2 status damrongdham-ssk-backend
 ```
 
 ---
@@ -70,6 +79,23 @@ docker exec damrongdham-app du -sh /app/uploads
 
 # ตรวจขนาด MySQL data
 docker exec damrongdham-db-prod du -sh /var/lib/mysql
+```
+
+### Target B (pm2 + host MySQL)
+
+```bash
+# CPU / Memory ของ backend process
+pm2 monit
+pm2 show damrongdham-ssk-backend
+
+# Disk usage
+df -h /home/<user>/Documents/damrongdham-ssk
+
+# ตรวจขนาด uploads
+du -sh /home/<user>/Documents/damrongdham-ssk/backend/uploads
+
+# ตรวจขนาด MySQL data (ทั้งเครื่อง — MySQL ไม่ได้แยก schema ต่อ volume)
+sudo du -sh /var/lib/mysql
 ```
 
 ---
@@ -92,31 +118,49 @@ docker compose -f docker-compose.prod.yml ps
 curl -s http://localhost/api/health
 ```
 
+### อัปเดต Application Code (Target B)
+
+```bash
+cd /home/<user>/Documents/damrongdham-ssk
+
+git pull origin main
+cd backend && npm install --omit=dev && pm2 restart damrongdham-ssk-backend
+cd ../frontend && npm install && npm run build && cp -r dist/* /var/www/html/damrongdham-ssk/
+
+pm2 status damrongdham-ssk-backend
+curl -s http://localhost:4020/api/health
+```
+
 ### Restart Services
 
 ```bash
-# Restart เฉพาะ app
-docker compose -f docker-compose.prod.yml restart app
+# Target A
+docker compose -f docker-compose.prod.yml restart app     # เฉพาะ app
+docker compose -f docker-compose.prod.yml restart          # ทุก service (downtime ~30 วินาที)
 
-# Restart ทุก service (downtime ~30 วินาที)
-docker compose -f docker-compose.prod.yml restart
+# Target B
+pm2 restart damrongdham-ssk-backend
+sudo systemctl reload nginx   # ถ้าแก้ nginx config
 ```
 
 ### หยุดระบบชั่วคราว / กลับมาทำงาน
 
 ```bash
-# หยุด (เก็บ volumes ไว้)
+# Target A
 docker compose -f docker-compose.prod.yml stop
-
-# กลับมาทำงาน
 docker compose -f docker-compose.prod.yml start
+
+# Target B
+pm2 stop damrongdham-ssk-backend
+pm2 start damrongdham-ssk-backend
 ```
 
 ### เพิ่ม/แก้ Admin Account ผ่าน MySQL
 
 ```bash
 # เข้า MySQL shell
-docker exec -it damrongdham-db-prod mysql -u damrongdham_user -p damrongdham_db
+docker exec -it damrongdham-db-prod mysql -u damrongdham_user -p damrongdham_db   # Target A
+mysql -u damrongdham_user -p damrongdham_db                                       # Target B
 
 # ดู accounts
 SELECT id, username, full_name, role, is_active FROM users;
@@ -133,13 +177,17 @@ SLA cron รันทุกวัน 08:00 Asia/Bangkok โดยอัตโน
 
 ```bash
 # ตรวจสอบว่า SLA cron ทำงาน
-docker compose -f docker-compose.prod.yml logs app | grep "SLA"
+docker compose -f docker-compose.prod.yml logs app | grep "SLA"   # Target A
+pm2 logs damrongdham-ssk-backend --nostream | grep "SLA"           # Target B
 # ควรเห็น: "SLA check scheduled: daily 08:00 Asia/Bangkok"
 
 # ดูจำนวน complaint ที่ is_overdue = 1
 docker exec damrongdham-db-prod \
   mysql -u damrongdham_user -p"<password>" damrongdham_db \
-  -e "SELECT COUNT(*) as overdue FROM complaints WHERE is_overdue = 1 AND status NOT IN ('CLOSED', 'REJECTED');"
+  -e "SELECT COUNT(*) as overdue FROM complaints WHERE is_overdue = 1 AND status NOT IN ('CLOSED', 'REJECTED');"   # Target A
+
+mysql -u damrongdham_user -p damrongdham_db \
+  -e "SELECT COUNT(*) as overdue FROM complaints WHERE is_overdue = 1 AND status NOT IN ('CLOSED', 'REJECTED');"   # Target B
 ```
 
 ---
@@ -148,12 +196,12 @@ docker exec damrongdham-db-prod \
 
 | อาการ | สาเหตุที่เป็นไปได้ | วิธีแก้ |
 |------|------------------|--------|
-| `/api/health` → 503 | App container down | `docker compose restart app` |
-| `/api/health` db: error | MySQL down / password ผิด | ตรวจ `docker compose logs db` |
-| ล็อกอินไม่ได้ | JWT_SECRET เปลี่ยน | ตรวจ `.env.production` |
-| อัปโหลดไฟล์ล้มเหลว | uploads volume เต็ม/ขาด | `df -h`, ตรวจ mount |
-| nginx 502 | App ไม่ตอบสนอง | `docker compose restart app` |
-| สูญเสียไฟล์แนบ (Railway) | Ephemeral FS | ใช้ Railway Volume |
+| `/api/health` → 503 | App/process down | Target A: `docker compose restart app` / Target B: `pm2 restart damrongdham-ssk-backend` |
+| `/api/health` db: error | MySQL down / password ผิด | Target A: `docker compose logs db` / Target B: `systemctl status mysql`, ตรวจ `backend/.env` |
+| ล็อกอินไม่ได้ | JWT_SECRET เปลี่ยน | ตรวจ `.env.production` (Target A) หรือ `backend/.env` (Target B) |
+| อัปโหลดไฟล์ล้มเหลว | uploads เต็ม/พาธผิด | `df -h`, ตรวจ mount (Target A) หรือ `backend/uploads/` permissions (Target B) |
+| nginx 502 | Backend ไม่ตอบสนอง | Target A: `docker compose restart app` / Target B: `pm2 restart damrongdham-ssk-backend` |
+| หน้าเว็บ 404 ทุกเส้นทางที่ไม่ใช่ root (Target B) | ลืม subpath ใน `location` block หรือ frontend build ผิด `base` | ตรวจ `try_files ... /<subpath>/index.html` ใน nginx config และ `vite.config.js` |
 
 ---
 

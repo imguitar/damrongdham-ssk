@@ -143,8 +143,8 @@ docker exec damrongdham-backend node -e \
 
 - [ ] rotate channel secret ทั้ง 2 channel (หากเคยใช้ค่า dev)
 - [ ] callback URL production (https) ลงทะเบียนใน Console
-- [ ] LINE env vars ตั้งบน Railway (ไม่ใช้ `.env` ไฟล์)
-- [ ] `VITE_API_ORIGIN` เว้นว่าง (same origin)
+- [ ] LINE env vars ตั้งใน `.env.production` (Target A) หรือ `backend/.env` (Target B) — ไม่ commit ใน git
+- [ ] `VITE_API_ORIGIN` เว้นว่าง (same origin); callback URL รวม subpath ด้วยถ้าเป็น Target B
 - [ ] add friend OA ใช้งานได้ + provider เดียวกัน
 - [ ] ทดสอบ login + push จริงบน staging
 - [ ] ไม่มี secret ใน git (`git grep` channel id/secret = ไม่พบ)

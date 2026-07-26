@@ -36,10 +36,15 @@
   # ต้องเห็น: 301 Moved Permanently → https://
   ```
 
-- [ ] **Docker containers ทุกตัว running**
+- [ ] **App process ทำงานอยู่**
   ```bash
+  # Target A (Docker)
   docker compose -f docker-compose.prod.yml ps
   # State: Up (healthy) สำหรับ db, Up สำหรับ app และ nginx
+
+  # Target B (pm2)
+  pm2 status damrongdham-ssk-backend
+  # status: online, ↺ (restart count) ไม่เพิ่มขึ้นเรื่อย ๆ
   ```
 
 ---
@@ -80,16 +85,25 @@
 
 - [ ] **Seed data ครบถ้วน**
   ```bash
+  # Target A
   docker exec damrongdham-db-prod \
     mysql -u damrongdham_user -p"<password>" damrongdham_db \
+    -e "SELECT COUNT(*) FROM users; SELECT COUNT(*) FROM complaint_categories; SELECT COUNT(*) FROM districts;"
+
+  # Target B
+  mysql -u damrongdham_user -p damrongdham_db \
     -e "SELECT COUNT(*) FROM users; SELECT COUNT(*) FROM complaint_categories; SELECT COUNT(*) FROM districts;"
   ```
 
 - [ ] **ไม่มีข้อมูล test/dummy ใน production** (ตรวจ complaints table)
   ```bash
+  # Target A
   docker exec damrongdham-db-prod \
     mysql -u damrongdham_user -p"<password>" damrongdham_db \
     -e "SELECT COUNT(*) as total FROM complaints;"
+
+  # Target B
+  mysql -u damrongdham_user -p damrongdham_db -e "SELECT COUNT(*) as total FROM complaints;"
   # ควรเป็น 0 สำหรับ production ใหม่
   ```
 
@@ -97,12 +111,12 @@
 
 ## หลัง Deploy — Security
 
-- [ ] **phpMyAdmin ไม่เปิด public** (port 8081 ปิด หรือ bind localhost เท่านั้น)
-- [ ] **Backend port 5001 ไม่เปิด public** (ต้องผ่าน nginx เท่านั้น)
-- [ ] **`.env.production` ไม่ commit ใน git**
+- [ ] **phpMyAdmin ไม่เปิด public** (port 8081 ปิด หรือ bind localhost เท่านั้น) — Target A
+- [ ] **Backend port ไม่เปิด public** (ต้องผ่าน nginx เท่านั้น — เช็คด้วย `ss -ltnp | grep <port>` ว่า bind อยู่ที่ host ไม่ได้เปิด firewall ตรง)
+- [ ] **`.env` / `.env.production` ไม่ commit ใน git**
   ```bash
-  cat .gitignore | grep .env.production
-  # ต้องเห็น: .env.production
+  cat .gitignore | grep -E "\.env(\.production)?$"
+  # ต้องเห็น: .env และ .env.production
   ```
 - [ ] **Rate limit API ทำงาน** (ลอง login ผิดหลายครั้ง)
 - [ ] **ตรวจสอบ CORS** — เรียก API จาก domain อื่นต้องถูก block

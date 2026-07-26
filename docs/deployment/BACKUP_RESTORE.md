@@ -6,12 +6,12 @@
 
 ## สิ่งที่ต้อง Backup
 
-| รายการ | ที่อยู่ | ความถี่แนะนำ |
-|--------|--------|------------|
-| MySQL Database | Docker volume `mysql_data_prod` | ทุกวัน |
-| ไฟล์แนบ (uploads) | Docker volume `app_uploads` | ทุกวัน |
-| .env.production | `/opt/damrongdham-ssk/.env.production` | ทุกครั้งที่แก้ไข |
-| nginx/ssl certs | `/opt/damrongdham-ssk/nginx/ssl/` | ทุกครั้งที่ renew |
+| รายการ | ที่อยู่ (Target A — Docker) | ที่อยู่ (Target B — pm2) | ความถี่แนะนำ |
+|--------|--------------------------|--------------------------|------------|
+| MySQL Database | Docker volume `mysql_data_prod` | MySQL บนเครื่อง host (`damrongdham_db`) | ทุกวัน |
+| ไฟล์แนบ (uploads) | Docker volume `app_uploads` | `backend/uploads/` | ทุกวัน |
+| .env | `/opt/damrongdham-ssk/.env.production` | `backend/.env`, `frontend/.env.production` | ทุกครั้งที่แก้ไข |
+| nginx/ssl certs | `/opt/damrongdham-ssk/nginx/ssl/` | `/etc/letsencrypt/` (shared host nginx) | ทุกครั้งที่ renew |
 
 ---
 
@@ -138,19 +138,53 @@ docker run --rm \
 
 ---
 
-## Railway — Backup (Target A)
+## Target B — Backup (pm2 + local MySQL)
 
-Railway ไม่มี built-in backup สำหรับ MySQL plugin ให้ทำ manual:
+ไม่มี Docker volume ให้ backup ตรง ๆ — MySQL อยู่บนเครื่อง host โดยตรง และไฟล์แนบอยู่ที่ `backend/uploads/`
 
+### Manual Backup
 ```bash
-# ใช้ Railway CLI ดึง MySQL connection string
-railway connect MySQL
+# Dump database
+DB_PASS=$(grep DB_PASSWORD /home/<user>/Documents/damrongdham-ssk/backend/.env | cut -d= -f2)
+mysqldump -u damrongdham_user -p"$DB_PASS" damrongdham_db > /backup/dcms_db_$(date +%Y%m%d_%H%M%S).sql
 
-# Dump ผ่าน connection ที่ได้
-mysqldump -h <host> -P <port> -u <user> -p <dbname> > dcms_railway_backup.sql
+# Backup ไฟล์แนบ
+tar czf /backup/dcms_uploads_$(date +%Y%m%d_%H%M%S).tar.gz \
+  -C /home/<user>/Documents/damrongdham-ssk/backend uploads
 ```
 
-แนะนำ: ตั้ง **Railway Cron Service** ที่รัน mysqldump แล้วอัปโหลดไป S3/GCS ทุกวัน
+### Auto Backup (Cron)
+```bash
+cat > /opt/dcms-backup.sh << 'EOF'
+#!/bin/bash
+APP_DIR="/home/<user>/Documents/damrongdham-ssk"
+BACKUP_DIR="/backup/dcms"
+RETAIN_DAYS=30
+DB_PASS=$(grep DB_PASSWORD "$APP_DIR/backend/.env" | cut -d= -f2)
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
+mkdir -p $BACKUP_DIR
+mysqldump -u damrongdham_user -p"$DB_PASS" damrongdham_db > "$BACKUP_DIR/db_$TIMESTAMP.sql"
+tar czf "$BACKUP_DIR/uploads_$TIMESTAMP.tar.gz" -C "$APP_DIR/backend" uploads
+
+find $BACKUP_DIR -name "*.sql" -mtime +$RETAIN_DAYS -delete
+find $BACKUP_DIR -name "*.tar.gz" -mtime +$RETAIN_DAYS -delete
+
+echo "[$(date)] Backup completed: db_$TIMESTAMP.sql, uploads_$TIMESTAMP.tar.gz"
+EOF
+
+chmod +x /opt/dcms-backup.sh
+crontab -e
+# 0 2 * * * /opt/dcms-backup.sh >> /var/log/dcms-backup.log 2>&1
+```
+
+### Restore (Target B)
+```bash
+pm2 stop damrongdham-ssk-backend
+mysql -u damrongdham_user -p damrongdham_db < /backup/dcms/db_YYYYMMDD_HHMMSS.sql
+tar xzf /backup/dcms/uploads_YYYYMMDD_HHMMSS.tar.gz -C /home/<user>/Documents/damrongdham-ssk/backend
+pm2 start damrongdham-ssk-backend
+```
 
 ---
 

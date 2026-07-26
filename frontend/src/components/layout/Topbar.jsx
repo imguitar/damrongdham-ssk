@@ -25,8 +25,6 @@ import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { ADMIN_HEADER_HEIGHT, DRAWER_WIDTH, MINI_DRAWER_WIDTH } from '../../utils/constants';
-import agency1Icon from '../icons/Agency-1.png';
-import agency2Icon from '../icons/Agency-2.png';
 
 const TYPE_COLOR = {
   SLA_OVERDUE:    'error',
@@ -107,9 +105,6 @@ const Topbar = ({ drawerOpen, onDesktopDrawerToggle, onMobileMenuClick }) => {
         <IconButton edge="start" onClick={onDesktopDrawerToggle} sx={{ mr: 1, display: { xs: 'none', md: 'inline-flex' } }}>
           <MenuIcon />
         </IconButton>
-
-        <Box component="img" src={agency1Icon} alt="agency-1" sx={{ height: 36, width: 'auto', mr: 1 }} />
-        <Box component="img" src={agency2Icon} alt="agency-2" sx={{ height: 36, width: 'auto' }} />
 
         <Box sx={{ flex: 1 }} />
 

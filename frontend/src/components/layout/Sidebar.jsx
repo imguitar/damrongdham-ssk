@@ -22,7 +22,7 @@ import HistoryIcon from '@mui/icons-material/History';
 
 import { useAuth } from '../../contexts/AuthContext';
 import { ADMIN_HEADER_HEIGHT, MINI_DRAWER_WIDTH, ROLES, DRAWER_WIDTH } from '../../utils/constants';
-import appIcon from '../icons/App-Icon-v2.png';
+import appIcon from '../icons/app-icon-v2.png';
 
 const { SUPER_ADMIN, ADMIN, OFFICER, CHIEF, AGENCY_HEAD, AGENCY_OFFICER, EXECUTIVE } = ROLES;
 

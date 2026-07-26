@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   headers: { 'Content-Type': 'application/json' },
   timeout: 30000,
 });
@@ -31,7 +31,7 @@ axiosInstance.interceptors.response.use(
       localStorage.removeItem('dcms_token');
       localStorage.removeItem('dcms_user');
       if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/login';
+        window.location.href = `${import.meta.env.BASE_URL}login`;
       }
     }
     return Promise.reject(error);

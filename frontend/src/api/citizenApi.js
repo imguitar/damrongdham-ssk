@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Citizen API uses separate axios instance with citizen JWT
 const citizenAxios = axios.create({
-  baseURL: '/api/citizen',
+  baseURL: `${import.meta.env.VITE_API_BASE_URL || '/api'}/citizen`,
   headers: { 'Content-Type': 'application/json' },
   timeout: 30000,
 });
@@ -20,7 +20,7 @@ citizenAxios.interceptors.response.use(
       localStorage.removeItem('dcms_citizen_token');
       localStorage.removeItem('dcms_citizen_user');
       if (!window.location.pathname.includes('/citizen/login')) {
-        window.location.href = '/citizen/login';
+        window.location.href = `${import.meta.env.BASE_URL}citizen/login`;
       }
     }
     return Promise.reject(err);

@@ -20,7 +20,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { AUTH_APPBAR_HEIGHT, AUTH_APPBAR_TITLE_FONT_SIZE, AUTH_CARD_MAX_WIDTH, AUTH_CARD_MIN_HEIGHT, AUTH_LOGIN_ICON_SIZE, AUTH_LOGIN_ICON_RADIUS } from '../../utils/constants';
-import appIcon from '../../components/icons/App-Icon-v2.png';
+import appIcon from '../../components/icons/app-icon-v2.png';
 
 const LoginPage = () => {
   const { user, login } = useAuth();

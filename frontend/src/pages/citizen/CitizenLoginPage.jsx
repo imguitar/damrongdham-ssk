@@ -19,7 +19,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import { useCitizenAuth } from '../../contexts/CitizenAuthContext';
 import { AUTH_APPBAR_HEIGHT, AUTH_APPBAR_TITLE_FONT_SIZE, AUTH_CARD_MAX_WIDTH, AUTH_CARD_MIN_HEIGHT, AUTH_LOGIN_ICON_SIZE, AUTH_LOGIN_ICON_RADIUS } from '../../utils/constants';
-import appIcon from '../../components/icons/App-Icon-v2.png';
+import appIcon from '../../components/icons/app-icon-v2.png';
 
 // Friendly Thai messages for backend LINE error codes (details logged server-side)
 const LINE_ERROR_MESSAGES = {
@@ -47,7 +47,7 @@ const CitizenLoginPage = () => {
   if (citizen) return <Navigate to="/citizen/complaints" replace />;
 
   const handleLineLogin = () => {
-    window.location.href = `${API_ORIGIN}/api/citizen/auth/line`;
+    window.location.href = `${API_ORIGIN}${import.meta.env.BASE_URL}api/citizen/auth/line`;
   };
 
   const handleChange = (e) => {

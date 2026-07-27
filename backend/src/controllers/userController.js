@@ -14,6 +14,20 @@ const generateTempPassword = () => {
   return Array.from({ length: 10 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 };
 
+const findRoleFromPayload = async ({ role_id, role_code }) => {
+  if (role_id) {
+    const [[role]] = await pool.query('SELECT id, code FROM roles WHERE id = ?', [role_id]);
+    return role || null;
+  }
+
+  if (role_code) {
+    const [[role]] = await pool.query('SELECT id, code FROM roles WHERE code = ?', [role_code]);
+    return role || null;
+  }
+
+  return null;
+};
+
 // GET /api/users
 const list = async (req, res, next) => {
   try {
@@ -54,15 +68,14 @@ const getById = async (req, res, next) => {
 // POST /api/users
 const create = async (req, res, next) => {
   try {
-    const { username, password, full_name, email, phone, role_id, agency_id } = req.body;
+    const { username, password, full_name, email, phone, role_id, role_code, agency_id } = req.body;
 
-    if (!username || !password || !full_name || !role_id) {
-      return error(res, 'VALIDATION_ERROR', 'username, password, full_name, role_id เป็นข้อมูลที่จำเป็น', 400);
+    if (!username || !password || !full_name || (!role_id && !role_code)) {
+      return error(res, 'VALIDATION_ERROR', 'username, password, full_name และ role_id หรือ role_code เป็นข้อมูลที่จำเป็น', 400);
     }
 
-    // Validate role exists
-    const [[role]] = await pool.query('SELECT id, code FROM roles WHERE id = ?', [role_id]);
-    if (!role) return error(res, 'VALIDATION_ERROR', 'role_id ไม่ถูกต้อง', 400);
+    const role = await findRoleFromPayload({ role_id, role_code });
+    if (!role) return error(res, 'VALIDATION_ERROR', 'role_id หรือ role_code ไม่ถูกต้อง', 400);
 
     // admin cannot create super_admin
     if (req.user.role === 'admin' && role.code === 'super_admin') {
@@ -70,7 +83,7 @@ const create = async (req, res, next) => {
     }
 
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-    const id = await userModel.createUser({ username, passwordHash, fullName: full_name, email, phone, roleId: role_id, agencyId: agency_id });
+    const id = await userModel.createUser({ username, passwordHash, fullName: full_name, email, phone, roleId: role.id, agencyId: agency_id });
 
     writeAuditLog({ userId: req.user.id, action: 'CREATE_USER', resource: 'users', resourceId: id, details: { username }, ipAddress: req.ip, userAgent: req.get('user-agent') });
 
@@ -88,19 +101,19 @@ const update = async (req, res, next) => {
     const user = await userModel.findUserById(req.params.id);
     if (!user) return error(res, 'NOT_FOUND', 'ไม่พบผู้ใช้', 404);
 
-    const { full_name, email, phone, role_id, agency_id } = req.body;
-    if (!full_name || !role_id) {
-      return error(res, 'VALIDATION_ERROR', 'full_name และ role_id เป็นข้อมูลที่จำเป็น', 400);
+    const { full_name, email, phone, role_id, role_code, agency_id } = req.body;
+    if (!full_name || (!role_id && !role_code)) {
+      return error(res, 'VALIDATION_ERROR', 'full_name และ role_id หรือ role_code เป็นข้อมูลที่จำเป็น', 400);
     }
 
-    const [[role]] = await pool.query('SELECT id, code FROM roles WHERE id = ?', [role_id]);
-    if (!role) return error(res, 'VALIDATION_ERROR', 'role_id ไม่ถูกต้อง', 400);
+    const role = await findRoleFromPayload({ role_id, role_code });
+    if (!role) return error(res, 'VALIDATION_ERROR', 'role_id หรือ role_code ไม่ถูกต้อง', 400);
 
     if (req.user.role === 'admin' && role.code === 'super_admin') {
       return error(res, 'FORBIDDEN', 'ไม่มีสิทธิ์กำหนดบทบาท super_admin', 403);
     }
 
-    await userModel.updateUser(req.params.id, { fullName: full_name, email, phone, roleId: role_id, agencyId: agency_id });
+    await userModel.updateUser(req.params.id, { fullName: full_name, email, phone, roleId: role.id, agencyId: agency_id });
 
     writeAuditLog({ userId: req.user.id, action: 'UPDATE_USER', resource: 'users', resourceId: req.params.id, ipAddress: req.ip, userAgent: req.get('user-agent') });
 

@@ -58,7 +58,7 @@ const UserFormPage = () => {
     if (!isEdit) return;
     userApi.getById(id)
       .then((res) => {
-        const u = res.data?.data;
+        const u = res.data?.data?.user || {};
         setForm({
           username: u.username || '',
           full_name: u.full_name || '',

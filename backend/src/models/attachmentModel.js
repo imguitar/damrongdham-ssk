@@ -3,17 +3,18 @@
 const pool = require('../config/database');
 
 const create = async ({
-  complaintId, updateId, fileName, filePath, fileSize, fileType,
+  complaintId, updateId, infoRequestId, fileName, filePath, fileSize, fileType,
   uploadedBy, uploadedByCitizen, uploadSource,
 }) => {
   const [result] = await pool.query(
     `INSERT INTO complaint_attachments
-       (complaint_id, update_id, file_name, file_path, file_size, file_type,
+       (complaint_id, update_id, info_request_id, file_name, file_path, file_size, file_type,
         uploaded_by, uploaded_by_citizen, upload_source, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
     [
       complaintId,
       updateId || null,
+      infoRequestId || null,
       fileName,
       filePath,
       fileSize,

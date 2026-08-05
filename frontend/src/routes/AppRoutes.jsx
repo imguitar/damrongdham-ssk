@@ -30,6 +30,7 @@ import LineNotificationPage from '../pages/settings/LineNotificationPage';
 import PublicComplaintPage from '../pages/public/PublicComplaintPage';
 import PublicTrackPage     from '../pages/public/PublicTrackPage';
 import PublicSuccessPage   from '../pages/public/PublicSuccessPage';
+import PrivacyNoticePage   from '../pages/public/PrivacyNoticePage';
 
 // ── Citizen pages ─────────────────────────────────────────────────────────────
 import CitizenLoginPage           from '../pages/citizen/CitizenLoginPage';
@@ -72,6 +73,8 @@ const AppRoutes = () => (
       <Route path="/public/complaints/new" element={<PublicComplaintPage />} />
       <Route path="/public/track"          element={<PublicTrackPage />} />
       <Route path="/public/success"        element={<PublicSuccessPage />} />
+      {/* ประกาศความเป็นส่วนตัวฉบับเต็ม — ลิงก์จากข้อความใน LINE */}
+      <Route path="/public/privacy"        element={<PrivacyNoticePage />} />
     </Route>
 
     {/* ── Citizen section (CitizenLayout) ─────────────────────────────── */}

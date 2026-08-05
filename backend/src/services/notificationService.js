@@ -18,6 +18,7 @@ const NOTIFICATION_TEMPLATES = {
   ESCALATION_L1:      { title: 'เร่งรัด: ไม่มีการอัปเดต 30 วัน', message: (n) => `เรื่องร้องเรียน ${n} ไม่มีการอัปเดตความคืบหน้าเกิน 30 วัน` },
   ESCALATION_L2:      { title: 'เร่งรัด: ไม่มีการอัปเดต 45 วัน', message: (n) => `เรื่องร้องเรียน ${n} ไม่มีการอัปเดตความคืบหน้าเกิน 45 วัน` },
   ESCALATION_L3:      { title: 'เร่งรัดสูงสุด: ไม่มีการอัปเดต 52 วัน', message: (n) => `เรื่องร้องเรียน ${n} ไม่มีการอัปเดตความคืบหน้าเกิน 52 วัน กรุณาดำเนินการเร่งด่วน` },
+  INFO_RESPONSE_RECEIVED: { title: 'ประชาชนส่งข้อมูลเพิ่มเติม', message: (n) => `เรื่องร้องเรียน ${n} มีข้อมูล/เอกสารเพิ่มเติมจากผู้ร้องแล้ว กรุณาตรวจสอบ` },
 };
 
 // center actions → notify agency; agency actions → notify center
@@ -114,8 +115,30 @@ const notifyWorkflow = async (complaintId, action, { complaint_number, agencyId 
   }
 };
 
+// ประชาชนส่งข้อมูลเพิ่มเติมกลับมา → แจ้งเจ้าหน้าที่ที่เป็นผู้ขอ (สำรอง: เจ้าหน้าที่ศูนย์)
+// Fire-and-forget — ไม่ throw
+const notifyInfoResponse = async (complaintId, { complaint_number, requestedBy } = {}) => {
+  try {
+    const tpl = NOTIFICATION_TEMPLATES.INFO_RESPONSE_RECEIVED;
+    const notifData = {
+      complaintId,
+      type: 'INFO_RESPONSE_RECEIVED',
+      title: tpl.title,
+      message: tpl.message(complaint_number || `#${complaintId}`),
+    };
+    if (requestedBy) {
+      await notifModel.createBatch([{ userId: requestedBy, ...notifData }]);
+      return;
+    }
+    await createForCenterUsers(notifData);
+  } catch (err) {
+    console.error('[NotificationService] notifyInfoResponse error:', err.message);
+  }
+};
+
 module.exports = {
   NOTIFICATION_TEMPLATES,
+  notifyInfoResponse,
   getCenterUserIds,
   getAgencyUserIds,
   getAgencyHeadIds,

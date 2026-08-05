@@ -35,6 +35,7 @@ import ErrorAlert from '../../components/common/ErrorAlert';
 import StatusChip from '../../components/common/StatusChip';
 import PriorityChip from '../../components/common/PriorityChip';
 import LocationMapPicker from '../../components/common/LocationMapPicker';
+import LineChannelPanel from '../../components/complaints/LineChannelPanel';
 import * as complaintApi from '../../api/complaintApi';
 import * as assignmentApi from '../../api/assignmentApi';
 import * as agencyApi from '../../api/agencyApi';
@@ -372,6 +373,8 @@ const ComplaintDetailPage = () => {
   const isAgency = AGENCY_ROLES.includes(role);
   const canSeePII = CAN_SEE_PII.includes(role) || role === ROLES.SUPER_ADMIN;
   const myAssignment = assignments.find((a) => a.is_active);
+  // แท็บ "การมอบหมาย" แสดงเฉพาะเมื่อมีข้อมูล → ดัชนีแท็บ LINE ขยับตาม
+  const lineTabIndex = assignments.length > 0 ? 4 : 3;
 
   return (
     <Box>
@@ -516,6 +519,7 @@ const ComplaintDetailPage = () => {
         <Tab label={`ประวัติ (${timeline.length})`} />
         <Tab label={`ไฟล์แนบ (${attachments.length})`} />
         {assignments.length > 0 && <Tab label="การมอบหมาย" />}
+        <Tab label="LINE" />
       </Tabs>
 
       {/* Tab 0: Detail */}
@@ -704,6 +708,15 @@ const ComplaintDetailPage = () => {
             ))}
           </CardContent>
         </Card>
+      )}
+
+      {/* Tab LINE: ช่องทาง LINE ของเรื่อง (แผงจัดการ + ขอข้อมูลเพิ่มเติม) */}
+      {tab === lineTabIndex && (
+        <LineChannelPanel
+          complaintId={id}
+          canRequestInfo={isCenter || isAgency}
+          canNotify={isCenter}
+        />
       )}
 
       {/* Action Dialog */}

@@ -20,7 +20,13 @@ const config = {
   // ได้รับการแจ้งเตือนความคืบหน้า จึงเลือก aggressive; ผู้ใช้ยังกดข้ามได้
   botPrompt: process.env.LINE_LOGIN_BOT_PROMPT || 'aggressive',
   scope: 'openid profile',
+  // ประกาศความเป็นส่วนตัวฉบับเต็ม (PDPA) — ลิงก์ที่แนบไปกับข้อความในแชต
+  // ค่าเริ่มต้นชี้หน้าสาธารณะของระบบเดิม ตั้งค่า env เมื่อใช้ URL ของหน่วยงาน
+  privacyNoticeUrl: process.env.LINE_PRIVACY_NOTICE_URL || '',
 };
+
+// ลิงก์ประกาศความเป็นส่วนตัว (fallback = หน้าสาธารณะของระบบ)
+const privacyNoticeUrl = () => config.privacyNoticeUrl || `${config.frontendUrl}/public/privacy`;
 
 // LINE Login ใช้งานได้เมื่อมี channel id/secret/callback ครบ
 const isConfigured = () => Boolean(config.channelId && config.channelSecret && config.callbackUrl);
@@ -32,4 +38,5 @@ module.exports = {
   LINE_ISSUER,
   config,
   isConfigured,
+  privacyNoticeUrl,
 };

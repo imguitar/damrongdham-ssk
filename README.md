@@ -121,12 +121,26 @@ damrongdham-ssk/
 ดู [`backend/.env.example`](backend/.env.example) สำหรับ backend standalone
 ดู [`frontend/.env.example`](frontend/.env.example) สำหรับ frontend
 
-## LINE Integration (Login + Notification)
+## LINE Integration (Login + Notification + รับเรื่องผ่านแชต)
 
-ประชาชนเข้าสู่ระบบด้วย LINE และรับแจ้งเตือนความคืบหน้าเรื่องร้องเรียนผ่าน LINE Official Account
+ประชาชน **แจ้งเรื่องร้องเรียน ติดตามสถานะ และส่งเอกสารเพิ่มเติมผ่าน LINE Official Account** ได้โดยตรง
+โดยเรื่องทั้งหมดถูกบันทึกในระบบเดิม (เลขที่เรื่อง `DC-YYYYMM-XXXX` จาก `complaint_sequences` เดิม)
 
-- การตั้งค่า/สถาปัตยกรรม/troubleshooting/secret rotation: [`docs/LINE_INTEGRATION.md`](docs/LINE_INTEGRATION.md)
+- รับเรื่อง/ติดตาม/ขอข้อมูลเพิ่มเติมผ่านแชต + ตั้งค่า OA และ Rich Menu: [`docs/LINE_COMPLAINTS.md`](docs/LINE_COMPLAINTS.md)
+- LINE Login + แจ้งเตือน (สถาปัตยกรรม/troubleshooting/secret rotation): [`docs/LINE_INTEGRATION.md`](docs/LINE_INTEGRATION.md)
 - วิธีทดสอบ (login + push): [`docs/LINE_TESTING.md`](docs/LINE_TESTING.md)
+- ตัวอย่าง Rich Menu / Postback payload: [`docs/line/richmenu.json`](docs/line/richmenu.json) · [`docs/line/postback-payloads.md`](docs/line/postback-payloads.md)
+
+### API ที่เพิ่มสำหรับช่องทาง LINE
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/line/webhook` | Webhook ของ LINE (ตรวจ `X-Line-Signature`, กัน event ซ้ำ) |
+| GET | `/api/complaints/:id/line` | แผงช่องทาง LINE ของเรื่อง (การผูกบัญชี, ประวัติข้อความ, เอกสาร) |
+| GET/POST | `/api/complaints/:id/info-requests` | ดู/สร้างคำขอข้อมูลหรือเอกสารเพิ่มเติม |
+| POST | `/api/complaints/:id/info-requests/:reqId/resend` | ส่งคำขอซ้ำ (มี Audit Log) |
+| PATCH | `/api/complaints/:id/info-requests/:reqId/cancel` | ยกเลิกคำขอ |
+| POST | `/api/complaints/:id/line/notify` | ส่งแจ้งสถานะปัจจุบันซ้ำทาง LINE |
 
 ## Implementation Plan
 

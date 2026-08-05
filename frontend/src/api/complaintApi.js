@@ -32,6 +32,16 @@ export const deleteAttachment = (attachId) => axiosInstance.delete(`/complaints/
 export const downloadAttachment = (attachId) =>
   axiosInstance.get(`/complaints/attachments/${attachId}/download`, { responseType: 'blob' });
 
+// LINE channel — สถานะการผูกบัญชี, ประวัติข้อความ, คำขอข้อมูลเพิ่มเติม, เอกสารจากประชาชน
+export const getLineOverview = (id) => axiosInstance.get(`/complaints/${id}/line`);
+export const notifyLine = (id) => axiosInstance.post(`/complaints/${id}/line/notify`);
+export const getInfoRequests = (id) => axiosInstance.get(`/complaints/${id}/info-requests`);
+export const createInfoRequest = (id, data) => axiosInstance.post(`/complaints/${id}/info-requests`, data);
+export const resendInfoRequest = (id, reqId) =>
+  axiosInstance.post(`/complaints/${id}/info-requests/${reqId}/resend`);
+export const cancelInfoRequest = (id, reqId) =>
+  axiosInstance.patch(`/complaints/${id}/info-requests/${reqId}/cancel`);
+
 // Anonymous reveal (super_admin only)
 export const revealIdentity = (id, data) => axiosInstance.post(`/complaints/${id}/reveal-identity`, data);
 

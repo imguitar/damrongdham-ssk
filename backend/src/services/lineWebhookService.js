@@ -1,7 +1,9 @@
 'use strict';
 
 const lineGroupModel = require('../models/lineGroupModel');
+const webhookEventModel = require('../models/lineWebhookEventModel');
 const messaging = require('./lineMessagingService');
+const botService = require('./lineBotService');
 const { writeAuditLog } = require('../middleware/auditLog');
 
 const scopeLabel = (scope) => (scope === 'center' ? 'ศูนย์ดำรงธรรม' : 'หน่วยงาน');
@@ -9,6 +11,12 @@ const scopeLabel = (scope) => (scope === 'center' ? 'ศูนย์ดำรง
 // Handle a single LINE webhook event. Never throws.
 const handleEvent = async (event) => {
   const source = event.source || {};
+
+  // 1:1 chat with a citizen → complaint intake / tracking / extra documents
+  if (source.type === 'user') {
+    await botService.handleUserEvent(event);
+    return;
+  }
 
   // group text message → try to bind via a pairing code
   if (event.type === 'message' && source.type === 'group' && event.message?.type === 'text') {
@@ -57,9 +65,26 @@ const handleEvent = async (event) => {
 const handleEvents = async (events = []) => {
   for (const event of events) {
     try {
-      await handleEvent(event);
+      // Idempotency: LINE redelivers events on timeout/5xx — process each once.
+      const fresh = await webhookEventModel.claim({
+        webhookEventId: event.webhookEventId,
+        eventType: event.type,
+        sourceType: event.source?.type,
+      });
+      if (!fresh) {
+        console.log('[LineWebhook] duplicate event skipped');
+        continue;
+      }
+      try {
+        await handleEvent(event);
+      } catch (err) {
+        // ปล่อย claim คืน เพื่อให้ LINE ส่งซ้ำแล้วประมวลผลใหม่ได้
+        await webhookEventModel.release(event.webhookEventId).catch(() => {});
+        throw err;
+      }
     } catch (err) {
-      console.error('[LineWebhook] event error:', err.message);
+      // ห้าม log payload/ข้อมูลส่วนบุคคล — เก็บเฉพาะประเภท event + ข้อความ error
+      console.error(`[LineWebhook] event error (${event?.type}):`, err.message);
     }
   }
 };

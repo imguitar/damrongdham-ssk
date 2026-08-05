@@ -2,6 +2,9 @@
 
 คู่มือการตั้งค่าและดูแลระบบ **LINE Login (ประชาชน)** และ **LINE Notification (แจ้งเตือนความคืบหน้าผ่าน LINE Official Account)**
 
+> 📌 การ **รับเรื่องร้องเรียน / ติดตามสถานะ / ขอ-ส่งเอกสารเพิ่มเติมผ่านห้องแชต LINE**
+> อยู่ในเอกสารแยก: [`LINE_COMPLAINTS.md`](LINE_COMPLAINTS.md) (ใช้ Messaging channel เดียวกันกับหน้านี้)
+
 ระบบออกแบบแบบ *minimal-invasive*: เพิ่มเข้ากับระบบ citizen เดิม โดยไม่กระทบ staff login และ workflow เดิม
 
 ---
@@ -73,7 +76,9 @@ LINE Messaging API (/v2/bot/message/push) → ประชาชนได้ร�
 - ใช้สำหรับ push แจ้งเตือน
 - ค่าใช้จริงในโค้ด: **`LINE_MESSAGING_CHANNEL_ACCESS_TOKEN`** (Channel access token — long-lived)
   - ออกที่ แท็บ **Messaging API → Channel access token → Issue**
-  - `LINE_MESSAGING_CHANNEL_ID` / `LINE_MESSAGING_CHANNEL_SECRET` **ไม่ถูกใช้โดย push** (เก็บไว้เผื่อ webhook signature ในอนาคต)
+  - `LINE_MESSAGING_CHANNEL_SECRET` (Basic settings → Channel secret) ใช้ **ตรวจลายเซ็น webhook**
+    (`X-Line-Signature`) ของทั้งการรับเรื่องผ่านแชตและการจับคู่กลุ่มเจ้าหน้าที่ — ต้องตั้งเมื่อเปิดใช้ webhook
+  - `LINE_MESSAGING_CHANNEL_ID` **ไม่ถูกใช้ในโค้ด** (เก็บไว้อ้างอิงเท่านั้น)
 
 ---
 

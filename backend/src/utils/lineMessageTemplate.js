@@ -35,8 +35,12 @@ const buildComplaintProgressMessage = ({ complaintNumber }) =>
   `🔔 มีความคืบหน้าใหม่\n\nเลขที่เรื่อง: ${complaintNumber}\nเจ้าหน้าที่ได้อัปเดตความคืบหน้าของเรื่องท่านแล้ว` +
   footer(complaintNumber);
 
-const buildComplaintMoreInfoMessage = ({ complaintNumber }) =>
-  `🔔 ขอข้อมูลเพิ่มเติม\n\nเลขที่เรื่อง: ${complaintNumber}\nเจ้าหน้าที่ขอข้อมูลเพิ่มเติมเพื่อดำเนินการต่อ กรุณาเข้าสู่ระบบเพื่อดูรายละเอียด` +
+// requestDetail = ข้อความที่เจ้าหน้าที่พิมพ์ (รายการเอกสารที่ขอ) — ส่งถึงเจ้าของเรื่องเท่านั้น
+const buildComplaintMoreInfoMessage = ({ complaintNumber, requestDetail, dueDate }) =>
+  `🔔 ศูนย์ดำรงธรรมขอข้อมูลเพิ่มเติมสำหรับเรื่อง ${complaintNumber}\n` +
+  (requestDetail ? `\nรายการที่ต้องการ:\n${String(requestDetail).slice(0, 800)}\n` : '') +
+  (dueDate ? `\nกรุณาส่งข้อมูลภายในวันที่ ${dueDate}\n` : '') +
+  '\nกดเมนู "เพิ่มข้อมูล/เอกสาร" ในแชตนี้เพื่อส่งข้อมูลหรือเอกสารเพิ่มเติมได้ทันที' +
   footer(complaintNumber);
 
 const buildComplaintResolvedMessage = ({ complaintNumber }) =>

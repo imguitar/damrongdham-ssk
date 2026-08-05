@@ -7,12 +7,14 @@ const pool = require('../config/database');
 // the complaint change (§32). Falls back to the pool if no conn is given.
 // No-op when there is no citizen owner (e.g. staff-submitted complaint).
 // Idempotent on idempotency_key — duplicate enqueues are ignored.
-const enqueue = async (conn, { eventType, citizenId, complaintId, complaintNumber, status, idempotencyKey }) => {
+const enqueue = async (conn, { eventType, citizenId, complaintId, complaintNumber, status, idempotencyKey, extra }) => {
   if (!citizenId) return;
   const q = conn || pool;
   const payload = JSON.stringify({
     complaintNumber: complaintNumber || null,
     status: status || null,
+    // extra: ข้อมูลเพิ่มเติมสำหรับ template (ต้องไม่มี PII/ข้อมูลอ่อนไหว)
+    ...(extra || {}),
   });
   await q.query(
     `INSERT INTO notification_outbox

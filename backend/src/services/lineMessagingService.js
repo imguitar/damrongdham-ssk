@@ -7,7 +7,12 @@ const { config } = require('../config/line');
 // ref: https://developers.line.biz/en/reference/messaging-api/#send-push-message
 const LINE_PUSH_URL = 'https://api.line.me/v2/bot/message/push';
 const LINE_REPLY_URL = 'https://api.line.me/v2/bot/message/reply';
+// Message content (images/files sent by users) lives on the data subdomain
+// ref: https://developers.line.biz/en/reference/messaging-api/#get-content
+const LINE_CONTENT_URL = (messageId) => `https://api-data.line.me/v2/bot/message/${encodeURIComponent(messageId)}/content`;
 const MAX_TEXT_LENGTH = 5000; // LINE text message limit
+const MAX_MESSAGES_PER_REQUEST = 5; // LINE allows at most 5 message objects per call
+const MAX_CONTENT_BYTES = 10 * 1024 * 1024; // mirrors config/upload multer limit
 
 const isConfigured = () => Boolean(config.messagingAccessToken);
 
@@ -27,20 +32,35 @@ const verifyWebhookSignature = (rawBody, signature) => {
   }
 };
 
-// Reply within a webhook event (uses the short-lived replyToken). Never throws.
-const replyText = async (replyToken, text) => {
-  if (!isConfigured() || !replyToken || !text) return { ok: false };
+// Trim a message list to what LINE accepts and clamp text length.
+const normalizeMessages = (messages) =>
+  (Array.isArray(messages) ? messages : [messages])
+    .filter(Boolean)
+    .slice(0, MAX_MESSAGES_PER_REQUEST)
+    .map((m) => (m.type === 'text' ? { ...m, text: String(m.text || '').slice(0, MAX_TEXT_LENGTH) } : m));
+
+// Reply within a webhook event with full message objects (text + quick replies).
+// Never throws — a failed reply must not break webhook processing.
+const replyMessages = async (replyToken, messages) => {
+  const payload = normalizeMessages(messages);
+  if (!isConfigured() || !replyToken || !payload.length) return { ok: false };
   try {
     const resp = await fetch(LINE_REPLY_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.messagingAccessToken}` },
-      body: JSON.stringify({ replyToken, messages: [{ type: 'text', text: text.slice(0, MAX_TEXT_LENGTH) }] }),
+      body: JSON.stringify({ replyToken, messages: payload }),
       signal: AbortSignal.timeout(10000),
     });
     return { ok: resp.ok, status: resp.status };
   } catch {
     return { ok: false };
   }
+};
+
+// Reply within a webhook event (uses the short-lived replyToken). Never throws.
+const replyText = async (replyToken, text) => {
+  if (!text) return { ok: false };
+  return replyMessages(replyToken, [{ type: 'text', text }]);
 };
 
 // Derive a stable UUID-shaped retry key from our idempotency key so LINE also
@@ -55,15 +75,19 @@ const toRetryKey = (idempotencyKey) => {
 // 4xx (400/401/403) are config/logic errors → do NOT retry.
 const isRetryableStatus = (status) => status === 429 || (status >= 500 && status <= 599);
 
-// Send one text push message. Never throws; returns a structured result so the
+// Send push message objects. Never throws; returns a structured result so the
 // outbox worker can decide retry vs dead-letter.
 // Result: { ok, providerMessageId, status, retryable, errorCode, errorMessage }
-const pushText = async ({ to, text, idempotencyKey }) => {
+const pushMessages = async ({ to, messages, idempotencyKey }) => {
   if (!isConfigured()) {
     return { ok: false, retryable: false, errorCode: 'NOT_CONFIGURED', errorMessage: 'LINE messaging not configured' };
   }
   if (!to) return { ok: false, retryable: false, errorCode: 'INVALID_INPUT', errorMessage: 'missing recipient' };
-  if (!text || !text.trim()) return { ok: false, retryable: false, errorCode: 'INVALID_INPUT', errorMessage: 'empty text' };
+
+  const payload = normalizeMessages(messages);
+  if (!payload.length || payload.some((m) => m.type === 'text' && !m.text.trim())) {
+    return { ok: false, retryable: false, errorCode: 'INVALID_INPUT', errorMessage: 'empty text' };
+  }
 
   const headers = {
     'Content-Type': 'application/json',
@@ -71,7 +95,7 @@ const pushText = async ({ to, text, idempotencyKey }) => {
   };
   if (idempotencyKey) headers['X-Line-Retry-Key'] = toRetryKey(idempotencyKey);
 
-  const body = JSON.stringify({ to, messages: [{ type: 'text', text: text.slice(0, MAX_TEXT_LENGTH) }] });
+  const body = JSON.stringify({ to, messages: payload });
 
   let resp;
   try {
@@ -106,14 +130,85 @@ const pushText = async ({ to, text, idempotencyKey }) => {
   };
 };
 
+// Send a single text push message (thin wrapper kept for existing callers).
+const pushText = ({ to, text, idempotencyKey }) =>
+  pushMessages({ to, messages: [{ type: 'text', text: text == null ? '' : String(text) }], idempotencyKey });
+
+// Download media a user sent to the OA (image / file). Content is fetched
+// server-side with the channel token — it is never exposed as a public URL.
+// Result: { ok, buffer, contentType, errorCode, errorMessage }
+const getMessageContent = async (messageId) => {
+  if (!isConfigured()) return { ok: false, errorCode: 'NOT_CONFIGURED', errorMessage: 'LINE messaging not configured' };
+  if (!messageId) return { ok: false, errorCode: 'INVALID_INPUT', errorMessage: 'missing messageId' };
+
+  let resp;
+  try {
+    resp = await fetch(LINE_CONTENT_URL(messageId), {
+      headers: { Authorization: `Bearer ${config.messagingAccessToken}` }, // never logged
+      signal: AbortSignal.timeout(30000),
+    });
+  } catch (err) {
+    return { ok: false, errorCode: 'NETWORK', errorMessage: err.name === 'TimeoutError' ? 'timeout' : 'network error' };
+  }
+
+  if (!resp.ok) {
+    return { ok: false, errorCode: `HTTP_${resp.status}`, errorMessage: `LINE content fetch failed (${resp.status})` };
+  }
+
+  // Reject oversized content before buffering when the server declares a length
+  const declared = Number(resp.headers.get('content-length') || 0);
+  if (declared && declared > MAX_CONTENT_BYTES) {
+    return { ok: false, errorCode: 'FILE_TOO_LARGE', errorMessage: 'file exceeds size limit' };
+  }
+
+  let buffer;
+  try {
+    buffer = Buffer.from(await resp.arrayBuffer());
+  } catch {
+    return { ok: false, errorCode: 'READ_ERROR', errorMessage: 'cannot read content' };
+  }
+  if (buffer.length > MAX_CONTENT_BYTES) {
+    return { ok: false, errorCode: 'FILE_TOO_LARGE', errorMessage: 'file exceeds size limit' };
+  }
+
+  return {
+    ok: true,
+    buffer,
+    contentType: (resp.headers.get('content-type') || '').split(';')[0].trim().toLowerCase(),
+  };
+};
+
+// Display name of a user who messaged the OA (UX only — identity is the userId).
+// Never throws; returns null when unavailable.
+const getProfile = async (userId) => {
+  if (!isConfigured() || !userId) return null;
+  try {
+    const resp = await fetch(`https://api.line.me/v2/bot/profile/${encodeURIComponent(userId)}`, {
+      headers: { Authorization: `Bearer ${config.messagingAccessToken}` },
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!resp.ok) return null;
+    const j = await resp.json();
+    return { displayName: j?.displayName || null, pictureUrl: j?.pictureUrl || null };
+  } catch {
+    return null;
+  }
+};
+
 module.exports = {
   LINE_PUSH_URL,
   LINE_REPLY_URL,
+  LINE_CONTENT_URL,
   MAX_TEXT_LENGTH,
+  MAX_CONTENT_BYTES,
   isConfigured,
   toRetryKey,
   isRetryableStatus,
   pushText,
+  pushMessages,
+  getMessageContent,
+  getProfile,
   verifyWebhookSignature,
   replyText,
+  replyMessages,
 };

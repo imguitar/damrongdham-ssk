@@ -1,0 +1,53 @@
+{
+  "size": { "width": 2500, "height": 1686 },
+  "selected": true,
+  "name": "Damrongdham SSK — main menu",
+  "chatBarText": "เมนูศูนย์ดำรงธรรม",
+  "areas": [
+    {
+      "bounds": { "x": 0, "y": 0, "width": 1250, "height": 843 },
+      "action": {
+        "type": "postback",
+        "label": "แจ้งเรื่องร้องเรียน",
+        "data": "a=start",
+        "displayText": "แจ้งเรื่องร้องเรียน"
+      }
+    },
+    {
+      "bounds": { "x": 1250, "y": 0, "width": 1250, "height": 843 },
+      "action": {
+        "type": "postback",
+        "label": "ติดตามสถานะ",
+        "data": "a=track",
+        "displayText": "ติดตามสถานะ"
+      }
+    },
+    {
+      "bounds": { "x": 0, "y": 843, "width": 833, "height": 843 },
+      "action": {
+        "type": "postback",
+        "label": "เพิ่มข้อมูล/เอกสาร",
+        "data": "a=more_info",
+        "displayText": "เพิ่มข้อมูล/เอกสาร"
+      }
+    },
+    {
+      "bounds": { "x": 833, "y": 843, "width": 834, "height": 843 },
+      "action": {
+        "type": "postback",
+        "label": "ติดต่อเจ้าหน้าที่",
+        "data": "a=contact",
+        "displayText": "ติดต่อเจ้าหน้าที่"
+      }
+    },
+    {
+      "bounds": { "x": 1667, "y": 843, "width": 833, "height": 843 },
+      "action": {
+        "type": "postback",
+        "label": "คู่มือการร้องเรียน",
+        "data": "a=guide",
+        "displayText": "คู่มือการร้องเรียน"
+      }
+    }
+  ]
+}

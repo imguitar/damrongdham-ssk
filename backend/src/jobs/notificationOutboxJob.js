@@ -113,7 +113,7 @@ const processCitizenRow = async (row) => {
     return 'cancelled';
   }
   const payload = parsePayload(row.payload);
-  const text = tpl.buildByEvent(row.event_type, { complaintNumber: payload.complaintNumber, status: payload.status });
+  const text = tpl.buildByEvent(row.event_type, payload);
   if (!text) {
     await outboxModel.markFailed(row.id, 'no_template');
     return 'failed';

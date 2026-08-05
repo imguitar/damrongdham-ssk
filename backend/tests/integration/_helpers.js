@@ -74,6 +74,7 @@ export const getLogs = async (complaintId) => {
 };
 
 export const cleanupComplaint = async (complaintId) => {
+  await pool.query('DELETE FROM notifications WHERE complaint_id = ?', [complaintId]);
   await pool.query('DELETE FROM notification_logs WHERE complaint_id = ?', [complaintId]);
   await pool.query('DELETE FROM notification_outbox WHERE complaint_id = ?', [complaintId]);
   await pool.query('DELETE FROM complaint_status_logs WHERE complaint_id = ?', [complaintId]);

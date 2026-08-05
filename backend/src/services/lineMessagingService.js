@@ -10,6 +10,10 @@ const LINE_REPLY_URL = 'https://api.line.me/v2/bot/message/reply';
 // Message content (images/files sent by users) lives on the data subdomain
 // ref: https://developers.line.biz/en/reference/messaging-api/#get-content
 const LINE_CONTENT_URL = (messageId) => `https://api-data.line.me/v2/bot/message/${encodeURIComponent(messageId)}/content`;
+// Profile: 404 = ผู้ใช้ยังไม่ได้เพิ่ม OA เป็นเพื่อน (ใช้ตรวจว่าจะ push ถึงหรือไม่)
+// ref: https://developers.line.biz/en/reference/messaging-api/#get-profile
+const LINE_PROFILE_URL = (userId) => `https://api.line.me/v2/bot/profile/${encodeURIComponent(userId)}`;
+const LINE_BOT_INFO_URL = 'https://api.line.me/v2/bot/info';
 const MAX_TEXT_LENGTH = 5000; // LINE text message limit
 const MAX_MESSAGES_PER_REQUEST = 5; // LINE allows at most 5 message objects per call
 const MAX_CONTENT_BYTES = 10 * 1024 * 1024; // mirrors config/upload multer limit
@@ -178,21 +182,73 @@ const getMessageContent = async (messageId) => {
   };
 };
 
+// Friendship + profile lookup.
+// LINE returns 404 for the profile endpoint when the user has NOT added the OA
+// as a friend (or has blocked it) — which is exactly when push messages fail.
+// Never throws. Result: { friend: true | false | null, displayName, pictureUrl }
+//   friend === null  → ตรวจไม่ได้ (ยังไม่ตั้ง token / เครือข่ายมีปัญหา) — อย่าแสดงว่าไม่เป็นเพื่อน
+const getFriendshipStatus = async (userId) => {
+  if (!isConfigured() || !userId) return { friend: null, reason: 'not_configured' };
+  let resp;
+  try {
+    resp = await fetch(LINE_PROFILE_URL(userId), {
+      headers: { Authorization: `Bearer ${config.messagingAccessToken}` }, // never logged
+      signal: AbortSignal.timeout(10000),
+    });
+  } catch {
+    return { friend: null, reason: 'network' };
+  }
+
+  if (resp.ok) {
+    let j = {};
+    try { j = await resp.json(); } catch { /* ignore */ }
+    return { friend: true, displayName: j?.displayName || null, pictureUrl: j?.pictureUrl || null };
+  }
+  // 404 = ไม่ได้เป็นเพื่อนกับ OA (หรือบล็อกไว้) → push ส่งไม่ถึงแน่นอน
+  if (resp.status === 404) return { friend: false, reason: 'not_friend' };
+  return { friend: null, reason: `http_${resp.status}` };
+};
+
 // Display name of a user who messaged the OA (UX only — identity is the userId).
 // Never throws; returns null when unavailable.
 const getProfile = async (userId) => {
-  if (!isConfigured() || !userId) return null;
+  const res = await getFriendshipStatus(userId);
+  if (!res.friend) return null;
+  return { displayName: res.displayName || null, pictureUrl: res.pictureUrl || null };
+};
+
+// ลิงก์เพิ่มเพื่อน OA — ดึง basicId จาก LINE (cache ไว้ 1 ชั่วโมง ไม่ต้องตั้ง env เพิ่ม)
+let botInfoCache = null;
+let botInfoAt = 0;
+const BOT_INFO_TTL_MS = 60 * 60 * 1000;
+
+const getBotInfo = async () => {
+  if (!isConfigured()) return null;
+  if (botInfoCache && Date.now() - botInfoAt < BOT_INFO_TTL_MS) return botInfoCache;
   try {
-    const resp = await fetch(`https://api.line.me/v2/bot/profile/${encodeURIComponent(userId)}`, {
+    const resp = await fetch(LINE_BOT_INFO_URL, {
       headers: { Authorization: `Bearer ${config.messagingAccessToken}` },
       signal: AbortSignal.timeout(10000),
     });
     if (!resp.ok) return null;
     const j = await resp.json();
-    return { displayName: j?.displayName || null, pictureUrl: j?.pictureUrl || null };
+    botInfoCache = {
+      basicId: j?.basicId || null,
+      displayName: j?.displayName || null,
+      pictureUrl: j?.pictureUrl || null,
+    };
+    botInfoAt = Date.now();
+    return botInfoCache;
   } catch {
     return null;
   }
+};
+
+// https://line.me/R/ti/p/@basicid — เปิดหน้าเพิ่มเพื่อนของ OA
+const addFriendUrl = async () => {
+  const info = await getBotInfo();
+  const basicId = String(info?.basicId || '').trim();
+  return basicId ? `https://line.me/R/ti/p/${basicId}` : null;
 };
 
 module.exports = {
@@ -208,6 +264,9 @@ module.exports = {
   pushMessages,
   getMessageContent,
   getProfile,
+  getFriendshipStatus,
+  getBotInfo,
+  addFriendUrl,
   verifyWebhookSignature,
   replyText,
   replyMessages,

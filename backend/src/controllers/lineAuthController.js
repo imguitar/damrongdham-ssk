@@ -3,6 +3,7 @@
 const authService = require('../services/authService');
 const lineLoginService = require('../services/lineLoginService');
 const identityService = require('../services/identityService');
+const messaging = require('../services/lineMessagingService');
 const userPrefModel = require('../models/userNotificationPrefModel');
 const { isConfigured, config } = require('../config/line');
 const { writeAuditLog } = require('../middleware/auditLog');
@@ -48,6 +49,19 @@ const readCookie = (req, name) => {
     }
   }
   return null;
+};
+
+// สถานะการเป็นเพื่อนกับ OA + ลิงก์เพิ่มเพื่อน — best effort ไม่ทำให้ endpoint ล้ม
+const oaFriendship = async (providerUserId) => {
+  try {
+    const [status, url] = await Promise.all([
+      messaging.getFriendshipStatus(providerUserId),
+      messaging.addFriendUrl(),
+    ]);
+    return { friend: status.friend, addFriendUrl: url };
+  } catch {
+    return { friend: null, addFriendUrl: null };
+  }
 };
 
 const redirectError = (res, code) =>
@@ -217,10 +231,14 @@ const lineLinkInit = (req, res, next) => {
 const lineLinkStatus = async (req, res, next) => {
   try {
     const idn = await identityService.getLineIdentity(req.citizen.id);
+    // ผูกบัญชีแล้วยังไม่พอ — ต้อง "เพิ่มเพื่อน OA" ด้วย ไม่งั้น push ส่งไม่ถึง (LINE 403)
+    const oa = idn ? await oaFriendship(idn.provider_user_id) : { friend: null, addFriendUrl: null };
     return success(res, {
       linked: Boolean(idn),
       displayName: idn?.display_name || null,
       linkedAt: idn?.linked_at || null,
+      oaFriend: oa.friend,            // true / false / null (ตรวจไม่ได้)
+      addFriendUrl: oa.addFriendUrl,  // ลิงก์เพิ่มเพื่อน OA (null ถ้ายังไม่ตั้งค่า messaging)
     });
   } catch (err) {
     next(err);
@@ -264,7 +282,14 @@ const staffLineLinkInit = (req, res, next) => {
 const staffLineLinkStatus = async (req, res, next) => {
   try {
     const idn = await identityService.getUserLineIdentity(req.user.id);
-    return success(res, { linked: Boolean(idn), displayName: idn?.display_name || null, linkedAt: idn?.linked_at || null });
+    const oa = idn ? await oaFriendship(idn.provider_user_id) : { friend: null, addFriendUrl: null };
+    return success(res, {
+      linked: Boolean(idn),
+      displayName: idn?.display_name || null,
+      linkedAt: idn?.linked_at || null,
+      oaFriend: oa.friend,
+      addFriendUrl: oa.addFriendUrl,
+    });
   } catch (err) {
     next(err);
   }

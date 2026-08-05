@@ -189,6 +189,27 @@ Deploy: ไม่มี dependency ใหม่ ไม่เปลี่ยน s
   `LINE_INFO_RESPONSE_SUBMITTED`, `LINE_NOTIFY_RESENT`
 - Retention: ร่างบทสนทนา 60 นาที · webhook event id 30 วัน · แถวบทสนทนาที่ไม่ใช้งาน 90 วัน
 
+## 9b. การเป็นเพื่อนกับ OA (เงื่อนไขของการแจ้งเตือน)
+
+**ผูกบัญชี LINE ≠ เพิ่มเพื่อน OA** — LINE ไม่อนุญาตให้ OA ส่งข้อความหาผู้ที่ยังไม่ได้เพิ่มเป็นเพื่อน
+(หรือบล็อกไว้) การ push จะได้ HTTP 403 และถูกบันทึกเป็น `failed` โดยไม่ retry (4xx = ปัญหาเชิงสิทธิ์)
+
+ระบบจึงตรวจสถานะนี้ให้ล่วงหน้า โดยเรียก LINE profile API (`GET /v2/bot/profile/{userId}` —
+**404 = ยังไม่เป็นเพื่อน**) แล้วแสดงผลใน 3 จุด:
+
+| จุด | สิ่งที่แสดง |
+|---|---|
+| หน้า "ตั้งค่าการแจ้งเตือน" (ประชาชน) | คำเตือน + ปุ่ม **"เพิ่มเพื่อน"** (ลิงก์ `https://line.me/R/ti/p/@basicId` ดึง basicId จาก LINE อัตโนมัติ) |
+| หน้า Profile (เจ้าหน้าที่) | คำเตือนเดียวกันสำหรับ DM ส่วนตัว |
+| แท็บ LINE ของเรื่อง (เจ้าหน้าที่) | ป้ายเตือน "ผู้ร้องยังไม่ได้เพิ่ม OA เป็นเพื่อน — ส่งข้อความไม่ได้" + ปิดปุ่มส่งซ้ำ |
+
+- API คืน `oaFriend` / `oa_friend` เป็น `true` / `false` / **`null` เมื่อตรวจไม่ได้**
+  (ยังไม่ตั้ง access token หรือเครือข่ายมีปัญหา) — กรณี `null` จะ**ไม่แสดงคำเตือน** เพื่อไม่ให้เข้าใจผิด
+- ข้อความที่ `failed` ไปแล้วจะไม่ส่งย้อนหลังอัตโนมัติเมื่อผู้ใช้มาเพิ่มเพื่อนภายหลัง —
+  เจ้าหน้าที่กด "ส่งแจ้งสถานะปัจจุบันอีกครั้ง" ได้ในแท็บ LINE
+- ให้ผู้ใช้เจอหน้าเชิญเพิ่มเพื่อนตั้งแต่ตอนล็อกอิน: ตั้ง `LINE_LOGIN_BOT_PROMPT=aggressive`
+  **และ** ผูก OA เข้ากับ Login channel ที่ **LINE Login → Linked LINE Official Account**
+
 ## 10. การทดสอบ
 
 ```bash
@@ -200,6 +221,8 @@ cd backend && npm test
 | ขั้นตอนสนทนา (ยกเลิก/ย้อนกลับ/validate) | `tests/lineFlowMachine.test.js` | ไม่ |
 | ข้อความ/ความเป็นส่วนตัวของ template | `tests/lineBotMessages.test.js` | ไม่ |
 | รับไฟล์แนบจาก LINE (ชนิด/ขนาด/ชื่อไฟล์) | `tests/lineFileIntake.test.js` | ไม่ |
+| ตรวจสถานะเพื่อน OA + ลิงก์เพิ่มเพื่อน | `tests/lineFriendship.test.js` | ไม่ |
+| cookie path ของ OAuth เมื่อ deploy ใต้ subpath | `tests/security/lineOauthCookie.security.test.js` | ไม่ |
 | ลายเซ็น webhook | `tests/security/lineWebhook.security.test.js` | ไม่ |
 | สร้างเรื่อง + idempotency + retention | `tests/integration/lineIntake.integration.test.js` | ใช่ |
 | ขอ/ตอบข้อมูลเพิ่มเติม + audit | `tests/integration/lineInfoRequest.integration.test.js` | ใช่ |

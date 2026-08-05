@@ -145,6 +145,12 @@ const LineChannelPanel = ({ complaintId, canRequestInfo = false, canNotify = fal
                 ชื่อบัญชี LINE: {citizen.display_name}
               </Typography>
             )}
+            {citizen?.linked && citizen?.oa_friend === false && (
+              <Alert severity="warning" sx={{ mb: 1 }}>
+                ผู้ร้องยังไม่ได้เพิ่มบัญชีทางการ (OA) เป็นเพื่อน หรือบล็อกไว้ — ส่งข้อความทาง LINE ไม่ได้
+                (แนะนำให้ติดต่อทางโทรศัพท์แทน)
+              </Alert>
+            )}
             {citizen?.linked && !citizen?.notifications_enabled && (
               <Alert severity="info" sx={{ mb: 1 }}>ผู้ร้องปิดรับการแจ้งเตือนทาง LINE ไว้</Alert>
             )}
@@ -178,7 +184,7 @@ const LineChannelPanel = ({ complaintId, canRequestInfo = false, canNotify = fal
                   size="small"
                   variant="contained"
                   startIcon={<SendIcon />}
-                  disabled={busy || !citizen?.linked}
+                  disabled={busy || !citizen?.linked || citizen?.oa_friend === false}
                   onClick={() => act(() => complaintApi.notifyLine(complaintId), 'ส่งการแจ้งสถานะเข้าคิวแล้ว')}
                 >
                   ส่งแจ้งสถานะปัจจุบันอีกครั้ง

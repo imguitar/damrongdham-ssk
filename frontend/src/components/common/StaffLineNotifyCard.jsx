@@ -100,6 +100,23 @@ const StaffLineNotifyCard = () => {
                 ยกเลิกการเชื่อมต่อ
               </Button>
             </Box>
+            {/* ผูกบัญชีแล้วยังไม่พอ — ต้องเพิ่มเพื่อน OA ด้วย ไม่งั้น DM ส่งไม่ถึง */}
+            {status.oaFriend === false && (
+              <Alert
+                severity="warning"
+                icon={false}
+                sx={{ mb: 1 }}
+                action={status.addFriendUrl ? (
+                  <Button size="small" href={status.addFriendUrl} target="_blank" rel="noopener"
+                    sx={{ bgcolor: '#06C755', color: '#fff', fontWeight: 700, '&:hover': { bgcolor: '#05a948' } }}>
+                    เพิ่มเพื่อน
+                  </Button>
+                ) : null}
+              >
+                ยังไม่ได้เพิ่มบัญชีทางการ (OA) เป็นเพื่อน — ระบบ<strong>ส่งการแจ้งเตือนถึงท่านไม่ได้</strong>
+              </Alert>
+            )}
+
             <Divider sx={{ my: 1.5 }} />
             <FormControlLabel
               control={<Switch checked={Boolean(prefs?.line_enabled)} onChange={togglePref('line_enabled')} color="success" />}

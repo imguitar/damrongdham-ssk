@@ -6,6 +6,7 @@ const infoRequestModel = require('../models/infoRequestModel');
 const identityModel = require('../models/citizenIdentityModel');
 const prefModel = require('../models/notificationPrefModel');
 const outboxSvc = require('../services/notificationOutboxService');
+const messaging = require('../services/lineMessagingService');
 const { LINE_CHANNEL_NAME } = require('../services/lineIntakeService');
 const { writeAuditLog } = require('../middleware/auditLog');
 const { formatThaiDate } = require('../utils/thaiDate');
@@ -93,6 +94,11 @@ const getOverview = async (req, res, next) => {
     // เรื่องปกปิดตัวตน: ไม่เปิดเผยชื่อ LINE ให้ผู้ที่ไม่มีสิทธิ์เห็นข้อมูลผู้ร้อง
     const hideName = owner.is_anonymous && !CAN_SEE_PII.includes(req.user.role);
 
+    // ผูกบัญชีแล้วแต่ยังไม่เพิ่มเพื่อน OA → push ส่งไม่ถึง (LINE 403) ต้องเตือนเจ้าหน้าที่
+    const friendship = identity
+      ? await messaging.getFriendshipStatus(identity.provider_user_id)
+      : { friend: null };
+
     return success(res, {
       channel: { name: complaint.channel_name, is_line: complaint.channel_name === LINE_CHANNEL_NAME },
       citizen: {
@@ -100,6 +106,7 @@ const getOverview = async (req, res, next) => {
         display_name: identity && !hideName ? identity.display_name : null,
         linked_at: identity ? identity.linked_at : null,
         notifications_enabled: pref ? Boolean(pref.line_enabled) : true,
+        oa_friend: friendship.friend, // true / false (ส่งไม่ถึง) / null (ตรวจไม่ได้)
       },
       notification_logs: logs,
       notification_pending: pending,

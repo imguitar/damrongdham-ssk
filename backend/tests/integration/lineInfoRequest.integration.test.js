@@ -19,14 +19,24 @@ const mkReq = (over = {}) => ({ ip: '127.0.0.1', get: () => 'itest', headers: {}
 
 let citizenId; let userId; let complaint;
 
+// กัน network จริง: LINE profile API ตอบ 404 = ผู้ร้องยังไม่ได้เพิ่ม OA เป็นเพื่อน
+const realFetch = global.fetch;
+const stubLineApi = () => {
+  global.fetch = async () => ({
+    ok: false, status: 404, json: async () => ({}), text: async () => '', headers: { get: () => null },
+  });
+};
+
 beforeAll(async () => {
   if (!DB) return;
+  stubLineApi();
   citizenId = await createCitizen({ lineSub: 'Uitest_inforeq_0001' });
   userId = await createStaffUser({ roleId: 3 });
   complaint = await createComplaint({ citizenId, status: 'IN_PROGRESS' });
 });
 
 afterAll(async () => {
+  global.fetch = realFetch;
   if (!DB) return;
   if (complaint) {
     await pool.query('DELETE FROM complaint_info_responses WHERE complaint_id = ?', [complaint.id]);
@@ -151,6 +161,8 @@ afterAll(async () => {
 
     const data = res._s.body.data;
     expect(data.citizen.linked).toBe(true);
+    // ผูกบัญชีแล้วแต่ยังไม่เพิ่มเพื่อน OA → เตือนเจ้าหน้าที่ว่าส่งข้อความไม่ได้
+    expect(data.citizen.oa_friend).toBe(false);
     expect(data.info_requests.length).toBeGreaterThanOrEqual(1);
     expect(data.documents.some((d) => d.file_name === 'itest.pdf')).toBe(true);
     expect(data.notification_pending.length).toBeGreaterThanOrEqual(1);

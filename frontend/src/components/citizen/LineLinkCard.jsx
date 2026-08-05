@@ -87,16 +87,46 @@ const LineLinkCard = () => {
       {loading ? (
         <Box display="flex" justifyContent="center" py={2}><CircularProgress size={24} /></Box>
       ) : status?.linked ? (
-        <Box display="flex" alignItems="center" justifyContent="space-between" gap={2} flexWrap="wrap">
-          <Box>
-            <Chip icon={<CheckCircleIcon />} color="success" label="เชื่อมต่อแล้ว" size="small" sx={{ mb: 0.5 }} />
-            {status.displayName && (
-              <Typography variant="body2" color="text.secondary">บัญชี LINE: {status.displayName}</Typography>
-            )}
+        <Box>
+          <Box display="flex" alignItems="center" justifyContent="space-between" gap={2} flexWrap="wrap">
+            <Box>
+              <Chip icon={<CheckCircleIcon />} color="success" label="เชื่อมต่อแล้ว" size="small" sx={{ mb: 0.5 }} />
+              {status.displayName && (
+                <Typography variant="body2" color="text.secondary">บัญชี LINE: {status.displayName}</Typography>
+              )}
+            </Box>
+            <Button variant="outlined" color="error" size="small" onClick={handleUnlink} disabled={busy}>
+              ยกเลิกการเชื่อมต่อ
+            </Button>
           </Box>
-          <Button variant="outlined" color="error" size="small" onClick={handleUnlink} disabled={busy}>
-            ยกเลิกการเชื่อมต่อ
-          </Button>
+
+          {/* ผูกบัญชีแล้วยังไม่พอ — ต้องเพิ่มเพื่อน OA ด้วย ไม่งั้นแจ้งเตือนส่งไม่ถึง */}
+          {status.oaFriend === false && (
+            <Alert
+              severity="warning"
+              icon={false}
+              sx={{ mt: 2 }}
+              action={status.addFriendUrl ? (
+                <Button
+                  size="small"
+                  href={status.addFriendUrl}
+                  target="_blank"
+                  rel="noopener"
+                  sx={{ bgcolor: '#06C755', color: '#fff', fontWeight: 700, '&:hover': { bgcolor: '#05a948' } }}
+                >
+                  เพิ่มเพื่อน
+                </Button>
+              ) : null}
+            >
+              ยังไม่ได้เพิ่มบัญชีทางการ (OA) ของศูนย์ดำรงธรรมเป็นเพื่อน — ระบบจะ<strong>ส่งการแจ้งเตือนไม่ได้</strong>
+              {' '}กรุณากด &quot;เพิ่มเพื่อน&quot; แล้วกลับมารีเฟรชหน้านี้
+            </Alert>
+          )}
+          {status.oaFriend === true && (
+            <Typography variant="body2" color="success.main" mt={1.5}>
+              ✓ เพิ่มบัญชีทางการเป็นเพื่อนแล้ว — พร้อมรับการแจ้งเตือนความคืบหน้า
+            </Typography>
+          )}
         </Box>
       ) : (
         <Box>

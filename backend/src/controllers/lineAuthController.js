@@ -9,14 +9,30 @@ const { writeAuditLog } = require('../middleware/auditLog');
 const { success, error } = require('../utils/response');
 
 const OAUTH_COOKIE = 'line_oauth';
-const COOKIE_PATH = '/api/citizen/auth/line';
 const isProd = () => process.env.NODE_ENV === 'production';
+
+// เมื่อ deploy ใต้ subpath (Target B: https://host/<subpath>/api/...) เบราว์เซอร์เห็น
+// path ที่รวม prefix ด้วย — cookie path จึงต้องรวม prefix ไม่เช่นนั้น cookie จะไม่ถูก
+// ส่งกลับมาที่ callback และ state ตรวจไม่ผ่าน (line_invalid_state).
+// ดึง prefix จาก BACKEND_URL (root deployment → prefix ว่าง = พฤติกรรมเดิม)
+const basePathPrefix = (backendUrl) => {
+  try {
+    const p = new URL(backendUrl).pathname.replace(/\/+$/, '');
+    return p === '/' ? '' : p;
+  } catch {
+    return ''; // URL ไม่ถูกต้อง → ใช้พฤติกรรมเดิม ไม่ทำให้ login พัง
+  }
+};
+
+// จำกัดขอบเขต cookie ให้แคบที่สุดเท่าที่ callback ยังใช้งานได้
+const cookiePathFor = (backendUrl) => `${basePathPrefix(backendUrl)}/api/citizen/auth/line`;
+const cookiePath = () => cookiePathFor(config.backendUrl);
 
 const cookieOptions = () => ({
   httpOnly: true,
   sameSite: 'lax', // allow cookie on top-level GET redirect back from LINE
   secure: isProd(),
-  path: COOKIE_PATH,
+  path: cookiePath(),
   maxAge: 10 * 60 * 1000,
 });
 
@@ -57,7 +73,7 @@ const lineLogin = (req, res, next) => {
 // GET /api/citizen/auth/line/callback — LINE redirects back here
 const lineCallback = async (req, res) => {
   const { code, state, error: lineError } = req.query;
-  const clearCookie = () => res.clearCookie(OAUTH_COOKIE, { path: COOKIE_PATH });
+  const clearCookie = () => res.clearCookie(OAUTH_COOKIE, { path: cookiePath() });
 
   try {
     // 1. user cancelled / LINE returned an error
@@ -297,6 +313,7 @@ const updateUserNotificationPreferences = async (req, res, next) => {
 };
 
 module.exports = {
+  cookiePath, cookiePathFor, // exported for tests (subpath deployments)
   lineLogin, lineCallback, lineLinkInit, lineLinkStatus, lineUnlink,
   staffLineLinkInit, staffLineLinkStatus, staffLineUnlink,
   getUserNotificationPreferences, updateUserNotificationPreferences,

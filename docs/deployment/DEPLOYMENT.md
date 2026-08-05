@@ -196,7 +196,28 @@ UPLOAD_DIR=./uploads
 UPLOAD_MAX_SIZE=10485760
 
 CORS_ORIGIN=https://<domain>
+
+# ── LINE (ใส่ค่าจริงที่นี่เท่านั้น — backend/.env อยู่ใน .gitignore) ───────────
+# URL ต้องรวม subpath เพราะแอปอยู่ใต้ /<subpath>/
+FRONTEND_URL=https://<domain>/<subpath>
+BACKEND_URL=https://<domain>/<subpath>
+
+# LINE Login channel (ประชาชน/เจ้าหน้าที่ผูกบัญชี)
+LINE_LOGIN_CHANNEL_ID=
+LINE_LOGIN_CHANNEL_SECRET=
+LINE_LOGIN_CALLBACK_URL=https://<domain>/<subpath>/api/citizen/auth/line/callback
+LINE_LOGIN_BOT_PROMPT=aggressive
+
+# LINE Messaging API channel (รับเรื่องผ่านแชต + แจ้งเตือน)
+# Webhook URL ที่ตั้งใน LINE Console: https://<domain>/<subpath>/api/line/webhook
+LINE_MESSAGING_CHANNEL_ACCESS_TOKEN=
+LINE_MESSAGING_CHANNEL_SECRET=
+# เว้นว่าง = ใช้หน้า /public/privacy ของระบบ
+LINE_PRIVACY_NOTICE_URL=
 ```
+
+> URL ทุกตัวต้อง **ตรงเป๊ะ** กับที่ลงทะเบียนใน LINE Developers Console (scheme/host/subpath — มี `www.` หรือไม่มี ต้องเหมือนกัน)
+> แก้ `backend/.env` แล้วต้อง `pm2 restart damrongdham-ssk-backend` ทุกครั้ง (ไม่โหลด env ใหม่เอง)
 
 ```bash
 cd backend

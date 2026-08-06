@@ -152,7 +152,9 @@ const ComplaintDetailPage = () => {
   const [actionError, setActionError] = useState('');
   const [dialog, setDialog] = useState(null); // { type, title, fields, onConfirm }
   const [updateText, setUpdateText] = useState('');
-  const [updatePublic, setUpdatePublic] = useState(false);
+  // ค่าเริ่มต้น = เปิด (แสดงต่อประชาชน + แจ้งเตือน LINE) เพื่อให้ผู้ร้องได้รับ
+  // ความคืบหน้าเป็นค่าปกติ — ปิดสวิตช์เมื่อต้องการบันทึกภายในเท่านั้น
+  const [updatePublic, setUpdatePublic] = useState(true);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [pendingFiles, setPendingFiles] = useState([]);
   const [deleteDialog, setDeleteDialog] = useState(false);
@@ -327,7 +329,7 @@ const ComplaintDetailPage = () => {
       }
 
       setUpdateText('');
-      setUpdatePublic(false);
+      setUpdatePublic(true); // กลับเป็นค่าเริ่มต้น (เปิด) สำหรับบันทึกถัดไป
       load();
     } catch (err) {
       setActionError(err?.response?.data?.error?.message || 'เกิดข้อผิดพลาด');

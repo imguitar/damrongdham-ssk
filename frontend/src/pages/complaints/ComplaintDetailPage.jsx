@@ -157,6 +157,7 @@ const ComplaintDetailPage = () => {
   const [updatePublic, setUpdatePublic] = useState(true);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [pendingFiles, setPendingFiles] = useState([]);
+  const [confirmPublic, setConfirmPublic] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -303,8 +304,19 @@ const ComplaintDetailPage = () => {
     setDialog({ type, ...defs[type] });
   };
 
-  const handleAddUpdate = async () => {
+  // บันทึกแบบสาธารณะส่งถึงผู้ร้องทาง LINE และย้อนกลับไม่ได้ → ยืนยันก่อนทุกครั้ง
+  const handleAddUpdate = () => {
     if (!updateText.trim()) return;
+    if (updatePublic) {
+      setConfirmPublic(true);
+      return;
+    }
+    submitUpdate();
+  };
+
+  const submitUpdate = async () => {
+    if (!updateText.trim()) return;
+    setConfirmPublic(false);
     setUpdateLoading(true);
     setActionError('');
     try {
@@ -732,6 +744,34 @@ const ComplaintDetailPage = () => {
           loading={actionLoading}
         />
       )}
+
+      {/* ยืนยันก่อนส่งบันทึกที่ประชาชนจะเห็น (ส่งแล้วเรียกคืนไม่ได้) */}
+      <Dialog open={confirmPublic} onClose={() => setConfirmPublic(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>ยืนยันการส่งข้อความถึงผู้ร้อง</DialogTitle>
+        <DialogContent>
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            ข้อความนี้จะ<strong>แสดงต่อประชาชนเจ้าของเรื่องและส่งแจ้งเตือนทาง LINE</strong> ยืนยันหรือไม่
+          </Alert>
+          <Typography variant="caption" color="text.secondary">ข้อความที่จะส่ง</Typography>
+          <Typography
+            variant="body2"
+            whiteSpace="pre-wrap"
+            sx={{ mt: 0.5, p: 1.5, bgcolor: 'action.hover', borderRadius: 1, maxHeight: 200, overflow: 'auto' }}
+          >
+            {updateText}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" display="block" mt={1.5}>
+            กรุณาตรวจสอบว่าไม่มีข้อมูลภายใน ข้อมูลส่วนบุคคลของบุคคลอื่น หรือชื่อผู้ถูกร้อง
+            — หากต้องการบันทึกเฉพาะเจ้าหน้าที่ ให้ปิดสวิตช์ &quot;แสดงต่อประชาชน&quot; ก่อนบันทึก
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmPublic(false)} disabled={updateLoading}>ยกเลิก</Button>
+          <Button variant="contained" color="success" onClick={submitUpdate} disabled={updateLoading}>
+            ยืนยันส่งถึงผู้ร้อง
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialog} onClose={() => setDeleteDialog(false)} maxWidth="xs" fullWidth>

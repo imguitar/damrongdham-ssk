@@ -22,7 +22,11 @@ const findByUserId = async (userId, { page = 1, limit = 20, unreadOnly = false }
     [userId]
   );
   const [rows] = await pool.query(
-    `SELECT * FROM notifications WHERE user_id = ? ${cond} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+    `SELECT n.*, c.complaint_number
+     FROM notifications n
+     LEFT JOIN complaints c ON c.id = n.complaint_id
+     WHERE n.user_id = ? ${cond}
+     ORDER BY n.created_at DESC LIMIT ? OFFSET ?`,
     [userId, limit, offset]
   );
   return { rows, total };

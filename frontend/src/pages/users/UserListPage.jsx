@@ -10,10 +10,12 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import ToggleOnIcon from '@mui/icons-material/ToggleOn';
 import ToggleOffIcon from '@mui/icons-material/ToggleOff';
+import PeopleIcon from '@mui/icons-material/People';
 import DataTable from '../../components/common/DataTable';
 import FilterBar from '../../components/common/FilterBar';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 import ErrorAlert from '../../components/common/ErrorAlert';
+import PageHeader from '../../components/common/PageHeader';
 import * as userApi from '../../api/userApi';
 import * as agencyApi from '../../api/agencyApi';
 import { ROLE_LABELS } from '../../utils/constants';
@@ -124,12 +126,16 @@ const UserListPage = () => {
 
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h5" fontWeight={700}>จัดการผู้ใช้งาน</Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/users/new')}>
-          เพิ่มผู้ใช้
-        </Button>
-      </Box>
+      <PageHeader
+        icon={<PeopleIcon />}
+        title="จัดการผู้ใช้งาน"
+        subtitle="เจ้าหน้าที่และผู้ดูแลระบบทั้งหมด"
+        action={
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/users/new')}>
+            เพิ่มผู้ใช้
+          </Button>
+        }
+      />
 
       {error && <ErrorAlert message={error} sx={{ mb: 2 }} />}
 

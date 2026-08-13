@@ -5,9 +5,10 @@
 }
 
 body {
-  font-family: 'Sarabun', 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Kanit', 'Sarabun', 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 #root {

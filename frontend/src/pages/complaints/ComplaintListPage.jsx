@@ -9,11 +9,13 @@ import Typography from '@mui/material/Typography';
 import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import DataTable from '../../components/common/DataTable';
 import FilterBar from '../../components/common/FilterBar';
 import StatusChip from '../../components/common/StatusChip';
 import PriorityChip from '../../components/common/PriorityChip';
 import ErrorAlert from '../../components/common/ErrorAlert';
+import PageHeader from '../../components/common/PageHeader';
 import * as complaintApi from '../../api/complaintApi';
 import * as masterDataApi from '../../api/masterDataApi';
 import { useAuth } from '../../contexts/AuthContext';
@@ -156,9 +158,11 @@ const ComplaintListPage = () => {
 
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h5" fontWeight={700}>เรื่องร้องเรียน</Typography>
-        {canCreate && (
+      <PageHeader
+        icon={<AssignmentIcon />}
+        title="เรื่องร้องเรียน"
+        subtitle="รายการเรื่องร้องเรียนทั้งหมดในระบบ"
+        action={canCreate && (
           <Button
             variant="contained"
             startIcon={<AddIcon />}
@@ -167,7 +171,7 @@ const ComplaintListPage = () => {
             รับเรื่องใหม่
           </Button>
         )}
-      </Box>
+      />
 
       {error && <ErrorAlert message={error} sx={{ mb: 2 }} />}
 

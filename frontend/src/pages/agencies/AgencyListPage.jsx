@@ -18,9 +18,11 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import ToggleOnIcon from '@mui/icons-material/ToggleOn';
 import ToggleOffIcon from '@mui/icons-material/ToggleOff';
+import BusinessIcon from '@mui/icons-material/Business';
 import DataTable from '../../components/common/DataTable';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 import ErrorAlert from '../../components/common/ErrorAlert';
+import PageHeader from '../../components/common/PageHeader';
 import { useAuth } from '../../contexts/AuthContext';
 import * as agencyApi from '../../api/agencyApi';
 import { ROLES } from '../../utils/constants';
@@ -128,14 +130,17 @@ const AgencyListPage = () => {
 
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h5" fontWeight={700}>จัดการหน่วยงาน</Typography>
-        {isAdmin && (
+      <PageHeader
+        icon={<BusinessIcon />}
+        title="จัดการหน่วยงาน"
+        subtitle="หน่วยงานที่รับผิดชอบเรื่องร้องเรียน"
+        color="secondary"
+        action={isAdmin && (
           <Button variant="contained" startIcon={<AddIcon />} onClick={openCreate}>
             เพิ่มหน่วยงาน
           </Button>
         )}
-      </Box>
+      />
 
       {error && <ErrorAlert message={error} sx={{ mb: 2 }} />}
 

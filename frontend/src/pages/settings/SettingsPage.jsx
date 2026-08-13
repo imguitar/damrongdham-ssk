@@ -23,8 +23,10 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import ToggleOnIcon from '@mui/icons-material/ToggleOn';
 import ToggleOffIcon from '@mui/icons-material/ToggleOff';
+import TuneIcon from '@mui/icons-material/Tune';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
+import PageHeader from '../../components/common/PageHeader';
 import * as masterDataApi from '../../api/masterDataApi';
 import { alertError, alertWarning, extractError, toastSuccess } from '../../utils/alert';
 
@@ -211,12 +213,17 @@ const SettingsPage = () => {
 
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h5" fontWeight={700}>ตั้งค่า Master Data</Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={openCreate}>
-          เพิ่ม
-        </Button>
-      </Box>
+      <PageHeader
+        icon={<TuneIcon />}
+        title="ตั้งค่า Master Data"
+        subtitle="ประเภทเรื่อง ช่องทาง และข้อมูลอ้างอิงของระบบ"
+        color="info"
+        action={
+          <Button variant="contained" startIcon={<AddIcon />} onClick={openCreate}>
+            เพิ่ม
+          </Button>
+        }
+      />
 
       {error && <ErrorAlert message={error} sx={{ mb: 2 }} />}
 

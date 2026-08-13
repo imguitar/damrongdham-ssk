@@ -5,6 +5,7 @@ const fs = require('fs');
 const attachmentModel = require('../models/attachmentModel');
 const complaintModel = require('../models/complaintModel');
 const { writeAuditLog } = require('../middleware/auditLog');
+const { ensureAgencyAccess } = require('../middleware/complaintAccess');
 const { success, error } = require('../utils/response');
 const { UPLOAD_DIR } = require('../config/upload');
 
@@ -59,6 +60,9 @@ const download = async (req, res, next) => {
   try {
     const attachment = await attachmentModel.findById(req.params.id);
     if (!attachment) return error(res, 'NOT_FOUND', 'ไม่พบไฟล์แนบ', 404);
+
+    // เจ้าหน้าที่หน่วยงานโหลดได้เฉพาะไฟล์ของเรื่องที่หน่วยงานตนรับผิดชอบ (กัน IDOR)
+    if (!(await ensureAgencyAccess(req, res, attachment.complaint_id))) return undefined;
 
     const safeName = path.basename(attachment.file_path);
     const fullPath = path.join(UPLOAD_DIR, safeName);

@@ -6,7 +6,8 @@ const { authorize } = require('../middleware/authorize');
 const masterDataController = require('../controllers/masterDataController');
 
 const ADMIN_ROLES = ['super_admin', 'admin'];
-const STAFF_ROLES = ['super_admin', 'admin', 'officer', 'agency_head', 'agency_officer'];
+// ต้องมี 'chief' ด้วย — chief สร้าง/ดูเรื่องได้ (complaintRoutes) จึงต้องโหลด master data ในฟอร์มได้
+const STAFF_ROLES = ['super_admin', 'admin', 'officer', 'chief', 'agency_head', 'agency_officer'];
 
 router.use(authenticate);
 

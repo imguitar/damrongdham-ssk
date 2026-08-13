@@ -32,10 +32,13 @@ const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const MAX_ATTACHMENTS = 5;
 
 let cachedRefs = null;
+let cachedRefsAt = 0;
+const REFS_TTL_MS = 10 * 60 * 1000; // cache ชั่วคราว ไม่ผูกตลอดอายุ process
 
-// master data ids ที่ใช้ประจำ — อ่านครั้งเดียวแล้ว cache (ค่าคงที่ของระบบ)
+// master data ids ที่ใช้ประจำ — cache 10 นาที (กันกรณี seed ช่องทาง LINE หลังบูต
+// แล้ว fallback ไป channel แรกค้างจนต้อง restart)
 const masterRefs = async () => {
-  if (cachedRefs) return cachedRefs;
+  if (cachedRefs && Date.now() - cachedRefsAt < REFS_TTL_MS) return cachedRefs;
 
   const pick = async (table, name) => {
     const [rows] = await pool.query(
@@ -53,6 +56,7 @@ const masterRefs = async () => {
     complainantTypeId: await pick('complainant_types', DEFAULT_COMPLAINANT_TYPE),
     provinceId: await pick('provinces', PROVINCE_NAME),
   };
+  cachedRefsAt = Date.now();
   return cachedRefs;
 };
 

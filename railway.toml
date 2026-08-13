@@ -1,0 +1,15 @@
+# Railway deployment config — single-container (root Dockerfile)
+# build frontend → serve dist ที่ ./public + /api ด้วย backend (Express)
+# ตั้งค่า env vars (JWT_SECRET, DB_*, LINE_*, FRONTEND_URL, BACKEND_URL, CORS_ORIGIN)
+# บน Railway dashboard — ห้าม commit ค่าจริงลง repo
+
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "node src/server.js"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 100
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3

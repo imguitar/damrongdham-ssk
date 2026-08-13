@@ -19,14 +19,17 @@ axiosInstance.interceptors.request.use(
 );
 
 // Response interceptor — handle 401 (token expired / invalid)
-// Skip redirect for auth endpoints themselves (/auth/login, /auth/me) so their
-// callers can handle errors directly (e.g., show "wrong password" on login page).
+// Skip redirect only for login/me themselves so their callers can handle errors
+// directly (e.g., show "wrong password" on login page, silent me() check on boot).
+// Other authenticated endpoints (e.g. /auth/line/link) still redirect on a real 401.
+const NO_REDIRECT_401 = ['/auth/login', '/auth/me'];
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
+    const url = error.config?.url || '';
     if (
       error.response?.status === 401 &&
-      !error.config?.url?.includes('/auth/')
+      !NO_REDIRECT_401.some((p) => url.endsWith(p))
     ) {
       localStorage.removeItem('dcms_token');
       localStorage.removeItem('dcms_user');

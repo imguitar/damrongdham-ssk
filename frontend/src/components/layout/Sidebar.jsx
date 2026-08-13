@@ -27,7 +27,8 @@ import appIcon from '../icons/app-icon-v2.png';
 const { SUPER_ADMIN, ADMIN, OFFICER, CHIEF, AGENCY_HEAD, AGENCY_OFFICER, EXECUTIVE } = ROLES;
 
 const ALL_STAFF = [SUPER_ADMIN, ADMIN, OFFICER, CHIEF, AGENCY_HEAD, AGENCY_OFFICER, EXECUTIVE];
-const CENTER_ROLES = [SUPER_ADMIN, ADMIN, OFFICER, CHIEF];
+// staff ที่ทำงานกับเรื่อง (ไม่รวม executive) — ตรงกับ backend complaintRoutes.STAFF_ROLES
+const COMPLAINT_ROLES = [SUPER_ADMIN, ADMIN, OFFICER, CHIEF, AGENCY_HEAD, AGENCY_OFFICER];
 const REPORT_ROLES = [SUPER_ADMIN, ADMIN, OFFICER, CHIEF, EXECUTIVE];
 const ADMIN_ROLES = [SUPER_ADMIN, ADMIN];
 
@@ -44,7 +45,7 @@ const MENU_ITEMS = [
     label: 'เรื่องร้องเรียน',
     icon: <AssignmentIcon />,
     path: '/complaints',
-    roles: ALL_STAFF,
+    roles: COMPLAINT_ROLES,
   },
   {
     id: 'reports',
@@ -58,7 +59,7 @@ const MENU_ITEMS = [
     label: 'แจ้งเตือน',
     icon: <NotificationsIcon />,
     path: '/notifications',
-    roles: CENTER_ROLES,
+    roles: COMPLAINT_ROLES,
   },
   {
     id: 'line-notifications',

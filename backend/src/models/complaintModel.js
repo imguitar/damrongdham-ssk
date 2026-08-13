@@ -260,11 +260,11 @@ const update = async (id, fields) => {
   sets.push('updated_at = NOW()');
   params.push(id);
 
-  await pool.query(
+  const [result] = await pool.query(
     `UPDATE complaints SET ${sets.join(', ')} WHERE id = ? AND status != 'CLOSED'`,
     params
   );
-  return true;
+  return result.affectedRows > 0;
 };
 
 // Returns combined status_logs + updates sorted by created_at

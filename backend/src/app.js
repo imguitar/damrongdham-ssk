@@ -2,6 +2,7 @@
 
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const path = require('path');
 
 require('dotenv').config();
@@ -34,6 +35,13 @@ app.set('trust proxy', 1);
 // ============================================
 // Middleware
 // ============================================
+// Security headers. CSP ปิดไว้เพราะ SPA (MUI/Leaflet) โหลด inline style/asset —
+// การเปิด CSP ต้องปรับ policy เฉพาะทาง แยกเป็นงานภายหลัง. ส่วนที่สำคัญที่สุด
+// (X-Content-Type-Options: nosniff, X-Frame-Options, ฯลฯ) ยังทำงานครบ
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+}));
 app.use(cors(corsOptions));
 // capture the raw body so the LINE webhook can verify X-Line-Signature
 app.use(express.json({ verify: (req, res, buf) => { req.rawBody = buf; } }));

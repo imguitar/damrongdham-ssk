@@ -3,6 +3,7 @@
 const router = require('express').Router();
 const { authenticate } = require('../middleware/auth');
 const { authorize } = require('../middleware/authorize');
+const { requireComplaintAccess } = require('../middleware/complaintAccess');
 const { validateComplaint } = require('../middleware/validate');
 const { upload } = require('../config/upload');
 const complaintController = require('../controllers/complaintController');
@@ -23,8 +24,8 @@ router.use(authenticate);
 // Complaint CRUD
 router.get('/',    authorize(...STAFF_ROLES),  complaintController.list);
 router.post('/',   authorize(...STAFF_ROLES),  validateComplaint, complaintController.create);
-router.get('/:id', authorize(...STAFF_ROLES),  complaintController.getById);
-router.put('/:id', authorize(...STAFF_ROLES),  complaintController.update);
+router.get('/:id', authorize(...STAFF_ROLES),  requireComplaintAccess, complaintController.getById);
+router.put('/:id', authorize(...STAFF_ROLES),  requireComplaintAccess, complaintController.update);
 
 // ── Status Workflow ─────────────────────────────────────────────────────────────
 // T-01: NEW → SCREENING, T-12: RETURNED → SCREENING
@@ -43,12 +44,12 @@ router.patch('/:id/send-back', authorize(...CENTER_ROLES), complaintController.s
 router.patch('/:id/self-handle', authorize(...CENTER_ROLES), complaintController.selfHandle);
 
 // ── Assignments list for a complaint ───────────────────────────────────────────
-router.get('/:id/assignments', authorize(...STAFF_ROLES), assignmentController.list);
+router.get('/:id/assignments', authorize(...STAFF_ROLES), requireComplaintAccess, assignmentController.list);
 
 // ── Timeline & Updates ──────────────────────────────────────────────────────────
-router.get('/:id/timeline',    authorize(...STAFF_ROLES), complaintController.getTimeline);
-router.get('/:id/updates',     authorize(...STAFF_ROLES), complaintController.getUpdates);
-router.post('/:id/updates',    authorize(...STAFF_ROLES), complaintUpdateController.create);
+router.get('/:id/timeline',    authorize(...STAFF_ROLES), requireComplaintAccess, complaintController.getTimeline);
+router.get('/:id/updates',     authorize(...STAFF_ROLES), requireComplaintAccess, complaintController.getUpdates);
+router.post('/:id/updates',    authorize(...STAFF_ROLES), requireComplaintAccess, complaintUpdateController.create);
 
 // ── LINE channel (แผงจัดการช่องทาง LINE ของเรื่อง) ─────────────────────────────
 router.get('/:id/line',                        authorize(...STAFF_ROLES), lineComplaintController.getOverview);
@@ -67,8 +68,8 @@ router.post('/:id/reveal-identity', authorize('super_admin'), complaintControlle
 router.delete('/:id', authorize('super_admin'), complaintController.remove);
 
 // ── Attachments ─────────────────────────────────────────────────────────────────
-router.get('/:id/attachments',              authorize(...STAFF_ROLES), attachmentController.list);
-router.post('/:id/attachments',             authorize(...STAFF_ROLES), upload.single('file'), attachmentController.upload);
+router.get('/:id/attachments',              authorize(...STAFF_ROLES), requireComplaintAccess, attachmentController.list);
+router.post('/:id/attachments',             authorize(...STAFF_ROLES), requireComplaintAccess, upload.single('file'), attachmentController.upload);
 router.get('/attachments/:id/download',     authorize(...STAFF_ROLES), attachmentController.download);
 router.delete('/attachments/:id',           authorize(...ADMIN_ROLES), attachmentController.remove);
 

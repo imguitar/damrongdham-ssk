@@ -2,6 +2,7 @@ import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
+import { alpha } from '@mui/material/styles';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
@@ -51,7 +52,7 @@ const ComplaintTimeline = ({ events = [] }) => {
                 width: 32,
                 height: 32,
                 borderRadius: '50%',
-                bgcolor: 'primary.lighter' || 'primary.50',
+                bgcolor: (theme) => alpha(theme.palette.primary.main, 0.12),
                 border: '2px solid',
                 borderColor: 'primary.main',
                 display: 'flex',

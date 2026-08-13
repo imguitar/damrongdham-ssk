@@ -86,6 +86,15 @@ const uploadPublicAttachment = async (req, res, next) => {
     const complaint = await complaintModel.findById(complaint_id);
     if (!complaint) return error(res, 'NOT_FOUND', 'ไม่พบเรื่องร้องเรียน', 404);
 
+    // ช่องทางสาธารณะไม่มี token ยืนยันเจ้าของ — อนุญาตแนบไฟล์ได้เฉพาะเรื่องที่ยัง
+    // เป็นสถานะ NEW และเพิ่งสร้างภายในช่วงสั้น ๆ (ตรงกับ flow ที่ frontend อัปโหลด
+    // ทันทีหลังยื่นเรื่อง) เพื่อกันการสุ่ม complaint_id แนบไฟล์เข้าเรื่องเก่า/ของผู้อื่น
+    const ATTACH_WINDOW_MS = 60 * 60 * 1000;
+    const createdAtMs = complaint.created_at ? new Date(complaint.created_at).getTime() : 0;
+    if (complaint.status !== 'NEW' || Date.now() - createdAtMs > ATTACH_WINDOW_MS) {
+      return error(res, 'ATTACHMENT_WINDOW_CLOSED', 'ไม่สามารถแนบไฟล์กับเรื่องนี้ได้', 400);
+    }
+
     const id = await attachmentModel.create({
       complaintId: complaint_id,
       updateId: null,

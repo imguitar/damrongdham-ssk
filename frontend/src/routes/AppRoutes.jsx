@@ -1,9 +1,11 @@
+import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import AdminLayout from '../components/layout/AdminLayout';
 import PublicLayout from '../components/layout/PublicLayout';
 import CitizenLayout from '../components/layout/CitizenLayout';
 import ProtectedRoute from './ProtectedRoute';
 import CitizenProtectedRoute from './CitizenProtectedRoute';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 import NotFoundPage from '../pages/errors/NotFoundPage';
 import ForbiddenPage from '../pages/errors/ForbiddenPage';
 import { ROLES } from '../utils/constants';
@@ -14,10 +16,11 @@ import ChangePasswordPage from '../pages/auth/ChangePasswordPage';
 import ProfilePage        from '../pages/profile/ProfilePage';
 
 // ── Complaint pages ───────────────────────────────────────────────────────────
+// หน้าที่ import ไลบรารีหนัก (leaflet/recharts) แยกออกเป็น chunk ต่างหากด้วย lazy
 import ComplaintListPage   from '../pages/complaints/ComplaintListPage';
-import ComplaintCreatePage from '../pages/complaints/ComplaintCreatePage';
-import ComplaintDetailPage from '../pages/complaints/ComplaintDetailPage';
-import ComplaintEditPage   from '../pages/complaints/ComplaintEditPage';
+const ComplaintCreatePage = lazy(() => import('../pages/complaints/ComplaintCreatePage'));
+const ComplaintDetailPage = lazy(() => import('../pages/complaints/ComplaintDetailPage'));
+const ComplaintEditPage   = lazy(() => import('../pages/complaints/ComplaintEditPage'));
 
 // ── Admin pages ───────────────────────────────────────────────────────────────
 import UserListPage  from '../pages/users/UserListPage';
@@ -27,7 +30,7 @@ import SettingsPage   from '../pages/settings/SettingsPage';
 import LineNotificationPage from '../pages/settings/LineNotificationPage';
 
 // ── Public pages ──────────────────────────────────────────────────────────────
-import PublicComplaintPage from '../pages/public/PublicComplaintPage';
+const PublicComplaintPage = lazy(() => import('../pages/public/PublicComplaintPage'));
 import PublicTrackPage     from '../pages/public/PublicTrackPage';
 import PublicSuccessPage   from '../pages/public/PublicSuccessPage';
 import PrivacyNoticePage   from '../pages/public/PrivacyNoticePage';
@@ -37,15 +40,15 @@ import CitizenLoginPage           from '../pages/citizen/CitizenLoginPage';
 import CitizenLineCallbackPage    from '../pages/citizen/CitizenLineCallbackPage';
 import CitizenRegisterPage        from '../pages/citizen/CitizenRegisterPage';
 import CitizenComplaintListPage   from '../pages/citizen/CitizenComplaintListPage';
-import CitizenComplaintCreatePage from '../pages/citizen/CitizenComplaintCreatePage';
+const CitizenComplaintCreatePage = lazy(() => import('../pages/citizen/CitizenComplaintCreatePage'));
 import CitizenComplaintDetailPage from '../pages/citizen/CitizenComplaintDetailPage';
 import CitizenProfilePage         from '../pages/citizen/CitizenProfilePage';
 import CitizenNotificationSettingsPage from '../pages/citizen/CitizenNotificationSettingsPage';
 import CitizenCompleteProfilePage  from '../pages/citizen/CitizenCompleteProfilePage';
 
-// ── Phase 11 pages ────────────────────────────────────────────────────────────
-import DashboardPage from '../pages/dashboard/DashboardPage';
-import ReportPage    from '../pages/reports/ReportPage';
+// ── Phase 11 pages (recharts-heavy) ───────────────────────────────────────────
+const DashboardPage = lazy(() => import('../pages/dashboard/DashboardPage'));
+const ReportPage    = lazy(() => import('../pages/reports/ReportPage'));
 import AuditLogPage  from '../pages/audit/AuditLogPage';
 
 // ── Phase 12 pages ────────────────────────────────────────────────────────────
@@ -56,12 +59,16 @@ import NotificationPage from '../pages/notifications/NotificationPage';
 const { SUPER_ADMIN, ADMIN, OFFICER, CHIEF, AGENCY_HEAD, AGENCY_OFFICER, EXECUTIVE } = ROLES;
 
 const ALL_STAFF    = [SUPER_ADMIN, ADMIN, OFFICER, CHIEF, AGENCY_HEAD, AGENCY_OFFICER, EXECUTIVE];
+// เรื่องร้องเรียน = staff ที่ทำงานกับเรื่อง (ไม่รวม executive ซึ่งดูได้แค่ Dashboard/Report)
+// ต้องตรงกับ backend complaintRoutes.STAFF_ROLES
+const COMPLAINT_ROLES = [SUPER_ADMIN, ADMIN, OFFICER, CHIEF, AGENCY_HEAD, AGENCY_OFFICER];
 const CENTER_ROLES = [SUPER_ADMIN, ADMIN, OFFICER, CHIEF];
 const WRITE_ROLES  = [SUPER_ADMIN, ADMIN, OFFICER, CHIEF];
 const REPORT_ROLES = [SUPER_ADMIN, ADMIN, OFFICER, CHIEF, EXECUTIVE];
 const ADMIN_ROLES  = [SUPER_ADMIN, ADMIN];
 
 const AppRoutes = () => (
+  <Suspense fallback={<LoadingSpinner fullPage />}>
   <Routes>
     {/* ── Login — standalone ──────────────────────────────────────────── */}
     <Route path="/login"         element={<LoginPage />} />
@@ -100,9 +107,11 @@ const AppRoutes = () => (
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardPage />} />
 
-        {/* Complaints — all staff */}
-        <Route path="/complaints"     element={<ComplaintListPage />} />
-        <Route path="/complaints/:id" element={<ComplaintDetailPage />} />
+        {/* Complaints — staff who work on cases (executive excluded — matches backend) */}
+        <Route element={<ProtectedRoute allowedRoles={COMPLAINT_ROLES} />}>
+          <Route path="/complaints"     element={<ComplaintListPage />} />
+          <Route path="/complaints/:id" element={<ComplaintDetailPage />} />
+        </Route>
 
         {/* Complaints write — center roles */}
         <Route element={<ProtectedRoute allowedRoles={WRITE_ROLES} />}>
@@ -115,8 +124,10 @@ const AppRoutes = () => (
           <Route path="/reports" element={<ReportPage />} />
         </Route>
 
-        {/* Notifications — all staff can view their own notifications */}
-        <Route path="/notifications" element={<NotificationPage />} />
+        {/* Notifications — staff who work on cases (executive is read-only dashboard/report) */}
+        <Route element={<ProtectedRoute allowedRoles={COMPLAINT_ROLES} />}>
+          <Route path="/notifications" element={<NotificationPage />} />
+        </Route>
 
         {/* Admin only */}
         <Route element={<ProtectedRoute allowedRoles={ADMIN_ROLES} />}>
@@ -141,6 +152,7 @@ const AppRoutes = () => (
     <Route path="/404" element={<NotFoundPage />} />
     <Route path="*"    element={<Navigate to="/404" replace />} />
   </Routes>
+  </Suspense>
 );
 
 export default AppRoutes;

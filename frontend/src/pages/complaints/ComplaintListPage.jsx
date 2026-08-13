@@ -19,6 +19,7 @@ import * as masterDataApi from '../../api/masterDataApi';
 import { useAuth } from '../../contexts/AuthContext';
 import { COMPLAINT_STATUS, STATUS_LABELS, PRIORITY_LABELS, ROLES } from '../../utils/constants';
 import { formatDate, truncate } from '../../utils/formatters';
+import { extractError } from '../../utils/alert';
 
 const WRITE_ROLES = [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.OFFICER];
 
@@ -91,7 +92,7 @@ const ComplaintListPage = () => {
         setComplaints(res.data?.data || []);
         setPagination((p) => ({ ...p, ...res.data?.pagination, page }));
       })
-      .catch((err) => setError(err?.response?.data?.error?.message || 'เกิดข้อผิดพลาด'))
+      .catch((err) => setError(extractError(err, 'โหลดรายการเรื่องร้องเรียนไม่สำเร็จ')))
       .finally(() => setLoading(false));
   }, [activeFilters, pagination.limit]); // eslint-disable-line
 

@@ -42,6 +42,7 @@ import * as agencyApi from '../../api/agencyApi';
 import { useAuth } from '../../contexts/AuthContext';
 import { ROLES, STATUS_LABELS } from '../../utils/constants';
 import { formatDate, formatDateTime } from '../../utils/formatters';
+import { alertError, extractError, toastSuccess } from '../../utils/alert';
 
 // ── Role groups ───────────────────────────────────────────────
 const CENTER_ROLES = [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.OFFICER, ROLES.CHIEF];
@@ -149,7 +150,6 @@ const ComplaintDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [actionError, setActionError] = useState('');
   const [dialog, setDialog] = useState(null); // { type, title, fields, onConfirm }
   const [updateText, setUpdateText] = useState('');
   // ค่าเริ่มต้น = เปิด (แสดงต่อประชาชน + แจ้งเตือน LINE) เพื่อให้ผู้ร้องได้รับ
@@ -176,7 +176,7 @@ const ComplaintDetailPage = () => {
         setAttachments(aRes.data?.data?.attachments || []);
         setAssignments(asRes.data?.data?.assignments || []);
       })
-      .catch(() => setError('โหลดข้อมูลไม่สำเร็จ'))
+      .catch((err) => setError(extractError(err, 'โหลดข้อมูลเรื่องร้องเรียนไม่สำเร็จ')))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -184,13 +184,13 @@ const ComplaintDetailPage = () => {
 
   const runAction = async (apiFn, payload) => {
     setActionLoading(true);
-    setActionError('');
     try {
       await apiFn(payload);
       setDialog(null);
+      toastSuccess('ดำเนินการสำเร็จ');
       load();
     } catch (err) {
-      setActionError(err?.response?.data?.error?.message || 'เกิดข้อผิดพลาด');
+      alertError(err, { title: 'ดำเนินการไม่สำเร็จ' });
     } finally {
       setActionLoading(false);
     }
@@ -286,15 +286,15 @@ const ComplaintDetailPage = () => {
         fields: [{ key: 'reason', label: 'เหตุผลการเปิดเผย', type: 'textarea', required: true }],
         onConfirm: async (v) => {
           setActionLoading(true);
-          setActionError('');
           try {
             const res = await complaintApi.revealIdentity(id, v);
             // Use unmasked complaint from response directly — load() would re-mask it
             const unmasked = res.data?.data?.complaint;
             if (unmasked) setComplaint(unmasked);
             setDialog(null);
+            toastSuccess('เปิดเผยตัวตนผู้ร้องแล้ว (บันทึกประวัติการเข้าถึงไว้)');
           } catch (err) {
-            setActionError(err?.response?.data?.error?.message || 'เกิดข้อผิดพลาด');
+            alertError(err, { title: 'เปิดเผยตัวตนไม่สำเร็จ' });
           } finally {
             setActionLoading(false);
           }
@@ -318,7 +318,6 @@ const ComplaintDetailPage = () => {
     if (!updateText.trim()) return;
     setConfirmPublic(false);
     setUpdateLoading(true);
-    setActionError('');
     try {
       // Public update → PROGRESS (notifies citizen via LINE + resets escalation);
       // otherwise an internal REVIEW_NOTE that is never sent to the citizen (§14)
@@ -342,9 +341,10 @@ const ComplaintDetailPage = () => {
 
       setUpdateText('');
       setUpdatePublic(true); // กลับเป็นค่าเริ่มต้น (เปิด) สำหรับบันทึกถัดไป
+      toastSuccess(updatePublic ? 'บันทึกความคืบหน้าและแจ้งผู้ร้องทาง LINE แล้ว' : 'บันทึกหมายเหตุภายในแล้ว');
       load();
     } catch (err) {
-      setActionError(err?.response?.data?.error?.message || 'เกิดข้อผิดพลาด');
+      alertError(err, { title: 'บันทึกความคืบหน้าไม่สำเร็จ' });
     } finally {
       setUpdateLoading(false);
     }
@@ -359,8 +359,8 @@ const ComplaintDetailPage = () => {
       a.download = file.original_name || `attachment-${file.id}`;
       a.click();
       URL.revokeObjectURL(url);
-    } catch {
-      alert('ดาวน์โหลดไม่สำเร็จ');
+    } catch (err) {
+      alertError(err, { title: 'ดาวน์โหลดไฟล์ไม่สำเร็จ', fallback: 'ไม่สามารถดาวน์โหลดไฟล์ได้ กรุณาลองใหม่อีกครั้ง' });
     }
   };
 
@@ -368,9 +368,10 @@ const ComplaintDetailPage = () => {
     setDeleteLoading(true);
     try {
       await complaintApi.deleteComplaint(id);
+      toastSuccess('ลบเรื่องร้องเรียนแล้ว');
       navigate('/complaints');
     } catch (err) {
-      setActionError(err?.response?.data?.error?.message || 'เกิดข้อผิดพลาด');
+      alertError(err, { title: 'ลบเรื่องร้องเรียนไม่สำเร็จ' });
       setDeleteDialog(false);
     } finally {
       setDeleteLoading(false);
@@ -432,8 +433,6 @@ const ComplaintDetailPage = () => {
           )}
         </Box>
       </Box>
-
-      {actionError && <ErrorAlert message={actionError} sx={{ mb: 2 }} />}
 
       {/* Workflow Actions */}
       <Card sx={{ mb: 2 }}>
@@ -631,7 +630,6 @@ const ComplaintDetailPage = () => {
               <Card>
                 <CardContent>
                   <Typography variant="subtitle1" fontWeight={700} mb={1}>เพิ่มบันทึก / ความคืบหน้า</Typography>
-                  {actionError && <ErrorAlert message={actionError} sx={{ mb: 1 }} />}
                   <TextField
                     fullWidth
                     multiline

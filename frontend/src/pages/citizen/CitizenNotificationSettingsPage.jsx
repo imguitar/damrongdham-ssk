@@ -12,6 +12,7 @@ import Typography from '@mui/material/Typography';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import * as citizenApi from '../../api/citizenApi';
 import LineLinkCard from '../../components/citizen/LineLinkCard';
+import { alertError, extractError, toastSuccess } from '../../utils/alert';
 
 // event toggles shown only when LINE notifications are enabled
 const EVENT_TOGGLES = [
@@ -27,24 +28,20 @@ const CitizenNotificationSettingsPage = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [savedMsg, setSavedMsg] = useState('');
 
   useEffect(() => {
     citizenApi.getNotificationPreferences()
       .then((res) => setPrefs(res.data?.data?.preferences || null))
-      .catch(() => setErrorMsg('ไม่สามารถโหลดการตั้งค่าการแจ้งเตือนได้'))
+      .catch((err) => setErrorMsg(extractError(err, 'ไม่สามารถโหลดการตั้งค่าการแจ้งเตือนได้')))
       .finally(() => setLoading(false));
   }, []);
 
   const toggle = (key) => (e) => {
     setPrefs((p) => ({ ...p, [key]: e.target.checked ? 1 : 0 }));
-    setSavedMsg('');
   };
 
   const handleSave = async () => {
     setSaving(true);
-    setErrorMsg('');
-    setSavedMsg('');
     try {
       const payload = {
         line_enabled: prefs.line_enabled ? 1 : 0,
@@ -52,9 +49,9 @@ const CitizenNotificationSettingsPage = () => {
       };
       const res = await citizenApi.updateNotificationPreferences(payload);
       setPrefs(res.data?.data?.preferences || prefs);
-      setSavedMsg('บันทึกการตั้งค่าเรียบร้อยแล้ว');
-    } catch {
-      setErrorMsg('บันทึกการตั้งค่าไม่สำเร็จ กรุณาลองใหม่');
+      toastSuccess('บันทึกการตั้งค่าเรียบร้อยแล้ว');
+    } catch (err) {
+      alertError(err, { title: 'บันทึกการตั้งค่าไม่สำเร็จ' });
     } finally {
       setSaving(false);
     }
@@ -91,9 +88,6 @@ const CitizenNotificationSettingsPage = () => {
       <Typography variant="body2" color="text.secondary" mb={2}>
         เลือกเหตุการณ์ที่ต้องการรับแจ้งเตือนความคืบหน้าเรื่องร้องเรียนผ่าน LINE
       </Typography>
-
-      {errorMsg && <Alert severity="error" sx={{ mb: 2 }}>{errorMsg}</Alert>}
-      {savedMsg && <Alert severity="success" sx={{ mb: 2 }}>{savedMsg}</Alert>}
 
       <FormControlLabel
         control={<Switch checked={lineOn} onChange={toggle('line_enabled')} color="success" />}

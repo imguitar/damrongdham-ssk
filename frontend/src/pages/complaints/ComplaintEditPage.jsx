@@ -13,6 +13,7 @@ import ErrorAlert from '../../components/common/ErrorAlert';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import useMasterData from '../../hooks/useMasterData';
 import * as complaintApi from '../../api/complaintApi';
+import { alertError, alertWarning, extractError, toastSuccess } from '../../utils/alert';
 
 const ComplaintEditPage = () => {
   const { id } = useParams();
@@ -53,7 +54,7 @@ const ComplaintEditPage = () => {
           longitude: c.longitude || '',
         });
       })
-      .catch(() => setErrorMsg('โหลดข้อมูลไม่สำเร็จ'))
+      .catch((err) => setErrorMsg(extractError(err, 'โหลดข้อมูลเรื่องร้องเรียนไม่สำเร็จ')))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -71,9 +72,11 @@ const ComplaintEditPage = () => {
   };
 
   const handleSave = async () => {
-    if (!validate()) return;
+    if (!validate()) {
+      alertWarning('กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน (ช่องที่มีเครื่องหมายแจ้งเตือนสีแดง)');
+      return;
+    }
     setSaving(true);
-    setErrorMsg('');
     try {
       const toNum = (v) => (v !== '' && v != null ? Number(v) || undefined : undefined);
       const payload = {
@@ -90,9 +93,10 @@ const ComplaintEditPage = () => {
         longitude: form.longitude !== '' && form.longitude != null ? Number(form.longitude) : undefined,
       };
       await complaintApi.update(id, payload);
+      toastSuccess('บันทึกการแก้ไขสำเร็จ');
       navigate(`/complaints/${id}`);
     } catch (err) {
-      setErrorMsg(err?.response?.data?.error?.message || 'เกิดข้อผิดพลาด');
+      alertError(err, { title: 'บันทึกการแก้ไขไม่สำเร็จ' });
     } finally {
       setSaving(false);
     }

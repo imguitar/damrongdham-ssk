@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
@@ -11,6 +10,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import * as citizenApi from '../../api/citizenApi';
 import { useCitizenAuth } from '../../contexts/CitizenAuthContext';
+import { alertError, alertWarning, toastSuccess } from '../../utils/alert';
 
 // Provisional (LINE) accounts complete registration here: profile + PDPA consent.
 const CitizenCompleteProfilePage = () => {
@@ -25,27 +25,26 @@ const CitizenCompleteProfilePage = () => {
   });
   const [consent, setConsent] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
 
   const handleChange = (e) => {
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
-    setErrorMsg('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.full_name.trim()) { setErrorMsg('กรุณากรอกชื่อ-นามสกุล'); return; }
-    if (!form.phone.trim()) { setErrorMsg('กรุณากรอกเบอร์โทรศัพท์'); return; }
-    if (!consent) { setErrorMsg('กรุณายอมรับเงื่อนไขการเก็บและใช้ข้อมูลส่วนบุคคล'); return; }
+    if (!form.full_name.trim()) { alertWarning('กรุณากรอกชื่อ-นามสกุล'); return; }
+    if (!form.phone.trim()) { alertWarning('กรุณากรอกเบอร์โทรศัพท์'); return; }
+    if (!consent) { alertWarning('กรุณายอมรับเงื่อนไขการเก็บและใช้ข้อมูลส่วนบุคคลก่อนดำเนินการต่อ'); return; }
 
     setLoading(true);
     try {
       const res = await citizenApi.completeProfile({ ...form, consent: true });
       const updated = res.data?.data?.citizen;
       if (updated) setCitizen(updated);
+      toastSuccess('บันทึกข้อมูลสำเร็จ');
       navigate('/citizen/complaints', { replace: true });
     } catch (err) {
-      setErrorMsg(err?.response?.data?.error?.message || 'บันทึกข้อมูลไม่สำเร็จ');
+      alertError(err, { title: 'บันทึกข้อมูลไม่สำเร็จ' });
     } finally {
       setLoading(false);
     }
@@ -57,8 +56,6 @@ const CitizenCompleteProfilePage = () => {
       <Typography variant="body2" color="text.secondary" mb={2}>
         กรุณากรอกข้อมูลให้ครบถ้วนเพื่อใช้งานระบบและติดตามเรื่องร้องเรียนของท่าน
       </Typography>
-
-      {errorMsg && <Alert severity="error" sx={{ mb: 2 }}>{errorMsg}</Alert>}
 
       <Box component="form" onSubmit={handleSubmit} noValidate>
         <TextField fullWidth required label="ชื่อ-นามสกุล" name="full_name" value={form.full_name}

@@ -11,9 +11,9 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SaveIcon from '@mui/icons-material/Save';
 import ComplaintForm from '../../components/complaints/ComplaintForm';
 import FileUpload from '../../components/common/FileUpload';
-import ErrorAlert from '../../components/common/ErrorAlert';
 import useMasterData from '../../hooks/useMasterData';
 import * as citizenApi from '../../api/citizenApi';
+import { alertError, alertWarning, toastSuccess } from '../../utils/alert';
 
 const INITIAL = {
   title: '', description: '',
@@ -32,7 +32,6 @@ const CitizenComplaintCreatePage = () => {
   const [pendingFiles, setPendingFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  const [errorMsg, setErrorMsg] = useState('');
 
   const validate = () => {
     const e = {};
@@ -48,9 +47,11 @@ const CitizenComplaintCreatePage = () => {
   };
 
   const handleSubmit = async () => {
-    if (!validate()) return;
+    if (!validate()) {
+      alertWarning('กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน (ช่องที่มีเครื่องหมายแจ้งเตือนสีแดง)');
+      return;
+    }
     setLoading(true);
-    setErrorMsg('');
     try {
       const payload = {
         ...form,
@@ -78,9 +79,10 @@ const CitizenComplaintCreatePage = () => {
         );
       }
 
+      toastSuccess('ส่งเรื่องร้องเรียนสำเร็จ');
       navigate(`/citizen/complaints/${complaintNumber}`);
     } catch (err) {
-      setErrorMsg(err?.response?.data?.error?.message || 'เกิดข้อผิดพลาด');
+      alertError(err, { title: 'ส่งเรื่องร้องเรียนไม่สำเร็จ' });
     } finally {
       setLoading(false);
     }
@@ -94,8 +96,6 @@ const CitizenComplaintCreatePage = () => {
         </Button>
         <Typography variant="h5" fontWeight={700}>ยื่นเรื่องร้องเรียนใหม่</Typography>
       </Box>
-
-      {errorMsg && <ErrorAlert message={errorMsg} sx={{ mb: 2 }} />}
 
       <Card>
         <CardContent sx={{ p: 3 }}>

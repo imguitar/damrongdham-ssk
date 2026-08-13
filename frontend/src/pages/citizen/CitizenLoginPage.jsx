@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link as RouterLink, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -16,8 +16,8 @@ import Typography from '@mui/material/Typography';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import ErrorAlert from '../../components/common/ErrorAlert';
 import { useCitizenAuth } from '../../contexts/CitizenAuthContext';
+import { alertError, alertWarning, toastSuccess } from '../../utils/alert';
 import { AUTH_APPBAR_HEIGHT, AUTH_APPBAR_TITLE_FONT_SIZE, AUTH_CARD_MAX_WIDTH, AUTH_CARD_MIN_HEIGHT, AUTH_LOGIN_ICON_SIZE, AUTH_LOGIN_ICON_RADIUS } from '../../utils/constants';
 import appIcon from '../../components/icons/app-icon-v2.png';
 
@@ -42,7 +42,12 @@ const CitizenLoginPage = () => {
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState(() => getLineError(searchParams.get('line_error')));
+
+  // แจ้งผลการเข้าสู่ระบบด้วย LINE ที่ redirect กลับมาพร้อม error code
+  useEffect(() => {
+    const lineErr = getLineError(searchParams.get('line_error'));
+    if (lineErr) alertWarning(lineErr, { title: 'เข้าสู่ระบบด้วย LINE ไม่สำเร็จ' });
+  }, [searchParams]);
 
   if (citizen) return <Navigate to="/citizen/complaints" replace />;
 
@@ -52,18 +57,21 @@ const CitizenLoginPage = () => {
 
   const handleChange = (e) => {
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
-    setErrorMsg('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.email || !form.password) { setErrorMsg('กรุณากรอกอีเมลและรหัสผ่าน'); return; }
+    if (!form.email || !form.password) {
+      alertWarning('กรุณากรอกอีเมลและรหัสผ่านให้ครบก่อนเข้าสู่ระบบ');
+      return;
+    }
     setLoading(true);
     try {
       await login(form.email.trim(), form.password);
+      toastSuccess('เข้าสู่ระบบสำเร็จ');
       navigate('/citizen/complaints', { replace: true });
     } catch (err) {
-      setErrorMsg(err?.response?.data?.error?.message || 'เกิดข้อผิดพลาด');
+      alertError(err, { title: 'เข้าสู่ระบบไม่สำเร็จ' });
     } finally {
       setLoading(false);
     }
@@ -175,8 +183,6 @@ const CitizenLoginPage = () => {
             ยื่นเรื่องและติดตามสถานะเรื่องร้องเรียนของท่าน
           </Typography>
         </Box>
-
-        {errorMsg && <ErrorAlert message={errorMsg} sx={{ mb: 2 }} />}
 
         <Box component="form" onSubmit={handleSubmit} noValidate>
           <TextField

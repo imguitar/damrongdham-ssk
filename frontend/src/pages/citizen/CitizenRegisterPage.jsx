@@ -12,9 +12,9 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import ErrorAlert from '../../components/common/ErrorAlert';
 import { useCitizenAuth } from '../../contexts/CitizenAuthContext';
 import * as citizenApi from '../../api/citizenApi';
+import { alertError, toastSuccess } from '../../utils/alert';
 
 const CitizenRegisterPage = () => {
   const { citizen, login } = useCitizenAuth();
@@ -24,7 +24,6 @@ const CitizenRegisterPage = () => {
   });
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
 
   if (citizen) return <Navigate to="/citizen/complaints" replace />;
@@ -32,7 +31,6 @@ const CitizenRegisterPage = () => {
   const handleChange = (e) => {
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
     setFieldErrors((p) => ({ ...p, [e.target.name]: '' }));
-    setErrorMsg('');
   };
 
   const validate = () => {
@@ -58,9 +56,10 @@ const CitizenRegisterPage = () => {
       });
       // Auto-login after register
       await login(form.email.trim(), form.password);
+      toastSuccess('สมัครสมาชิกสำเร็จ ยินดีต้อนรับ');
       navigate('/citizen/complaints', { replace: true });
     } catch (err) {
-      setErrorMsg(err?.response?.data?.error?.message || 'เกิดข้อผิดพลาด');
+      alertError(err, { title: 'สมัครสมาชิกไม่สำเร็จ' });
     } finally {
       setLoading(false);
     }
@@ -73,8 +72,6 @@ const CitizenRegisterPage = () => {
         <Typography variant="body2" color="text.secondary" mb={3}>
           สร้างบัญชีเพื่อติดตามเรื่องร้องเรียนของท่าน
         </Typography>
-
-        {errorMsg && <ErrorAlert message={errorMsg} sx={{ mb: 2 }} />}
 
         <Box component="form" onSubmit={handleSubmit} noValidate>
           <Grid container spacing={2}>

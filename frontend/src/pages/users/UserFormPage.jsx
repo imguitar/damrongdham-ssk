@@ -19,6 +19,7 @@ import ErrorAlert from '../../components/common/ErrorAlert';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import * as userApi from '../../api/userApi';
 import * as agencyApi from '../../api/agencyApi';
+import { alertError, alertWarning, extractError, toastSuccess } from '../../utils/alert';
 
 // Backend roles (from DB)
 const BACKEND_ROLES = [
@@ -69,7 +70,7 @@ const UserFormPage = () => {
           password: '',
         });
       })
-      .catch(() => setErrorMsg('โหลดข้อมูลไม่สำเร็จ'))
+      .catch((err) => setErrorMsg(extractError(err, 'โหลดข้อมูลผู้ใช้ไม่สำเร็จ')))
       .finally(() => setLoading(false));
   }, [id, isEdit]);
 
@@ -96,9 +97,11 @@ const UserFormPage = () => {
   };
 
   const handleSave = async () => {
-    if (!validate()) return;
+    if (!validate()) {
+      alertWarning('กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน (ช่องที่มีเครื่องหมายแจ้งเตือนสีแดง)');
+      return;
+    }
     setSaving(true);
-    setErrorMsg('');
     try {
       const payload = {
         username: form.username.trim(),
@@ -114,9 +117,10 @@ const UserFormPage = () => {
       } else {
         await userApi.create(payload);
       }
+      toastSuccess(isEdit ? 'บันทึกการแก้ไขผู้ใช้สำเร็จ' : 'เพิ่มผู้ใช้ใหม่สำเร็จ');
       navigate('/users');
     } catch (err) {
-      setErrorMsg(err?.response?.data?.error?.message || 'เกิดข้อผิดพลาด');
+      alertError(err, { title: isEdit ? 'บันทึกผู้ใช้ไม่สำเร็จ' : 'เพิ่มผู้ใช้ไม่สำเร็จ' });
     } finally {
       setSaving(false);
     }

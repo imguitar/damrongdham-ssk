@@ -1,15 +1,14 @@
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import Box from '@mui/material/Box';
+import { extractError } from '../../utils/alert';
 
-const ErrorAlert = ({ error, title = 'เกิดข้อผิดพลาด', onRetry }) => {
-  const message =
-    error?.response?.data?.error?.message ||
-    error?.message ||
-    'ไม่สามารถดำเนินการได้ กรุณาลองใหม่อีกครั้ง';
+// รองรับทั้ง prop `error` (error object) และ `message` (string ที่เตรียมไว้แล้ว)
+const ErrorAlert = ({ error, message: messageProp, title = 'เกิดข้อผิดพลาด', onRetry, sx }) => {
+  const message = messageProp || extractError(error);
 
   return (
-    <Box py={2}>
+    <Box py={2} sx={sx}>
       <Alert
         severity="error"
         action={

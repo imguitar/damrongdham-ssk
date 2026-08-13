@@ -9,17 +9,15 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import SaveIcon from '@mui/icons-material/Save';
 import PersonIcon from '@mui/icons-material/Person';
-import ErrorAlert from '../../components/common/ErrorAlert';
 import { useCitizenAuth } from '../../contexts/CitizenAuthContext';
 import * as citizenApi from '../../api/citizenApi';
 import CitizenCredentialsCard from '../../components/citizen/CitizenCredentialsCard';
+import { alertError, alertWarning, toastSuccess } from '../../utils/alert';
 
 const CitizenProfilePage = () => {
   const { citizen, setCitizen } = useCitizenAuth();
   const [form, setForm] = useState({ full_name: '', phone: '' });
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
     if (citizen) {
@@ -29,19 +27,17 @@ const CitizenProfilePage = () => {
 
   const handleChange = (e) => {
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
-    setSuccess(false);
-    setErrorMsg('');
   };
 
   const handleSave = async () => {
-    if (!form.full_name.trim()) { setErrorMsg('กรุณาระบุชื่อ'); return; }
+    if (!form.full_name.trim()) { alertWarning('กรุณาระบุชื่อ-นามสกุล'); return; }
     setLoading(true);
     try {
       const res = await citizenApi.updateProfile(form);
       setCitizen((p) => ({ ...p, ...res.data?.data?.citizen }));
-      setSuccess(true);
+      toastSuccess('บันทึกข้อมูลส่วนตัวสำเร็จ');
     } catch (err) {
-      setErrorMsg(err?.response?.data?.error?.message || 'เกิดข้อผิดพลาด');
+      alertError(err, { title: 'บันทึกข้อมูลไม่สำเร็จ' });
     } finally {
       setLoading(false);
     }
@@ -53,13 +49,6 @@ const CitizenProfilePage = () => {
         <PersonIcon color="primary" />
         <Typography variant="h5" fontWeight={700}>ข้อมูลส่วนตัว</Typography>
       </Box>
-
-      {errorMsg && <ErrorAlert message={errorMsg} sx={{ mb: 2 }} />}
-      {success && (
-        <Box mb={2} p={1.5} bgcolor="success.50" borderRadius={1} border="1px solid" borderColor="success.light">
-          <Typography variant="body2" color="success.dark">บันทึกสำเร็จ</Typography>
-        </Box>
-      )}
 
       <Card>
         <CardContent sx={{ p: 3 }}>

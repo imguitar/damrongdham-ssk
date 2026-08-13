@@ -18,6 +18,7 @@ import * as userApi from '../../api/userApi';
 import * as agencyApi from '../../api/agencyApi';
 import { ROLE_LABELS } from '../../utils/constants';
 import { formatDateTime } from '../../utils/formatters';
+import { alertError, extractError, toastSuccess } from '../../utils/alert';
 
 const EMPTY_FILTERS = { search: '', role: '', agency_id: '' };
 
@@ -53,7 +54,7 @@ const UserListPage = () => {
         setUsers(res.data?.data || []);
         setPagination((p) => ({ ...p, ...res.data?.pagination, page }));
       })
-      .catch(() => setError('โหลดข้อมูลไม่สำเร็จ'))
+      .catch((err) => setError(extractError(err, 'โหลดข้อมูลผู้ใช้ไม่สำเร็จ')))
       .finally(() => setLoading(false));
   }, [activeFilters, pagination.limit]); // eslint-disable-line
 
@@ -61,12 +62,14 @@ const UserListPage = () => {
 
   const handleToggle = async () => {
     if (!toggleTarget) return;
+    const wasActive = toggleTarget.is_active;
     try {
       await userApi.toggleStatus(toggleTarget.id);
       setToggleTarget(null);
+      toastSuccess(wasActive ? 'ปิดใช้งานผู้ใช้แล้ว' : 'เปิดใช้งานผู้ใช้แล้ว');
       load(pagination.page, activeFilters);
-    } catch {
-      setError('เกิดข้อผิดพลาด');
+    } catch (err) {
+      alertError(err, { title: 'เปลี่ยนสถานะผู้ใช้ไม่สำเร็จ' });
     }
   };
 

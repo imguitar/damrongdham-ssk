@@ -9,11 +9,11 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import SaveIcon from '@mui/icons-material/Save';
-import ErrorAlert from '../../components/common/ErrorAlert';
 import FileUpload from '../../components/common/FileUpload';
 import ComplaintForm from '../../components/complaints/ComplaintForm';
 import useMasterData from '../../hooks/useMasterData';
 import * as publicApi from '../../api/publicApi';
+import { alertError, alertWarning, toastSuccess } from '../../utils/alert';
 
 const INITIAL = {
   title: '', description: '',
@@ -37,7 +37,6 @@ const PublicComplaintPage = () => {
   const [pendingFiles, setPendingFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  const [errorMsg, setErrorMsg] = useState('');
 
   // Set SSK E-CMS as default channel when channels load
   useEffect(() => {
@@ -60,9 +59,11 @@ const PublicComplaintPage = () => {
   };
 
   const handleSubmit = async () => {
-    if (!validate()) return;
+    if (!validate()) {
+      alertWarning('กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน (ช่องที่มีเครื่องหมายแจ้งเตือนสีแดง)');
+      return;
+    }
     setLoading(true);
-    setErrorMsg('');
     try {
       const payload = {
         ...form,
@@ -91,9 +92,10 @@ const PublicComplaintPage = () => {
         );
       }
 
+      toastSuccess('ส่งเรื่องร้องเรียนสำเร็จ');
       navigate('/public/success', { state: { complaint_number: complaintNumber } });
     } catch (err) {
-      setErrorMsg(err?.response?.data?.error?.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่');
+      alertError(err, { title: 'ส่งเรื่องร้องเรียนไม่สำเร็จ' });
     } finally {
       setLoading(false);
     }
@@ -107,8 +109,6 @@ const PublicComplaintPage = () => {
           Sisaket E-Complaint Management System — ไม่ต้องสมัครสมาชิก
         </Typography>
       </Box>
-
-      {errorMsg && <ErrorAlert message={errorMsg} sx={{ mb: 2 }} />}
 
       <Card>
         <CardContent sx={{ p: 3 }}>

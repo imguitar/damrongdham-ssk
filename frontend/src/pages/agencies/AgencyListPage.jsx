@@ -24,6 +24,7 @@ import ErrorAlert from '../../components/common/ErrorAlert';
 import { useAuth } from '../../contexts/AuthContext';
 import * as agencyApi from '../../api/agencyApi';
 import { ROLES } from '../../utils/constants';
+import { alertError, alertWarning, extractError, toastSuccess } from '../../utils/alert';
 
 const EMPTY_FORM = { name: '', short_name: '', contact_phone: '', contact_email: '', address: '' };
 
@@ -44,7 +45,7 @@ const AgencyListPage = () => {
     setLoading(true);
     agencyApi.list()
       .then((r) => setAgencies(r.data?.data?.agencies || []))
-      .catch(() => setError('โหลดข้อมูลไม่สำเร็จ'))
+      .catch((err) => setError(extractError(err, 'โหลดข้อมูลหน่วยงานไม่สำเร็จ')))
       .finally(() => setLoading(false));
   }, []);
 
@@ -62,7 +63,7 @@ const AgencyListPage = () => {
   };
 
   const handleSave = async () => {
-    if (!form.name.trim()) return;
+    if (!form.name.trim()) { alertWarning('กรุณาระบุชื่อหน่วยงาน'); return; }
     setSaving(true);
     try {
       if (editTarget) {
@@ -71,9 +72,10 @@ const AgencyListPage = () => {
         await agencyApi.create(form);
       }
       setDialogOpen(false);
+      toastSuccess(editTarget ? 'บันทึกการแก้ไขหน่วยงานสำเร็จ' : 'เพิ่มหน่วยงานใหม่สำเร็จ');
       load();
     } catch (err) {
-      setError(err?.response?.data?.error?.message || 'เกิดข้อผิดพลาด');
+      alertError(err, { title: editTarget ? 'บันทึกหน่วยงานไม่สำเร็จ' : 'เพิ่มหน่วยงานไม่สำเร็จ' });
     } finally {
       setSaving(false);
     }
@@ -81,8 +83,15 @@ const AgencyListPage = () => {
 
   const handleToggle = async () => {
     if (!toggleTarget) return;
-    try { await agencyApi.toggleStatus(toggleTarget.id); setToggleTarget(null); load(); }
-    catch { setError('เกิดข้อผิดพลาด'); }
+    const wasActive = toggleTarget.is_active;
+    try {
+      await agencyApi.toggleStatus(toggleTarget.id);
+      setToggleTarget(null);
+      toastSuccess(wasActive ? 'ปิดใช้งานหน่วยงานแล้ว' : 'เปิดใช้งานหน่วยงานแล้ว');
+      load();
+    } catch (err) {
+      alertError(err, { title: 'เปลี่ยนสถานะหน่วยงานไม่สำเร็จ' });
+    }
   };
 
   const columns = [

@@ -3,6 +3,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import GpsFixedIcon from '@mui/icons-material/GpsFixed';
+import { alertWarning } from '../../utils/alert';
 import 'leaflet/dist/leaflet.css';
 
 // Fix default marker icon issue with webpack/vite
@@ -99,7 +100,7 @@ const LocationMapPicker = ({ latitude, longitude, onChange, readOnly = false }) 
         setGpsLoading(false);
       },
       () => {
-        alert('ไม่สามารถระบุตำแหน่งได้ กรุณาอนุญาตการเข้าถึง GPS');
+        alertWarning('ไม่สามารถระบุตำแหน่งได้ กรุณาอนุญาตให้เว็บไซต์เข้าถึงตำแหน่ง (GPS) แล้วลองใหม่อีกครั้ง', { title: 'ระบุตำแหน่งไม่สำเร็จ' });
         setGpsLoading(false);
       }
     );

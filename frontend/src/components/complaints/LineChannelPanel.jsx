@@ -23,6 +23,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import * as complaintApi from '../../api/complaintApi';
 import ErrorAlert from '../common/ErrorAlert';
 import { formatDate, formatDateTime } from '../../utils/formatters';
+import { alertError, alertWarning, extractError, toastSuccess } from '../../utils/alert';
 
 // แผงจัดการช่องทาง LINE ของเรื่องร้องเรียน (ระบบหลังบ้าน)
 // แสดงสถานะการผูกบัญชี ประวัติข้อความที่ระบบส่ง คำขอข้อมูลเพิ่มเติม
@@ -48,7 +49,6 @@ const LineChannelPanel = ({ complaintId, canRequestInfo = false, canNotify = fal
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
-  const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({ message: '', due_date: '' });
@@ -60,7 +60,7 @@ const LineChannelPanel = ({ complaintId, canRequestInfo = false, canNotify = fal
       setData(res.data?.data || null);
       setErrorMsg('');
     } catch (err) {
-      setErrorMsg(err.response?.data?.error?.message || 'ไม่สามารถโหลดข้อมูลช่องทาง LINE ได้');
+      setErrorMsg(extractError(err, 'ไม่สามารถโหลดข้อมูลช่องทาง LINE ได้'));
     } finally {
       setLoading(false);
     }
@@ -70,15 +70,13 @@ const LineChannelPanel = ({ complaintId, canRequestInfo = false, canNotify = fal
 
   const act = async (fn, successMsg) => {
     setBusy(true);
-    setNotice('');
-    setErrorMsg('');
     try {
       await fn();
-      setNotice(successMsg);
+      toastSuccess(successMsg);
       await load();
       return true;
     } catch (err) {
-      setErrorMsg(err.response?.data?.error?.message || 'ดำเนินการไม่สำเร็จ');
+      alertError(err, { title: 'ดำเนินการไม่สำเร็จ' });
       return false;
     } finally {
       setBusy(false);
@@ -87,7 +85,7 @@ const LineChannelPanel = ({ complaintId, canRequestInfo = false, canNotify = fal
 
   const submitRequest = async () => {
     if (!form.message.trim()) {
-      setErrorMsg('กรุณาระบุรายการข้อมูลหรือเอกสารที่ต้องการ');
+      alertWarning('กรุณาระบุรายการข้อมูลหรือเอกสารที่ต้องการ');
       return;
     }
     const ok = await act(
@@ -116,7 +114,6 @@ const LineChannelPanel = ({ complaintId, canRequestInfo = false, canNotify = fal
   return (
     <Grid container spacing={2}>
       {errorMsg && <Grid item xs={12}><ErrorAlert message={errorMsg} /></Grid>}
-      {notice && <Grid item xs={12}><Alert severity="success" onClose={() => setNotice('')}>{notice}</Alert></Grid>}
 
       {/* สถานะช่องทาง + บัญชี LINE ของผู้ร้อง */}
       <Grid item xs={12} md={5}>

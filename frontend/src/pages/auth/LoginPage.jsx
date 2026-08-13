@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import Alert from '@mui/material/Alert';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -19,6 +18,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { alertError, alertWarning, toastSuccess } from '../../utils/alert';
 import { AUTH_APPBAR_HEIGHT, AUTH_APPBAR_TITLE_FONT_SIZE, AUTH_CARD_MAX_WIDTH, AUTH_CARD_MIN_HEIGHT, AUTH_LOGIN_ICON_SIZE, AUTH_LOGIN_ICON_RADIUS } from '../../utils/constants';
 import appIcon from '../../components/icons/app-icon-v2.png';
 
@@ -29,32 +29,27 @@ const LoginPage = () => {
   const [form, setForm]         = useState({ username: '', password: '' });
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading]   = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
 
   // If already authenticated, redirect declaratively (no side-effect during render)
   if (user) return <Navigate to="/dashboard" replace />;
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    setErrorMsg('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.username.trim() || !form.password) {
-      setErrorMsg('กรุณาระบุชื่อผู้ใช้และรหัสผ่าน');
+      alertWarning('กรุณากรอกชื่อผู้ใช้และรหัสผ่านให้ครบก่อนเข้าสู่ระบบ');
       return;
     }
     setLoading(true);
-    setErrorMsg('');
     try {
       await login(form.username.trim(), form.password);
+      toastSuccess('เข้าสู่ระบบสำเร็จ');
       navigate('/dashboard', { replace: true });
     } catch (err) {
-      const msg =
-        err?.response?.data?.error?.message ||
-        'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
-      setErrorMsg(msg);
+      alertError(err, { title: 'เข้าสู่ระบบไม่สำเร็จ' });
     } finally {
       setLoading(false);
     }
@@ -179,13 +174,6 @@ const LoginPage = () => {
               Sisaket E-Complaint Management System
             </Typography>
           </Box>
-
-          {/* Error alert */}
-          {errorMsg && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {errorMsg}
-            </Alert>
-          )}
 
           {/* Login form */}
           <Box component="form" onSubmit={handleSubmit} noValidate>

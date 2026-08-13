@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -13,6 +12,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import * as authApi from '../../api/authApi';
+import { alertError, alertWarning, alertSuccess } from '../../utils/alert';
 
 const INITIAL = { current_password: '', new_password: '', confirm_password: '' };
 
@@ -45,13 +45,9 @@ const ChangePasswordPage = () => {
   const [form, setForm]         = useState(INITIAL);
   const [show, setShow]         = useState({ current: false, new: false, confirm: false });
   const [loading, setLoading]   = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [success, setSuccess]   = useState(false);
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    setErrorMsg('');
-    setSuccess(false);
   };
 
   const toggleShow = (field) => setShow((prev) => ({ ...prev, [field]: !prev[field] }));
@@ -69,19 +65,15 @@ const ChangePasswordPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validationError = validate();
-    if (validationError) { setErrorMsg(validationError); return; }
+    if (validationError) { alertWarning(validationError); return; }
 
     setLoading(true);
-    setErrorMsg('');
     try {
       await authApi.changePassword(form.current_password, form.new_password);
-      setSuccess(true);
       setForm(INITIAL);
+      alertSuccess('เปลี่ยนรหัสผ่านสำเร็จ');
     } catch (err) {
-      const msg =
-        err?.response?.data?.error?.message ||
-        'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
-      setErrorMsg(msg);
+      alertError(err, { title: 'เปลี่ยนรหัสผ่านไม่สำเร็จ' });
     } finally {
       setLoading(false);
     }
@@ -96,17 +88,6 @@ const ChangePasswordPage = () => {
 
       <Card>
         <CardContent sx={{ p: 3 }}>
-          {success && (
-            <Alert severity="success" sx={{ mb: 2 }}>
-              เปลี่ยนรหัสผ่านสำเร็จ
-            </Alert>
-          )}
-          {errorMsg && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {errorMsg}
-            </Alert>
-          )}
-
           <Box component="form" onSubmit={handleSubmit} noValidate>
             <PasswordField
               name="current_password"

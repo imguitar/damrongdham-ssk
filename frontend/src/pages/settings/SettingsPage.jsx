@@ -26,6 +26,7 @@ import ToggleOffIcon from '@mui/icons-material/ToggleOff';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 import * as masterDataApi from '../../api/masterDataApi';
+import { alertError, alertWarning, extractError, toastSuccess } from '../../utils/alert';
 
 // ── Generic CRUD Table for simple master data ─────────────────────────────────
 const MasterDataTable = ({ items, onEdit, onToggle, isAdmin }) => (
@@ -153,7 +154,7 @@ const SettingsPage = () => {
     setError('');
     cfg.listFn()
       .then(setItems)
-      .catch(() => setError('โหลดข้อมูลไม่สำเร็จ'))
+      .catch((err) => setError(extractError(err, 'โหลดข้อมูลไม่สำเร็จ')))
       .finally(() => setLoading(false));
   }, [cfg]);
 
@@ -172,7 +173,7 @@ const SettingsPage = () => {
   };
 
   const handleSave = async () => {
-    if (!form.name.trim()) return;
+    if (!form.name.trim()) { alertWarning(`กรุณาระบุชื่อ${cfg.label}`); return; }
     setSaving(true);
     try {
       const payload = {
@@ -186,9 +187,10 @@ const SettingsPage = () => {
         await cfg.createFn(payload);
       }
       setDialogOpen(false);
+      toastSuccess(editTarget ? `บันทึกการแก้ไข${cfg.label}สำเร็จ` : `เพิ่ม${cfg.label}สำเร็จ`);
       load();
     } catch (err) {
-      setError(err?.response?.data?.error?.message || 'เกิดข้อผิดพลาด');
+      alertError(err, { title: 'บันทึกข้อมูลไม่สำเร็จ' });
     } finally {
       setSaving(false);
     }
@@ -196,8 +198,15 @@ const SettingsPage = () => {
 
   const handleToggle = async () => {
     if (!toggleTarget) return;
-    try { await cfg.toggleFn(toggleTarget.id, !toggleTarget.is_active); setToggleTarget(null); load(); }
-    catch { setError('เกิดข้อผิดพลาด'); }
+    const wasActive = toggleTarget.is_active;
+    try {
+      await cfg.toggleFn(toggleTarget.id, !toggleTarget.is_active);
+      setToggleTarget(null);
+      toastSuccess(wasActive ? 'ปิดใช้งานรายการแล้ว' : 'เปิดใช้งานรายการแล้ว');
+      load();
+    } catch (err) {
+      alertError(err, { title: 'เปลี่ยนสถานะไม่สำเร็จ' });
+    }
   };
 
   return (

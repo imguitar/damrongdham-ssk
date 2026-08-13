@@ -10,6 +10,7 @@ import Typography from '@mui/material/Typography';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DownloadIcon from '@mui/icons-material/Download';
+import { alertWarning } from '../../utils/alert';
 
 // Max 10 MB per file
 const MAX_SIZE = 10 * 1024 * 1024;
@@ -27,13 +28,14 @@ const FileUpload = ({
 
   const handleFileChange = (e) => {
     const selected = Array.from(e.target.files || []);
-    const valid = selected.filter((f) => {
-      if (f.size > MAX_SIZE) {
-        alert(`ไฟล์ "${f.name}" มีขนาดเกิน 10 MB`);
-        return false;
-      }
-      return true;
-    });
+    const tooBig = selected.filter((f) => f.size > MAX_SIZE);
+    const valid = selected.filter((f) => f.size <= MAX_SIZE);
+    if (tooBig.length) {
+      alertWarning(
+        `ไฟล์ต่อไปนี้มีขนาดเกิน 10 MB จึงไม่ถูกเพิ่ม:\n${tooBig.map((f) => `• ${f.name}`).join('\n')}`,
+        { title: 'ไฟล์มีขนาดใหญ่เกินไป' }
+      );
+    }
     if (valid.length) onAdd?.(valid);
     // Reset input so same file can be re-selected
     e.target.value = '';

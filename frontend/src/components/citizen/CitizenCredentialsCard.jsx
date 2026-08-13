@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -10,6 +9,7 @@ import Typography from '@mui/material/Typography';
 import LockIcon from '@mui/icons-material/Lock';
 import { useCitizenAuth } from '../../contexts/CitizenAuthContext';
 import * as citizenApi from '../../api/citizenApi';
+import { alertError, alertWarning, alertSuccess } from '../../utils/alert';
 
 // Two modes based on whether the account already has a password:
 // - has password (email signup)   → change password
@@ -20,33 +20,30 @@ const CitizenCredentialsCard = () => {
 
   const [form, setForm] = useState({ current: '', email: '', password: '', confirm: '' });
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [okMsg, setOkMsg] = useState('');
 
   const onChange = (e) => {
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
-    setErrorMsg(''); setOkMsg('');
   };
 
   const submit = async () => {
-    if (form.password.length < 6) { setErrorMsg('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร'); return; }
-    if (form.password !== form.confirm) { setErrorMsg('รหัสผ่านใหม่และการยืนยันไม่ตรงกัน'); return; }
-    if (hasPassword && !form.current) { setErrorMsg('กรุณาระบุรหัสผ่านปัจจุบัน'); return; }
-    if (!hasPassword && !form.email) { setErrorMsg('กรุณาระบุอีเมล'); return; }
+    if (form.password.length < 6) { alertWarning('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร'); return; }
+    if (form.password !== form.confirm) { alertWarning('รหัสผ่านใหม่และการยืนยันไม่ตรงกัน'); return; }
+    if (hasPassword && !form.current) { alertWarning('กรุณาระบุรหัสผ่านปัจจุบัน'); return; }
+    if (!hasPassword && !form.email) { alertWarning('กรุณาระบุอีเมล'); return; }
 
     setLoading(true);
     try {
       if (hasPassword) {
         await citizenApi.changePassword(form.current, form.password);
-        setOkMsg('เปลี่ยนรหัสผ่านสำเร็จ');
+        alertSuccess('เปลี่ยนรหัสผ่านสำเร็จ');
       } else {
         const res = await citizenApi.setCredentials(form.email.trim(), form.password);
         if (res.data?.data?.citizen) setCitizen((p) => ({ ...p, ...res.data.data.citizen }));
-        setOkMsg('เพิ่มอีเมลและรหัสผ่านสำเร็จ ตอนนี้เข้าสู่ระบบด้วยอีเมลได้แล้ว');
+        alertSuccess('เพิ่มอีเมลและรหัสผ่านสำเร็จ ตอนนี้เข้าสู่ระบบด้วยอีเมลได้แล้ว');
       }
       setForm({ current: '', email: '', password: '', confirm: '' });
     } catch (err) {
-      setErrorMsg(err?.response?.data?.error?.message || 'ดำเนินการไม่สำเร็จ');
+      alertError(err, { title: hasPassword ? 'เปลี่ยนรหัสผ่านไม่สำเร็จ' : 'เพิ่มอีเมล/รหัสผ่านไม่สำเร็จ' });
     } finally {
       setLoading(false);
     }
@@ -66,9 +63,6 @@ const CitizenCredentialsCard = () => {
             บัญชีของคุณเข้าสู่ระบบด้วย LINE — เพิ่มอีเมลและรหัสผ่านเพื่อใช้เข้าสู่ระบบด้วยอีเมลเป็นทางเลือกสำรอง
           </Typography>
         )}
-
-        {errorMsg && <Alert severity="error" sx={{ mb: 2 }}>{errorMsg}</Alert>}
-        {okMsg && <Alert severity="success" sx={{ mb: 2 }}>{okMsg}</Alert>}
 
         {hasPassword ? (
           <TextField

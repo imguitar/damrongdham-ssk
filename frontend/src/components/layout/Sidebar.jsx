@@ -23,6 +23,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import { useAuth } from '../../contexts/AuthContext';
 import { ADMIN_HEADER_HEIGHT, MINI_DRAWER_WIDTH, ROLES, DRAWER_WIDTH } from '../../utils/constants';
 import appIcon from '../icons/app-icon-v2.png';
+import packageJson from '../../../package.json';
 
 const { SUPER_ADMIN, ADMIN, OFFICER, CHIEF, AGENCY_HEAD, AGENCY_OFFICER, EXECUTIVE } = ROLES;
 
@@ -31,6 +32,7 @@ const ALL_STAFF = [SUPER_ADMIN, ADMIN, OFFICER, CHIEF, AGENCY_HEAD, AGENCY_OFFIC
 const COMPLAINT_ROLES = [SUPER_ADMIN, ADMIN, OFFICER, CHIEF, AGENCY_HEAD, AGENCY_OFFICER];
 const REPORT_ROLES = [SUPER_ADMIN, ADMIN, OFFICER, CHIEF, EXECUTIVE];
 const ADMIN_ROLES = [SUPER_ADMIN, ADMIN];
+const APP_VERSION = packageJson.version;
 
 const MENU_ITEMS = [
   {
@@ -255,6 +257,25 @@ const SidebarContent = ({ open }) => {
             </List>
           </>
         )}
+      </Box>
+
+      <Box
+        sx={{
+          flexShrink: 0,
+          px: open ? 2 : 0.5,
+          py: 1,
+          borderTop: '1px solid',
+          borderColor: 'divider',
+          textAlign: 'center',
+        }}
+      >
+        <Typography
+          variant="caption"
+          color="text.disabled"
+          sx={{ display: 'block', fontSize: open ? '0.75rem' : '0.625rem', whiteSpace: 'nowrap' }}
+        >
+          {open ? `เวอร์ชัน ${APP_VERSION}` : `v${APP_VERSION}`}
+        </Typography>
       </Box>
     </Box>
   );

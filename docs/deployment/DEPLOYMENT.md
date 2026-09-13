@@ -172,10 +172,11 @@ mysql -u damrongdham_user -p damrongdham_db < db/init/01-init.sql
 mysql -u damrongdham_user -p damrongdham_db < db/init/02-line-notification.sql
 mysql -u damrongdham_user -p damrongdham_db < db/init/03-staff-line.sql
 mysql -u damrongdham_user -p damrongdham_db < db/init/04-line-complaints.sql
+mysql -u damrongdham_user -p damrongdham_db < db/init/05-user-agency-affiliations.sql
 ```
 
-> ไฟล์ `02`–`04` เป็น migration แบบ idempotent — รันซ้ำบน DB ที่มีข้อมูลอยู่แล้วได้อย่างปลอดภัย
-> (ใช้ตอนอัปเดตระบบเดิมให้รองรับการรับเรื่องผ่าน LINE — ดู `docs/LINE_COMPLAINTS.md` §6)
+> ไฟล์ `02`–`05` เป็น migration แบบ idempotent — รันซ้ำบน DB ที่มีข้อมูลอยู่แล้วได้อย่างปลอดภัย
+> โดยไฟล์ `02`–`04` รองรับระบบ LINE และไฟล์ `05` ปรับหน่วยงานสังกัดของผู้ใช้เดิม
 
 #### 3. Backend — ตั้งค่าและรันด้วย pm2
 เลือก port ว่างบนเครื่อง (เช็คด้วย `ss -ltnp`) แล้วสร้าง `backend/.env`:

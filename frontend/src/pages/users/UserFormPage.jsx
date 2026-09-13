@@ -52,7 +52,9 @@ const UserFormPage = () => {
   const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
-    agencyApi.list().then((r) => setAgencies((r.data?.data?.agencies || []).filter((a) => a.is_active))).catch(() => {});
+    agencyApi.list()
+      .then((r) => setAgencies((r.data?.data?.agencies || []).filter((a) => a.is_active && !a.is_center)))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {

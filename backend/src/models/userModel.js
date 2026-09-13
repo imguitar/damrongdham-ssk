@@ -4,9 +4,12 @@ const pool = require('../config/database');
 
 const findByUsername = async (username) => {
   const [rows] = await pool.query(
-    `SELECT u.*, r.code AS role_name
+    `SELECT u.*, r.code AS role_name,
+            a.name AS agency_name, a.short_name AS agency_short_name,
+            a.is_center AS agency_is_center
      FROM users u
      JOIN roles r ON u.role_id = r.id
+     LEFT JOIN agencies a ON a.id = u.agency_id
      WHERE u.username = ? AND u.is_active = 1`,
     [username]
   );
@@ -17,9 +20,12 @@ const findById = async (id) => {
   const [rows] = await pool.query(
     `SELECT u.id, u.username, u.full_name, u.email, u.phone,
             u.role_id, u.agency_id, u.is_active, u.last_login_at, u.created_at,
-            r.code AS role_name
+            r.code AS role_name,
+            a.name AS agency_name, a.short_name AS agency_short_name,
+            a.is_center AS agency_is_center
      FROM users u
      JOIN roles r ON u.role_id = r.id
+     LEFT JOIN agencies a ON a.id = u.agency_id
      WHERE u.id = ? AND u.is_active = 1`,
     [id]
   );

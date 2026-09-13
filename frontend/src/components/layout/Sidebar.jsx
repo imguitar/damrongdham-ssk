@@ -39,6 +39,7 @@ const MENU_ITEMS = [
     id: 'dashboard',
     label: 'Dashboard',
     icon: <DashboardIcon />,
+    iconColor: '#1565C0',
     path: '/dashboard',
     roles: ALL_STAFF,
   },
@@ -46,6 +47,7 @@ const MENU_ITEMS = [
     id: 'complaints',
     label: 'เรื่องร้องเรียน',
     icon: <AssignmentIcon />,
+    iconColor: '#7B1FA2',
     path: '/complaints',
     roles: COMPLAINT_ROLES,
   },
@@ -53,6 +55,7 @@ const MENU_ITEMS = [
     id: 'reports',
     label: 'รายงาน',
     icon: <BarChartIcon />,
+    iconColor: '#2E7D32',
     path: '/reports',
     roles: REPORT_ROLES,
   },
@@ -60,6 +63,7 @@ const MENU_ITEMS = [
     id: 'notifications',
     label: 'แจ้งเตือน',
     icon: <NotificationsIcon />,
+    iconColor: '#E53935',
     path: '/notifications',
     roles: COMPLAINT_ROLES,
   },
@@ -67,6 +71,7 @@ const MENU_ITEMS = [
     id: 'line-notifications',
     label: 'การแจ้งเตือน LINE',
     icon: <ChatIcon />,
+    iconColor: '#00A84F',
     path: '/line-notifications',
     roles: ALL_STAFF,
   },
@@ -77,6 +82,7 @@ const ADMIN_MENU_ITEMS = [
     id: 'users',
     label: 'ผู้ใช้งาน',
     icon: <PeopleIcon />,
+    iconColor: '#00838F',
     path: '/users',
     roles: ADMIN_ROLES,
   },
@@ -84,6 +90,7 @@ const ADMIN_MENU_ITEMS = [
     id: 'agencies',
     label: 'หน่วยงาน',
     icon: <BusinessIcon />,
+    iconColor: '#F57C00',
     path: '/agencies',
     roles: ADMIN_ROLES,
   },
@@ -91,6 +98,7 @@ const ADMIN_MENU_ITEMS = [
     id: 'settings',
     label: 'ตั้งค่า Master Data',
     icon: <SettingsIcon />,
+    iconColor: '#5E35B1',
     path: '/settings',
     roles: ADMIN_ROLES,
   },
@@ -98,6 +106,7 @@ const ADMIN_MENU_ITEMS = [
     id: 'audit-logs',
     label: 'Audit Log',
     icon: <HistoryIcon />,
+    iconColor: '#546E7A',
     path: '/audit-logs',
     roles: ADMIN_ROLES,
   },
@@ -114,6 +123,9 @@ const MenuItem = ({ item, selected, open }) => {
         px: open ? 1.5 : 1,
         minHeight: 44,
         justifyContent: open ? 'flex-start' : 'center',
+        '&.Mui-selected .MuiListItemIcon-root': {
+          color: item.iconColor,
+        },
       }}
     >
       <ListItemIcon
@@ -121,6 +133,10 @@ const MenuItem = ({ item, selected, open }) => {
           minWidth: 0,
           justifyContent: 'center',
           mr: open ? 1.5 : 0,
+          color: item.iconColor,
+          transition: (theme) => theme.transitions.create('color', {
+            duration: theme.transitions.duration.shorter,
+          }),
         }}
       >
         {item.icon}

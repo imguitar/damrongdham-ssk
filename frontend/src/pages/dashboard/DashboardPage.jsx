@@ -224,10 +224,16 @@ const DashboardPage = () => {
   const trendData = data.trend.map((t) => ({ ...t, monthLabel: MONTHS_TH[t.month - 1] }));
 
   // Category bar — top 8
-  const catData = data.byCategory.slice(0, 8).map((c) => ({ name: c.name.length > 14 ? c.name.slice(0, 14) + '…' : c.name, ทั้งหมด: c.total, ปิด: c.closed, เกิน: c.overdue }));
+  const catData = data.byCategory
+    .filter((c) => Number(c.total) > 0)
+    .slice(0, 8)
+    .map((c) => ({ name: c.name.length > 14 ? c.name.slice(0, 14) + '…' : c.name, ทั้งหมด: c.total, ปิด: c.closed, เกิน: c.overdue }));
 
   // Agency bar — top 8
-  const agData = data.byAgency.slice(0, 8).map((a) => ({ name: a.short_name || a.name.slice(0, 12), ทั้งหมด: a.total, ปิด: a.closed, เกิน: a.overdue }));
+  const agData = data.byAgency
+    .filter((a) => Number(a.total) > 0)
+    .slice(0, 8)
+    .map((a) => ({ name: a.short_name || a.name.slice(0, 12), ทั้งหมด: a.total, ปิด: a.closed, เกิน: a.overdue }));
 
   // Status pie
   const pieData = data.byStatus.filter((b) => b.count > 0).map((b) => ({
@@ -336,43 +342,49 @@ const DashboardPage = () => {
             </Grid>
           </Grid>
 
-          <Grid container spacing={2} mb={2}>
-            {/* Category Bar */}
-            <Grid item xs={12} md={6}>
-              <ChartCard title="ตามประเภทเรื่อง (สูงสุด 8)">
-                <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={catData} layout="vertical" margin={{ top: 0, right: 10, left: 10, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                    <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
-                    <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 10 }} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <Bar dataKey="ทั้งหมด" fill="#1976d2" maxBarSize={14} />
-                    <Bar dataKey="ปิด"     fill="#2e7d32" maxBarSize={14} />
-                    <Bar dataKey="เกิน"    fill="#d32f2f" maxBarSize={14} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartCard>
-            </Grid>
+          {(catData.length > 0 || agData.length > 0) && (
+            <Grid container spacing={2} mb={2}>
+              {/* Category Bar */}
+              {catData.length > 0 && (
+                <Grid item xs={12} md={agData.length > 0 ? 6 : 12}>
+                  <ChartCard title="ตามประเภทเรื่อง (สูงสุด 8)">
+                    <ResponsiveContainer width="100%" height={220}>
+                      <BarChart data={catData} layout="vertical" margin={{ top: 0, right: 10, left: 10, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                        <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
+                        <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 10 }} />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Legend wrapperStyle={{ fontSize: 12 }} />
+                        <Bar dataKey="ทั้งหมด" fill="#1976d2" maxBarSize={14} />
+                        <Bar dataKey="ปิด"     fill="#2e7d32" maxBarSize={14} />
+                        <Bar dataKey="เกิน"    fill="#d32f2f" maxBarSize={14} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </ChartCard>
+                </Grid>
+              )}
 
-            {/* Agency Bar */}
-            <Grid item xs={12} md={6}>
-              <ChartCard title="ตามหน่วยงาน (สูงสุด 8)">
-                <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={agData} layout="vertical" margin={{ top: 0, right: 10, left: 10, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                    <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
-                    <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 10 }} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <Bar dataKey="ทั้งหมด" fill="#0097a7" maxBarSize={14} />
-                    <Bar dataKey="ปิด"     fill="#2e7d32" maxBarSize={14} />
-                    <Bar dataKey="เกิน"    fill="#d32f2f" maxBarSize={14} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartCard>
+              {/* Agency Bar */}
+              {agData.length > 0 && (
+                <Grid item xs={12} md={catData.length > 0 ? 6 : 12}>
+                  <ChartCard title="ตามหน่วยงาน (สูงสุด 8)">
+                    <ResponsiveContainer width="100%" height={220}>
+                      <BarChart data={agData} layout="vertical" margin={{ top: 0, right: 10, left: 10, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                        <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
+                        <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 10 }} />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Legend wrapperStyle={{ fontSize: 12 }} />
+                        <Bar dataKey="ทั้งหมด" fill="#0097a7" maxBarSize={14} />
+                        <Bar dataKey="ปิด"     fill="#2e7d32" maxBarSize={14} />
+                        <Bar dataKey="เกิน"    fill="#d32f2f" maxBarSize={14} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </ChartCard>
+                </Grid>
+              )}
             </Grid>
-          </Grid>
+          )}
         </>
       )}
 

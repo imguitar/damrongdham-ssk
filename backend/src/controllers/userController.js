@@ -2,12 +2,15 @@
 
 const bcrypt = require('bcrypt');
 const userModel = require('../models/userModel');
+const agencyModel = require('../models/agencyModel');
 const { success, successList, error } = require('../utils/response');
 const { parsePagination, paginationMeta } = require('../utils/pagination');
 const { writeAuditLog } = require('../middleware/auditLog');
 const pool = require('../config/database');
 
 const SALT_ROUNDS = 12;
+const CENTER_ROLES = ['super_admin', 'admin', 'officer', 'chief'];
+const AGENCY_ROLES = ['agency_officer', 'agency_head'];
 
 const generateTempPassword = () => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
@@ -26,6 +29,30 @@ const findRoleFromPayload = async ({ role_id, role_code }) => {
   }
 
   return null;
+};
+
+const resolveAgencyForRole = async (roleCode, requestedAgencyId) => {
+  if (CENTER_ROLES.includes(roleCode)) {
+    const center = await agencyModel.findCenter();
+    if (!center) {
+      return { error: ['CONFIG_ERROR', 'ไม่พบข้อมูลหน่วยงานศูนย์ดำรงธรรม', 500] };
+    }
+    return { agencyId: center.id };
+  }
+
+  if (AGENCY_ROLES.includes(roleCode)) {
+    if (!requestedAgencyId) {
+      return { error: ['VALIDATION_ERROR', 'กรุณาระบุหน่วยงานสำหรับผู้ใช้หน่วยงานปลายทาง', 400] };
+    }
+
+    const agency = await agencyModel.findById(requestedAgencyId);
+    if (!agency || !agency.is_active || agency.is_center) {
+      return { error: ['VALIDATION_ERROR', 'หน่วยงานปลายทางไม่ถูกต้องหรือไม่ได้เปิดใช้งาน', 400] };
+    }
+    return { agencyId: agency.id };
+  }
+
+  return { agencyId: null };
 };
 
 // GET /api/users
@@ -82,8 +109,19 @@ const create = async (req, res, next) => {
       return error(res, 'FORBIDDEN', 'ไม่มีสิทธิ์สร้างผู้ใช้บทบาท super_admin', 403);
     }
 
+    const affiliation = await resolveAgencyForRole(role.code, agency_id);
+    if (affiliation.error) return error(res, ...affiliation.error);
+
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-    const id = await userModel.createUser({ username, passwordHash, fullName: full_name, email, phone, roleId: role.id, agencyId: agency_id });
+    const id = await userModel.createUser({
+      username,
+      passwordHash,
+      fullName: full_name,
+      email,
+      phone,
+      roleId: role.id,
+      agencyId: affiliation.agencyId,
+    });
 
     writeAuditLog({ userId: req.user.id, action: 'CREATE_USER', resource: 'users', resourceId: id, details: { username }, ipAddress: req.ip, userAgent: req.get('user-agent') });
 
@@ -113,7 +151,16 @@ const update = async (req, res, next) => {
       return error(res, 'FORBIDDEN', 'ไม่มีสิทธิ์กำหนดบทบาท super_admin', 403);
     }
 
-    await userModel.updateUser(req.params.id, { fullName: full_name, email, phone, roleId: role.id, agencyId: agency_id });
+    const affiliation = await resolveAgencyForRole(role.code, agency_id);
+    if (affiliation.error) return error(res, ...affiliation.error);
+
+    await userModel.updateUser(req.params.id, {
+      fullName: full_name,
+      email,
+      phone,
+      roleId: role.id,
+      agencyId: affiliation.agencyId,
+    });
 
     writeAuditLog({ userId: req.user.id, action: 'UPDATE_USER', resource: 'users', resourceId: req.params.id, ipAddress: req.ip, userAgent: req.get('user-agent') });
 

@@ -108,6 +108,24 @@ const Topbar = ({ drawerOpen, onDesktopDrawerToggle, onMobileMenuClick }) => {
 
         <Box sx={{ flex: 1 }} />
 
+        {/* Current user's agency */}
+        {user?.agency_name && (
+          <Tooltip title={user.agency_name}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              fontWeight={600}
+              noWrap
+              sx={{
+                mr: 1,
+                maxWidth: { xs: 120, sm: 240, lg: 360 },
+              }}
+            >
+              {user.agency_name}
+            </Typography>
+          </Tooltip>
+        )}
+
         {/* Notification Bell */}
         <Tooltip title="การแจ้งเตือน">
           <IconButton onClick={handleOpenNotif} sx={{ mr: 0.5 }}>

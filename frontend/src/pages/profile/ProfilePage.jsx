@@ -79,6 +79,7 @@ const ProfilePage = () => {
           <Typography variant="subtitle2" color="text.secondary" fontWeight={600} mb={0.5}>
             ข้อมูลบัญชี
           </Typography>
+          <InfoRow label="หน่วยงานสังกัด" value={user?.agency_name} />
           <InfoRow label="บทบาท" value={user?.role_label || user?.role} />
           <InfoRow label="เข้าสู่ระบบล่าสุด"
             value={user?.last_login_at ? formatDateTime(user.last_login_at) : '-'} />

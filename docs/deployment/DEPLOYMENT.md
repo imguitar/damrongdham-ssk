@@ -173,10 +173,11 @@ mysql -u damrongdham_user -p damrongdham_db < db/init/02-line-notification.sql
 mysql -u damrongdham_user -p damrongdham_db < db/init/03-staff-line.sql
 mysql -u damrongdham_user -p damrongdham_db < db/init/04-line-complaints.sql
 mysql -u damrongdham_user -p damrongdham_db < db/init/05-user-agency-affiliations.sql
+mysql -u damrongdham_user -p damrongdham_db < db/init/06-system-settings.sql
 ```
 
-> ไฟล์ `02`–`05` เป็น migration แบบ idempotent — รันซ้ำบน DB ที่มีข้อมูลอยู่แล้วได้อย่างปลอดภัย
-> โดยไฟล์ `02`–`04` รองรับระบบ LINE และไฟล์ `05` ปรับหน่วยงานสังกัดของผู้ใช้เดิม
+> ไฟล์ `02`–`06` เป็น migration แบบ idempotent — รันซ้ำบน DB ที่มีข้อมูลอยู่แล้วได้อย่างปลอดภัย
+> โดยไฟล์ `02`–`04` รองรับระบบ LINE, ไฟล์ `05` ปรับหน่วยงานสังกัดของผู้ใช้เดิม และไฟล์ `06` เพิ่มการตั้งค่าเกณฑ์เร่งรัด
 
 #### 3. Backend — ตั้งค่าและรันด้วย pm2
 เลือก port ว่างบนเครื่อง (เช็คด้วย `ss -ltnp`) แล้วสร้าง `backend/.env`:

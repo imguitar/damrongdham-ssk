@@ -25,6 +25,7 @@ const auditLogRouter = require('./routes/auditLogRoutes');
 const notificationRouter = require('./routes/notificationRoutes');
 const lineWebhookRouter = require('./routes/lineWebhookRoutes');
 const lineGroupRouter = require('./routes/lineGroupRoutes');
+const settingRouter = require('./routes/settingRoutes');
 
 const app = express();
 
@@ -66,6 +67,7 @@ app.use('/api/audit-logs', auditLogRouter);
 app.use('/api/notifications', notificationRouter);
 app.use('/api/line', lineWebhookRouter);
 app.use('/api/admin/line-groups', lineGroupRouter);
+app.use('/api/settings', settingRouter);
 
 // ============================================
 // Serve Frontend (Production)

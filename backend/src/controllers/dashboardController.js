@@ -2,6 +2,7 @@
 
 const pool = require('../config/database');
 const { success } = require('../utils/response');
+const settingModel = require('../models/settingModel');
 
 const AGENCY_ROLES = ['agency_officer', 'agency_head'];
 
@@ -350,7 +351,8 @@ const escalated = async (req, res, next) => {
       ORDER BY c.escalation_level DESC, c.last_progress_at ASC`;
 
     const [rows] = await pool.query(sql, vals);
-    return success(res, { escalated: rows });
+    const escalationSettings = await settingModel.getEscalationSettings();
+    return success(res, { escalated: rows, escalation_settings: escalationSettings });
   } catch (err) { next(err); }
 };
 

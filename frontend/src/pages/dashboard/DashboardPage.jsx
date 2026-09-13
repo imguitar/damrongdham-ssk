@@ -246,8 +246,16 @@ const ESCALATION_CONFIG = {
   3: { label: 'L3', color: 'error',   bg: '#4a0000', border: '#b71c1c' },
 };
 
+const DEFAULT_ESCALATION_SETTINGS = {
+  escalation_enabled: true,
+  escalation_l1_days: 30,
+  escalation_l2_days: 45,
+  escalation_l3_days: 52,
+};
+
 const EMPTY_DATA = {
   summary: {}, byStatus: [], byCategory: [], byAgency: [], trend: [], overdue: [], nearDue: [], escalated: [],
+  escalationSettings: DEFAULT_ESCALATION_SETTINGS,
 };
 
 const DashboardPage = () => {
@@ -295,6 +303,7 @@ const DashboardPage = () => {
         overdue:    overdueRes?.data?.data?.overdue   || [],
         nearDue:    nearRes?.data?.data?.near_due     || [],
         escalated:  escalRes?.data?.data?.escalated   || [],
+        escalationSettings: escalRes?.data?.data?.escalation_settings || DEFAULT_ESCALATION_SETTINGS,
       });
     } catch (err) {
       setError('โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่');
@@ -306,6 +315,7 @@ const DashboardPage = () => {
   useEffect(() => { load(); }, [load]);
 
   const s = data.summary;
+  const escalationSettings = data.escalationSettings || DEFAULT_ESCALATION_SETTINGS;
 
   const isAgency = AGENCY_ROLES.includes(role);
   const isExecutive = role === ROLES.EXECUTIVE;
@@ -605,71 +615,89 @@ const DashboardPage = () => {
             {loading ? (
               <Box display="flex" justifyContent="center" py={3}><CircularProgress size={28} /></Box>
             ) : (
-              <Box sx={{ overflowX: 'auto' }}>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>ระดับ</TableCell>
-                      <TableCell>เลขที่</TableCell>
-                      <TableCell>หัวเรื่อง</TableCell>
-                      <TableCell>หน่วยงาน</TableCell>
-                      <TableCell>ความสำคัญ</TableCell>
-                      <TableCell align="right">ไม่มีอัปเดต (วัน)</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {data.escalated.map((row) => {
-                      const cfg = ESCALATION_CONFIG[row.escalation_level] || ESCALATION_CONFIG[1];
-                      return (
-                        <TableRow
-                          key={row.id} hover sx={{ cursor: 'pointer' }}
-                          onClick={() => navigate(`/complaints/${row.id}`)}
-                        >
-                          <TableCell>
-                            <Chip
-                              label={cfg.label}
-                              size="small"
-                              color={cfg.color}
-                              variant={row.escalation_level === 3 ? 'filled' : 'outlined'}
-                              sx={row.escalation_level === 3 ? { color: '#fff', bgcolor: cfg.border } : {}}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body2" color="primary.main" fontWeight={600}>
-                              {row.complaint_number}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body2">{row.title?.slice(0, 40)}</Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body2">{row.agency_short_name || row.agency_name || '-'}</Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Chip
-                              label={{ LOW: 'ต่ำ', MEDIUM: 'ปานกลาง', HIGH: 'สูง', CRITICAL: 'วิกฤต' }[row.priority] || row.priority}
-                              size="small"
-                              color={row.priority === 'CRITICAL' ? 'error' : row.priority === 'HIGH' ? 'warning' : 'default'}
-                            />
-                          </TableCell>
-                          <TableCell align="right">
-                            {row.last_progress_at ? (() => {
-                              const days = Math.floor((Date.now() - new Date(row.last_progress_at)) / 86400000);
-                              return (
-                                <Chip
-                                  label={`${days} วัน`}
-                                  size="small"
-                                  color={days >= 90 ? 'error' : days >= 60 ? 'error' : 'warning'}
-                                  variant={days >= 60 ? 'filled' : 'outlined'}
-                                />
-                              );
-                            })() : <Typography variant="caption" color="text.secondary">-</Typography>}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+              <Box>
+                <Box sx={{ overflowX: 'auto' }}>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>ระดับ</TableCell>
+                        <TableCell>เลขที่</TableCell>
+                        <TableCell>หัวเรื่อง</TableCell>
+                        <TableCell>หน่วยงาน</TableCell>
+                        <TableCell>ความสำคัญ</TableCell>
+                        <TableCell align="right">ไม่มีอัปเดต (วัน)</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {data.escalated.map((row) => {
+                        const cfg = ESCALATION_CONFIG[row.escalation_level] || ESCALATION_CONFIG[1];
+                        return (
+                          <TableRow
+                            key={row.id} hover sx={{ cursor: 'pointer' }}
+                            onClick={() => navigate(`/complaints/${row.id}`)}
+                          >
+                            <TableCell>
+                              <Chip
+                                label={cfg.label}
+                                size="small"
+                                color={cfg.color}
+                                variant={row.escalation_level === 3 ? 'filled' : 'outlined'}
+                                sx={row.escalation_level === 3 ? { color: '#fff', bgcolor: cfg.border } : {}}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="body2" color="primary.main" fontWeight={600}>
+                                {row.complaint_number}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="body2">{row.title?.slice(0, 40)}</Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="body2">{row.agency_short_name || row.agency_name || '-'}</Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={{ LOW: 'ต่ำ', MEDIUM: 'ปานกลาง', HIGH: 'สูง', CRITICAL: 'วิกฤต' }[row.priority] || row.priority}
+                                size="small"
+                                color={row.priority === 'CRITICAL' ? 'error' : row.priority === 'HIGH' ? 'warning' : 'default'}
+                              />
+                            </TableCell>
+                            <TableCell align="right">
+                              {row.last_progress_at ? (() => {
+                                const days = Math.floor((Date.now() - new Date(row.last_progress_at)) / 86400000);
+                                return (
+                                  <Chip
+                                    label={`${days} วัน`}
+                                    size="small"
+                                    color={days >= 90 ? 'error' : days >= 60 ? 'error' : 'warning'}
+                                    variant={days >= 60 ? 'filled' : 'outlined'}
+                                  />
+                                );
+                              })() : <Typography variant="caption" color="text.secondary">-</Typography>}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </Box>
+                <Paper variant="outlined" sx={{ mt: 2, p: 1.5, bgcolor: '#fff8e1', borderColor: '#ffe082' }}>
+                  <Typography variant="body2" fontWeight={700} mb={1}>คำอธิบายระดับการเร่งรัด</Typography>
+                  <Box display="flex" flexDirection="column" gap={0.75}>
+                    <Typography variant="body2"><strong>ระดับที่ 1 (L1):</strong> ไม่มีการอัปเดตความคืบหน้าติดต่อกันตั้งแต่ {escalationSettings.escalation_l1_days} วัน</Typography>
+                    <Typography variant="body2"><strong>ระดับที่ 2 (L2):</strong> ไม่มีการอัปเดตความคืบหน้าติดต่อกันตั้งแต่ {escalationSettings.escalation_l2_days} วัน</Typography>
+                    <Typography variant="body2"><strong>ระดับที่ 3 (L3):</strong> ไม่มีการอัปเดตความคืบหน้าติดต่อกันตั้งแต่ {escalationSettings.escalation_l3_days} วัน เป็นระดับเร่งรัดสูงสุด</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      ระบบนับจากวันที่อัปเดตความคืบหน้าล่าสุด หรือวันที่รับเรื่องหากยังไม่เคยอัปเดต และจะเริ่มนับใหม่เมื่อมีการบันทึกความคืบหน้า การเร่งรัดนี้เป็นคนละเงื่อนไขกับกรอบระยะเวลามาตรฐานในการดำเนินการ (SLA)
+                    </Typography>
+                    {!escalationSettings.escalation_enabled && (
+                      <Typography variant="caption" color="error.main" fontWeight={700}>
+                        ขณะนี้ระบบตรวจสอบและแจ้งเตือนการเร่งรัดถูกปิดใช้งาน
+                      </Typography>
+                    )}
+                  </Box>
+                </Paper>
               </Box>
             )}
           </CardContent>
@@ -729,6 +757,16 @@ const DashboardPage = () => {
                       </TableBody>
                     </Table>
                   </Box>
+                )}
+                {!loading && (
+                  <Paper variant="outlined" sx={{ mt: 2, p: 1.5, bgcolor: '#ffebee', borderColor: '#ef9a9a' }}>
+                    <Typography variant="body2" fontWeight={700} mb={0.5}>
+                      กรอบระยะเวลามาตรฐานในการดำเนินการ (SLA) คืออะไร
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                      คือจำนวนวันที่กำหนดให้ดำเนินการตามประเภทเรื่องใน Master Data ซึ่งแต่ละประเภทอาจมีจำนวนวันไม่เท่ากัน และหากเรื่องไม่ได้ระบุประเภท ระบบจะใช้ค่าเริ่มต้น 15 วัน โดยเริ่มนับตั้งแต่วันที่ส่งมอบเรื่องให้หน่วยงานและนับรวมวันหยุด เรื่องจะแสดงในตารางนี้เมื่อพ้นวันครบกำหนดแล้วยังไม่ปิดหรือปฏิเสธ โดยคอลัมน์ “เกิน (วัน)” แสดงจำนวนวันที่เกินจากวันครบกำหนด
+                    </Typography>
+                  </Paper>
                 )}
               </CardContent>
             </Card>

@@ -27,6 +27,7 @@ import TuneIcon from '@mui/icons-material/Tune';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 import PageHeader from '../../components/common/PageHeader';
+import EscalationSettingPanel from './EscalationSettingPanel';
 import * as masterDataApi from '../../api/masterDataApi';
 import { alertError, alertWarning, extractError, toastSuccess } from '../../utils/alert';
 
@@ -136,6 +137,10 @@ const TABS = [
     toggleFn: masterDataApi.toggleComplainantType,
     hasDescription: false,
   },
+  {
+    label: 'ระดับการเร่งรัด',
+    custom: true,
+  },
 ];
 
 const SettingsPage = () => {
@@ -152,6 +157,12 @@ const SettingsPage = () => {
   const cfg = TABS[tab];
 
   const load = useCallback(() => {
+    if (cfg.custom) {
+      setItems([]);
+      setLoading(false);
+      setError('');
+      return;
+    }
     setLoading(true);
     setError('');
     cfg.listFn()
@@ -218,11 +229,11 @@ const SettingsPage = () => {
         title="ตั้งค่า Master Data"
         subtitle="ประเภทเรื่อง ช่องทาง และข้อมูลอ้างอิงของระบบ"
         color="info"
-        action={
+        action={!cfg.custom ? (
           <Button variant="contained" startIcon={<AddIcon />} onClick={openCreate}>
             เพิ่ม
           </Button>
-        }
+        ) : null}
       />
 
       {error && <ErrorAlert message={error} sx={{ mb: 2 }} />}
@@ -237,7 +248,9 @@ const SettingsPage = () => {
         {TABS.map((t) => <Tab key={t.label} label={t.label} />)}
       </Tabs>
 
-      {loading ? (
+      {cfg.custom ? (
+        <EscalationSettingPanel />
+      ) : loading ? (
         <Box display="flex" justifyContent="center" py={4}>
           <CircularProgress />
         </Box>

@@ -22,6 +22,7 @@ import Tabs from '@mui/material/Tabs';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import DownloadIcon from '@mui/icons-material/Download';
+import SummarizeIcon from '@mui/icons-material/Summarize';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import CategoryIcon from '@mui/icons-material/Category';
@@ -35,6 +36,7 @@ import * as agencyApi from '../../api/agencyApi';
 import * as complaintApi from '../../api/complaintApi';
 import * as reportApi from '../../api/reportApi';
 import { formatDateShort } from '../../utils/formatters';
+import ExecutiveSummaryTab from './ExecutiveSummaryTab';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -628,10 +630,10 @@ const ReportPage = () => {
     }).catch(() => {});
   }, []);
 
-  const exportTypeMap = ['monthly', 'by-category', 'by-agency', 'overdue'];
-  const tabLabels     = ['รายเดือน', 'ตามประเภทเรื่อง', 'ตามหน่วยงาน', 'เรื่องเกินกำหนด'];
+  const exportTypeMap = [null, 'monthly', 'by-category', 'by-agency', 'overdue'];
 
   const handleExport = async () => {
+    if (!exportTypeMap[tab]) return;
     setExporting(true);
     try {
       const res = await reportApi.exportExcel({ type: exportTypeMap[tab] });
@@ -649,6 +651,7 @@ const ReportPage = () => {
   };
 
   const TAB_CONTENT = [
+    <ExecutiveSummaryTab agencies={agencies} />,
     <MonthlyTab    agencies={agencies} />,
     <ByCategoryTab agencies={agencies} />,
     <ByAgencyTab   agencies={agencies} />,
@@ -659,13 +662,15 @@ const ReportPage = () => {
     <Box>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h5" fontWeight={700}>รายงาน</Typography>
-        <Button
-          variant="outlined" size="small"
-          startIcon={exporting ? <CircularProgress size={14} /> : <DownloadIcon />}
-          onClick={handleExport} disabled={exporting}
-        >
-          Export Excel
-        </Button>
+        {tab > 0 && (
+          <Button
+            variant="outlined" size="small"
+            startIcon={exporting ? <CircularProgress size={14} /> : <DownloadIcon />}
+            onClick={handleExport} disabled={exporting}
+          >
+            Export Excel
+          </Button>
+        )}
       </Box>
 
       <Paper sx={{ mb: 2 }}>
@@ -673,6 +678,7 @@ const ReportPage = () => {
           value={tab} onChange={(_, v) => setTab(v)}
           variant="scrollable" scrollButtons="auto"
         >
+          <Tab icon={<SummarizeIcon sx={{ color: '#0D47A1' }} />} iconPosition="start" label="บทสรุปผู้บริหาร" />
           <Tab icon={<CalendarMonthIcon sx={{ color: '#1565C0' }} />} iconPosition="start" label="รายเดือน" />
           <Tab icon={<CategoryIcon sx={{ color: '#7B1FA2' }} />} iconPosition="start" label="ตามประเภทเรื่อง" />
           <Tab icon={<BusinessIcon sx={{ color: '#00838F' }} />} iconPosition="start" label="ตามหน่วยงาน" />

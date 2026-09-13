@@ -33,6 +33,7 @@ const BACKEND_ROLES = [
 ];
 
 const AGENCY_ROLES = ['agency_officer', 'agency_head'];
+const CENTER_ROLES = ['super_admin', 'admin', 'officer', 'chief'];
 
 const EMPTY_FORM = {
   username: '', full_name: '', email: '', phone: '',
@@ -81,7 +82,7 @@ const UserFormPage = () => {
     setForm((p) => ({
       ...p,
       [name]: value,
-      ...(name === 'role_code' && !AGENCY_ROLES.includes(value) ? { agency_id: '' } : {}),
+      ...(name === 'role_code' && (CENTER_ROLES.includes(value) || !AGENCY_ROLES.includes(value)) ? { agency_id: '' } : {}),
     }));
     setErrors((p) => ({ ...p, [name]: '' }));
   };
@@ -130,7 +131,9 @@ const UserFormPage = () => {
 
   if (loading) return <LoadingSpinner />;
 
-  const needsAgency = AGENCY_ROLES.includes(form.role_code);
+  const isCenter = CENTER_ROLES.includes(form.role_code);
+  const isAgencyRole = AGENCY_ROLES.includes(form.role_code);
+  const showAgency = Boolean(form.role_code);
 
   return (
     <Box>
@@ -184,14 +187,29 @@ const UserFormPage = () => {
                 </Select>
               </FormControl>
             </Grid>
-            {needsAgency && (
+            {showAgency && (
               <Grid item xs={12} sm={6}>
-                <FormControl fullWidth required size="small" error={Boolean(errors.agency_id)}>
-                  <InputLabel>หน่วยงาน</InputLabel>
-                  <Select name="agency_id" value={form.agency_id} label="หน่วยงาน" onChange={handleChange} disabled={saving}>
-                    {agencies.map((a) => <MenuItem key={a.id} value={a.id}>{a.name}</MenuItem>)}
-                  </Select>
-                </FormControl>
+                {isCenter ? (
+                  <TextField
+                    fullWidth label="หน่วยงาน" size="small"
+                    value="ศูนย์ดำรงธรรมจังหวัดศรีสะเกษ (กำหนดอัตโนมัติ)"
+                    disabled
+                    helperText="บทบาทนี้จะถูกกำหนดหน่วยงานศูนย์ดำรงธรรมโดยอัตโนมัติ"
+                  />
+                ) : (
+                  <FormControl fullWidth required={isAgencyRole} size="small" error={Boolean(errors.agency_id)}>
+                    <InputLabel>หน่วยงาน</InputLabel>
+                    <Select name="agency_id" value={form.agency_id} label="หน่วยงาน" onChange={handleChange} disabled={saving}>
+                      {!isAgencyRole && <MenuItem value=""><em>ไม่ระบุ</em></MenuItem>}
+                      {agencies.map((a) => <MenuItem key={a.id} value={a.id}>{a.name}</MenuItem>)}
+                    </Select>
+                    {errors.agency_id && (
+                      <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.5 }}>
+                        {errors.agency_id}
+                      </Typography>
+                    )}
+                  </FormControl>
+                )}
               </Grid>
             )}
           </Grid>

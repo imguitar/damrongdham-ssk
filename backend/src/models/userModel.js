@@ -50,7 +50,7 @@ const updateLastLogin = async (id) => {
 
 // ── User Management (admin CRUD) ───────────────────────────────────────────────
 
-const findAll = async ({ search, roleId, agencyId, isActive, limit = 20, offset = 0 } = {}) => {
+const findAll = async ({ search, role, roleId, agencyId, isActive, limit = 20, offset = 0 } = {}) => {
   const conditions = [];
   const params = [];
 
@@ -58,6 +58,7 @@ const findAll = async ({ search, roleId, agencyId, isActive, limit = 20, offset 
     conditions.push('(u.username LIKE ? OR u.full_name LIKE ? OR u.email LIKE ?)');
     params.push(`%${search}%`, `%${search}%`, `%${search}%`);
   }
+  if (role) { conditions.push('r.code = ?'); params.push(role); }
   if (roleId) { conditions.push('u.role_id = ?'); params.push(parseInt(roleId)); }
   if (agencyId) { conditions.push('u.agency_id = ?'); params.push(parseInt(agencyId)); }
   if (isActive !== undefined) { conditions.push('u.is_active = ?'); params.push(isActive ? 1 : 0); }
@@ -65,7 +66,7 @@ const findAll = async ({ search, roleId, agencyId, isActive, limit = 20, offset 
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
 
   const [[{ total }]] = await pool.query(
-    `SELECT COUNT(*) AS total FROM users u ${where}`,
+    `SELECT COUNT(*) AS total FROM users u JOIN roles r ON r.id = u.role_id ${where}`,
     params
   );
 

@@ -21,11 +21,20 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import { darken } from '@mui/material/styles';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import BusinessIcon from '@mui/icons-material/Business';
+import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import FactCheckIcon from '@mui/icons-material/FactCheck';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import NewReleasesIcon from '@mui/icons-material/NewReleases';
+import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import ScheduleIcon from '@mui/icons-material/Schedule';
 import SendIcon from '@mui/icons-material/Send';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
@@ -42,6 +51,7 @@ import { formatDateShort } from '../../utils/formatters';
 
 const REPORT_ROLES  = [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.OFFICER, ROLES.CHIEF, ROLES.EXECUTIVE];
 const CENTER_ADMIN  = [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.OFFICER, ROLES.CHIEF];
+const AGENCY_ROLES  = [ROLES.AGENCY_OFFICER, ROLES.AGENCY_HEAD];
 
 const MONTHS_TH = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 const CURRENT_YEAR = new Date().getFullYear();
@@ -51,15 +61,6 @@ const STATUS_HEX = {
   NEW: '#1565c0', SCREENING: '#7b1fa2', ASSIGNED: '#0277bd',
   ACCEPTED: '#00796b', IN_PROGRESS: '#f57c00', RESOLVED: '#558b2f',
   REVIEWING: '#6a1b9a', CLOSED: '#2e7d32', REJECTED: '#c62828', RETURNED: '#e65100',
-};
-
-const SUMMARY_GRADIENTS = {
-  primary:   'linear-gradient(135deg, #0D47A1 0%, #1565C0 55%, #1976D2 100%)',
-  info:      'linear-gradient(135deg, #01579B 0%, #0277BD 55%, #039BE5 100%)',
-  warning:   'linear-gradient(135deg, #7A3E00 0%, #E65100 55%, #F57C00 100%)',
-  error:     'linear-gradient(135deg, #7F1D1D 0%, #B71C1C 55%, #C62828 100%)',
-  secondary: 'linear-gradient(135deg, #1B5E20 0%, #2E7D32 55%, #43A047 100%)',
-  success:   'linear-gradient(135deg, #0B3D2E 0%, #1B5E20 55%, #2E7D32 100%)',
 };
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -92,53 +93,149 @@ const ChartCard = ({ title, children, action }) => (
   </Card>
 );
 
-const SummaryCard = ({ label, value, icon, color, onClick }) => (
-  <Card
-    sx={{
-      height: '100%',
-      color: '#fff',
-      background: SUMMARY_GRADIENTS[color] || SUMMARY_GRADIENTS.primary,
-      overflow: 'hidden',
-    }}
-  >
-    <CardActionArea
-      onClick={onClick}
+const SummaryCard = ({ label, value, icon, accent, details = [], onClick, largeIcon = false }) => {
+  const content = (
+    <CardContent
       sx={{
+        minHeight: largeIcon ? 136 : 132,
         height: '100%',
-        color: 'inherit',
-        '&:hover': {
-          backgroundColor: 'rgba(255,255,255,0.08)',
-        },
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        p: largeIcon ? 2.25 : 2,
+        position: 'relative',
+        zIndex: 1,
       }}
     >
-      <CardContent sx={{ height: '100%', display: 'flex', alignItems: 'center' }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
-          <Box>
-            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.82)' }} noWrap>{label}</Typography>
-            <Typography variant="h4" fontWeight={700} color="inherit" lineHeight={1.2} mt={0.5}>
-              {value?.toLocaleString('th-TH') ?? '-'}
-            </Typography>
-          </Box>
+      <Box display="flex" justifyContent="space-between" alignItems="flex-start" gap={1}>
+        <Box minWidth={0}>
+          <Typography
+            variant={largeIcon ? 'subtitle1' : 'body2'}
+            sx={{ color: 'rgba(255,255,255,0.92)', fontSize: largeIcon ? '1.05rem' : undefined }}
+            fontWeight={largeIcon ? 600 : 500}
+          >
+            {label}
+          </Typography>
+          <Typography
+            variant={largeIcon ? 'h3' : 'h4'}
+            fontWeight={largeIcon ? 800 : 700}
+            color="inherit"
+            lineHeight={1.1}
+            mt={largeIcon ? 0.75 : 0.5}
+            sx={{ fontSize: largeIcon ? '2.5rem' : undefined }}
+          >
+            {value?.toLocaleString('th-TH') ?? '-'}
+          </Typography>
+        </Box>
+        {!largeIcon && (
           <Box
             sx={{
-              width: 48,
-              height: 48,
-              borderRadius: '50%',
-              bgcolor: 'rgba(255,255,255,0.18)',
-              color: 'rgba(255,255,255,0.9)',
+              width: 60,
+              height: 60,
+              borderRadius: '18px',
+              bgcolor: 'rgba(255,255,255,0.22)',
+              color: 'rgba(255,255,255,0.98)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0,
-              '& .MuiSvgIcon-root': { fontSize: 28 },
+              boxShadow: '0 4px 14px rgba(0,0,0,0.14)',
+              '& .MuiSvgIcon-root': { fontSize: 40 },
             }}
           >
             {icon}
           </Box>
+        )}
+      </Box>
+
+      {details.length > 0 && (
+        <Box display="flex" alignItems="center" flexWrap="wrap" columnGap={0.75} rowGap={0.25} mt={1.25}>
+          {details.map((detail, index) => (
+            <Box key={detail.label} display="flex" alignItems="center" gap={0.35}>
+              {index > 0 && <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.48)' }}>•</Typography>}
+              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.75)' }}>{detail.label}</Typography>
+              <Typography variant="caption" color="inherit" fontWeight={600}>
+                {Number(detail.value || 0).toLocaleString('th-TH')}
+              </Typography>
+            </Box>
+          ))}
         </Box>
-      </CardContent>
-    </CardActionArea>
-  </Card>
+      )}
+    </CardContent>
+  );
+
+  return (
+    <Card
+      sx={{
+        height: '100%',
+        overflow: 'hidden',
+        position: 'relative',
+        color: '#fff',
+        background: `linear-gradient(135deg, ${darken(accent, 0.36)} 0%, ${darken(accent, 0.08)} 100%)`,
+        boxShadow: (theme) => theme.shadows[3],
+        transition: (theme) => theme.transitions.create(['transform', 'box-shadow'], {
+          duration: theme.transitions.duration.shorter,
+        }),
+        ...(onClick && {
+          '&:hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: (theme) => theme.shadowsSoftHover,
+          },
+        }),
+      }}
+    >
+      {largeIcon && (
+        <Box
+          aria-hidden="true"
+          sx={{
+            position: 'absolute',
+            right: -8,
+            bottom: -16,
+            opacity: 0.18,
+            color: '#fff',
+            pointerEvents: 'none',
+            zIndex: 0,
+            '& .MuiSvgIcon-root': { fontSize: 104 },
+            transform: 'rotate(-8deg)',
+          }}
+        >
+          {icon}
+        </Box>
+      )}
+      {onClick ? (
+        <CardActionArea onClick={onClick} sx={{ height: '100%', color: 'inherit' }}>
+          {content}
+        </CardActionArea>
+      ) : content}
+    </Card>
+  );
+};
+
+const CardSection = ({ title, subtitle, icon, cards, columns = 3, loading, onCardClick, largeIcon = false }) => (
+  <Box mb={2.5}>
+    <Box mb={1.25}>
+      <Box display="flex" alignItems="center" gap={0.75}>
+        {icon}
+        <Typography variant="subtitle1" fontWeight={700}>{title}</Typography>
+      </Box>
+      {subtitle && <Typography variant="caption" color="text.secondary" sx={{ ml: icon ? 3.75 : 0 }}>{subtitle}</Typography>}
+    </Box>
+    <Grid container spacing={2}>
+      {cards.map((card) => {
+        const { key, ...cardProps } = card;
+        return (
+          <Grid item xs={columns === 4 ? 6 : 12} sm={columns === 4 ? 6 : 4} md={12 / columns} key={key}>
+            <SummaryCard
+              {...cardProps}
+              value={loading ? undefined : card.value}
+              onClick={onCardClick ? () => onCardClick(card) : undefined}
+              largeIcon={largeIcon}
+            />
+          </Grid>
+        );
+      })}
+    </Grid>
+  </Box>
 );
 
 // ── Main Component ────────────────────────────────────────────────────────────
@@ -184,7 +281,7 @@ const DashboardPage = () => {
         isReportRole ? dashboardApi.getTrend({ year })     : Promise.resolve(null),
         isCenterAdmin ? dashboardApi.getOverdue(params)   : Promise.resolve(null),
         isCenterAdmin ? dashboardApi.getNearDue(params)   : Promise.resolve(null),
-        dashboardApi.getEscalated(),
+        dashboardApi.getEscalated(params),
       ];
 
       const [sumRes, statusRes, catRes, agRes, trendRes, overdueRes, nearRes, escalRes] = await Promise.all(calls);
@@ -210,15 +307,77 @@ const DashboardPage = () => {
 
   const s = data.summary;
 
-  // Summary card definitions
-  const CARDS = [
-    { key: 'total',      label: 'ทั้งหมด',          value: s.total,                               color: 'primary',   icon: <AssignmentIcon />,    nav: '/complaints' },
-    { key: 'new',        label: 'รับใหม่/คัดกรอง',  value: (s.new||0)+(s.screening||0),           color: 'info',      icon: <NewReleasesIcon />,   nav: '/complaints', navState: { status: 'NEW' } },
-    { key: 'active',     label: 'กำลังดำเนินการ',   value: (s.accepted||0)+(s.in_progress||0),    color: 'warning',   icon: <HourglassEmptyIcon />,nav: '/complaints', navState: { status: 'IN_PROGRESS' } },
-    { key: 'overdue',    label: 'เกินกำหนด',         value: s.overdue,                             color: 'error',     icon: <WarningAmberIcon />,  nav: '/complaints' },
-    { key: 'assigned',   label: 'ส่งต่อหน่วยงาน',   value: s.assigned,                            color: 'secondary', icon: <SendIcon />,          nav: '/complaints', navState: { status: 'ASSIGNED' } },
-    { key: 'closed',     label: 'ปิดแล้ว',           value: s.closed,                              color: 'success',   icon: <CheckCircleIcon />,   nav: '/complaints', navState: { status: 'CLOSED' } },
+  const isAgency = AGENCY_ROLES.includes(role);
+  const isExecutive = role === ROLES.EXECUTIVE;
+  const pendingTotal = Math.max(0, (s.total || 0) - (s.closed || 0) - (s.rejected || 0));
+
+  const overviewCards = [
+    { key: 'total', label: 'ทั้งหมด', value: s.total || 0, accent: '#1565C0', icon: <AssignmentIcon />, filter: {} },
+    {
+      key: 'pending', label: 'คงค้าง', value: pendingTotal, accent: '#3949AB', icon: <PendingActionsIcon />,
+      filter: { statuses: 'NEW,SCREENING,ASSIGNED,ACCEPTED,IN_PROGRESS,RESOLVED,REVIEWING,RETURNED' },
+    },
+    { key: 'closed', label: 'ปิดแล้ว', value: s.closed || 0, accent: '#2E7D32', icon: <CheckCircleIcon />, filter: { status: 'CLOSED' } },
+    { key: 'rejected', label: 'ปฏิเสธ', value: s.rejected || 0, accent: '#64748B', icon: <CancelIcon />, filter: { status: 'REJECTED' } },
   ];
+
+  const centerCards = [
+    {
+      key: 'center-queue', label: 'รอรับและคัดกรอง',
+      value: (s.new || 0) + (s.screening || 0) + (s.returned || 0),
+      accent: '#0288D1', icon: <NewReleasesIcon />,
+      details: [
+        { label: 'ใหม่', value: s.new },
+        { label: 'คัดกรอง', value: s.screening },
+        { label: 'ส่งกลับ', value: s.returned },
+      ],
+      filter: { statuses: 'NEW,SCREENING,RETURNED' },
+    },
+    {
+      key: 'center-in-progress', label: 'ศูนย์กำลังดำเนินการ', value: s.center_in_progress || 0,
+      accent: '#00838F', icon: <AccountBalanceIcon />, filter: { status: 'IN_PROGRESS', work_owner: 'center' },
+    },
+    {
+      key: 'center-review', label: 'รอตรวจผลและปิดเรื่อง', value: (s.resolved || 0) + (s.reviewing || 0),
+      accent: '#6A1B9A', icon: <FactCheckIcon />,
+      details: [
+        { label: 'รอตรวจ', value: s.resolved },
+        { label: 'กำลังตรวจ', value: s.reviewing },
+      ],
+      filter: { statuses: 'RESOLVED,REVIEWING' },
+    },
+  ];
+
+  const agencyCards = [
+    { key: 'assigned', label: 'รอหน่วยงานรับเรื่อง', value: s.assigned || 0, accent: '#5E35B1', icon: <SendIcon />, filter: { status: 'ASSIGNED' } },
+    { key: 'accepted', label: 'รับแล้ว รอเริ่มงาน', value: s.accepted || 0, accent: '#00796B', icon: <AssignmentTurnedInIcon />, filter: { status: 'ACCEPTED' } },
+    {
+      key: 'agency-progress', label: 'หน่วยงานกำลังดำเนินการ', value: s.agency_in_progress || 0,
+      accent: '#B45309', icon: <BusinessIcon />, filter: { status: 'IN_PROGRESS', work_owner: 'agency' },
+    },
+  ];
+
+  const urgentCards = [
+    { key: 'near-due', label: 'ใกล้ครบกำหนด SLA', value: s.near_due || 0, accent: '#A16207', icon: <ScheduleIcon />, filter: { near_due: 'true' }, urgent: true },
+    { key: 'overdue', label: 'เกินกำหนด SLA', value: s.overdue || 0, accent: '#D32F2F', icon: <WarningAmberIcon />, filter: { is_overdue: 'true' }, urgent: true },
+    {
+      key: 'escalated', label: 'เรื่องที่ถูกเร่งรัด', value: s.escalated || 0, accent: '#C2185B', icon: <ErrorOutlineIcon />, urgent: true,
+      details: [
+        { label: 'L1', value: s.escalation_l1 },
+        { label: 'L2', value: s.escalation_l2 },
+        { label: 'L3', value: s.escalation_l3 },
+      ],
+      filter: { escalated: 'true' },
+    },
+  ];
+
+  const openCard = (card) => {
+    if (isExecutive) return;
+    const params = { ...card.filter };
+    if (dateFrom) params.date_from = dateFrom;
+    if (dateTo) params.date_to = dateTo;
+    navigate('/complaints', { state: { dashboardFilter: { label: card.label, params } } });
+  };
 
   // Trend chart data — add Thai month label
   const trendData = data.trend.map((t) => ({ ...t, monthLabel: MONTHS_TH[t.month - 1] }));
@@ -246,7 +405,24 @@ const DashboardPage = () => {
     <Box>
       {/* ── Header ─────────────────────────────────────────────── */}
       <Box display="flex" flexWrap="wrap" gap={1} justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h5" fontWeight={700}>Dashboard</Typography>
+        <Box display="flex" alignItems="center" gap={1.25}>
+          <DashboardIcon sx={{ fontSize: 32, color: '#1565C0' }} />
+          <Box>
+            <Typography
+              variant="h4"
+              fontWeight={800}
+              sx={{
+                background: 'linear-gradient(135deg, #1565C0 0%, #0D47A1 60%, #00838F 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                letterSpacing: '-0.02em',
+                lineHeight: 1.2,
+              }}
+            >
+              Dashboard
+            </Typography>
+          </Box>
+        </Box>
         <Box display="flex" gap={1} alignItems="center" flexWrap="wrap">
           <TextField
             type="date" label="ตั้งแต่" size="small"
@@ -262,6 +438,7 @@ const DashboardPage = () => {
             variant="outlined" size="small"
             startIcon={loading ? <CircularProgress size={14} /> : <RefreshIcon />}
             onClick={load} disabled={loading}
+            sx={{ height: 40 }}
           >
             โหลดใหม่
           </Button>
@@ -275,19 +452,45 @@ const DashboardPage = () => {
       )}
 
       {/* ── Summary Cards ──────────────────────────────────────── */}
-      <Grid container spacing={2} mb={3}>
-        {CARDS.map((card) => (
-          <Grid item xs={6} sm={4} md={2} key={card.key}>
-            <SummaryCard
-              label={card.label}
-              value={loading ? undefined : card.value}
-              icon={card.icon}
-              color={card.color}
-              onClick={() => navigate(card.nav, card.navState ? { state: card.navState } : undefined)}
-            />
-          </Grid>
-        ))}
-      </Grid>
+      <CardSection
+        icon={<AssignmentIcon sx={{ color: '#1565C0', fontSize: 22 }} />}
+        title="ภาพรวม"
+        subtitle="สรุปจำนวนเรื่องตามผลลัพธ์ล่าสุด"
+        cards={overviewCards}
+        columns={4}
+        loading={loading}
+        onCardClick={isExecutive ? null : openCard}
+        largeIcon
+      />
+
+      {(isCenterAdmin || isExecutive) && (
+        <CardSection
+          icon={<AccountBalanceIcon sx={{ color: '#00838F', fontSize: 22 }} />}
+          title="งานของศูนย์ดำรงธรรม"
+          subtitle="คิวรับเรื่อง คัดกรอง และตรวจผลก่อนปิดเรื่อง"
+          cards={centerCards}
+          loading={loading}
+          onCardClick={isExecutive ? null : openCard}
+        />
+      )}
+
+      <CardSection
+        icon={<BusinessIcon sx={{ color: '#B45309', fontSize: 22 }} />}
+        title="งานของหน่วยงานปลายทาง"
+        subtitle={isAgency ? 'คิวงานของหน่วยงานที่คุณสังกัด' : 'คิวรับเรื่องและดำเนินการของหน่วยงานที่รับส่งต่อ'}
+        cards={agencyCards}
+        loading={loading}
+        onCardClick={isExecutive ? null : openCard}
+      />
+
+      <CardSection
+        icon={<WarningAmberIcon sx={{ color: '#D32F2F', fontSize: 22 }} />}
+        title="งานต้องติดตามเร่งด่วน"
+        subtitle="แสดงทุกการ์ดแม้ยังไม่มีงาน เพื่อให้เห็นสถานะครบถ้วน"
+        cards={urgentCards}
+        loading={loading}
+        onCardClick={isExecutive ? null : openCard}
+      />
 
       {/* ── Charts — REPORT_ROLES only ─────────────────────────── */}
       {isReportRole && (

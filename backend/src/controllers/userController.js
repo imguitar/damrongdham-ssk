@@ -59,11 +59,11 @@ const resolveAgencyForRole = async (roleCode, requestedAgencyId) => {
 const list = async (req, res, next) => {
   try {
     const { page, limit, offset } = parsePagination(req.query);
-    const { search, role_id, agency_id, is_active } = req.query;
+    const { search, role, role_id, agency_id, is_active } = req.query;
 
     const isActiveFilter = is_active === 'true' ? true : is_active === 'false' ? false : undefined;
 
-    const { rows, total } = await userModel.findAll({ search, roleId: role_id, agencyId: agency_id, isActive: isActiveFilter, limit, offset });
+    const { rows, total } = await userModel.findAll({ search, role, roleId: role_id, agencyId: agency_id, isActive: isActiveFilter, limit, offset });
     return successList(res, rows, paginationMeta(total, page, limit));
   } catch (err) {
     next(err);

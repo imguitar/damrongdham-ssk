@@ -21,6 +21,7 @@ import Typography from '@mui/material/Typography';
 import MenuIcon from '@mui/icons-material/Menu';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
+import PersonIcon from '@mui/icons-material/Person';
 
 import { useAuth } from '../../contexts/AuthContext';
 import { useNotification } from '../../contexts/NotificationContext';
@@ -108,9 +109,9 @@ const Topbar = ({ drawerOpen, onDesktopDrawerToggle, onMobileMenuClick }) => {
 
         <Box sx={{ flex: 1 }} />
 
-        {/* Current user's agency */}
+        {/* Current user's agency + name */}
         {user?.agency_name && (
-          <Tooltip title={user.agency_name}>
+          <Tooltip title={`${user.agency_name} (${user.full_name || user.username})`}>
             <Typography
               variant="body2"
               color="text.secondary"
@@ -118,10 +119,10 @@ const Topbar = ({ drawerOpen, onDesktopDrawerToggle, onMobileMenuClick }) => {
               noWrap
               sx={{
                 mr: 1,
-                maxWidth: { xs: 120, sm: 240, lg: 360 },
+                maxWidth: { xs: 140, sm: 280, lg: 420 },
               }}
             >
-              {user.agency_name}
+              {user.agency_name} ({user.full_name || user.username})
             </Typography>
           </Tooltip>
         )}
@@ -214,8 +215,8 @@ const Topbar = ({ drawerOpen, onDesktopDrawerToggle, onMobileMenuClick }) => {
         {/* User avatar menu */}
         <Tooltip title={user?.full_name || user?.username || ''}>
           <IconButton onClick={handleOpenMenu} sx={{ p: 0.5 }}>
-            <Avatar sx={{ width: 34, height: 34, bgcolor: 'primary.main', fontSize: '0.8rem', fontWeight: 700 }}>
-              {initials}
+            <Avatar sx={{ width: 34, height: 34, bgcolor: 'primary.main' }}>
+              <PersonIcon sx={{ fontSize: 22 }} />
             </Avatar>
           </IconButton>
         </Tooltip>

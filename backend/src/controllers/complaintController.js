@@ -16,8 +16,9 @@ const list = async (req, res, next) => {
   try {
     const { page, limit, offset } = parsePagination(req.query);
     const {
-      status, category_id, agency_id, district_id, province_id,
-      priority, is_overdue, search, date_from, date_to,
+      status, statuses, category_id, agency_id, district_id, province_id,
+      priority, is_overdue, near_due, escalated, work_owner,
+      search, date_from, date_to,
       sort, order,
     } = req.query;
 
@@ -26,8 +27,9 @@ const list = async (req, res, next) => {
       : null;
 
     const { rows, total } = await complaintModel.findAll({
-      status, category_id, agency_id, district_id, province_id,
-      priority, is_overdue, search, date_from, date_to,
+      status, statuses, category_id, agency_id, district_id, province_id,
+      priority, is_overdue, near_due, escalated, work_owner,
+      search, date_from, date_to,
       sort, order, limit, offset,
       currentUserAgencyId,
     });

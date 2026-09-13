@@ -127,8 +127,8 @@ const create = async ({
 };
 
 const findAll = async ({
-  status, category_id, agency_id: agencyIdFilter, district_id, province_id: provinceIdFilter,
-  priority, is_overdue, search, date_from, date_to,
+  status, statuses, category_id, agency_id: agencyIdFilter, district_id, province_id: provinceIdFilter,
+  priority, is_overdue, near_due, escalated, work_owner, search, date_from, date_to,
   sort = 'created_at', order = 'desc',
   limit = 20, offset = 0,
   currentUserAgencyId = null,
@@ -153,11 +153,59 @@ const findAll = async ({
   }
 
   if (status) { whereConditions.push('c.status = ?'); filterParams.push(status); }
+  if (statuses) {
+    const statusList = String(statuses)
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean);
+    if (statusList.length) {
+      whereConditions.push(`c.status IN (${statusList.map(() => '?').join(',')})`);
+      filterParams.push(...statusList);
+    }
+  }
   if (category_id) { whereConditions.push('c.category_id = ?'); filterParams.push(parseInt(category_id)); }
   if (district_id) { whereConditions.push('c.district_id = ?'); filterParams.push(parseInt(district_id)); }
   if (provinceIdFilter) { whereConditions.push('c.province_id = ?'); filterParams.push(parseInt(provinceIdFilter)); }
   if (priority) { whereConditions.push('c.priority = ?'); filterParams.push(priority); }
-  if (is_overdue === 'true' || is_overdue === '1') { whereConditions.push('c.is_overdue = 1'); }
+  if (is_overdue === 'true' || is_overdue === '1') {
+    whereConditions.push(
+      "(c.is_overdue = 1 OR (c.due_date IS NOT NULL AND c.due_date < CURDATE())) AND c.status NOT IN ('CLOSED','REJECTED')"
+    );
+  }
+  if (near_due === 'true' || near_due === '1') {
+    whereConditions.push(
+      "c.due_date IS NOT NULL AND DATEDIFF(c.due_date, CURDATE()) BETWEEN 0 AND 3 AND c.is_overdue = 0 AND c.status NOT IN ('CLOSED','REJECTED')"
+    );
+  }
+  if (escalated === 'true' || escalated === '1') {
+    whereConditions.push("c.escalation_level > 0 AND c.status NOT IN ('CLOSED','REJECTED')");
+  }
+  if (work_owner === 'center') {
+    whereConditions.push(`(
+      NOT EXISTS (
+        SELECT 1 FROM complaint_assignments ca_owner
+        WHERE ca_owner.complaint_id = c.id AND ca_owner.is_active = 1
+      )
+      OR EXISTS (
+        SELECT 1
+        FROM complaint_assignments ca_owner
+        INNER JOIN agencies a_owner ON a_owner.id = ca_owner.agency_id
+        WHERE ca_owner.complaint_id = c.id
+          AND ca_owner.is_active = 1
+          AND a_owner.is_center = 1
+      )
+    )`);
+  }
+  if (work_owner === 'agency') {
+    whereConditions.push(`EXISTS (
+      SELECT 1
+      FROM complaint_assignments ca_owner
+      INNER JOIN agencies a_owner ON a_owner.id = ca_owner.agency_id
+      WHERE ca_owner.complaint_id = c.id
+        AND ca_owner.is_active = 1
+        AND a_owner.is_center = 0
+    )`);
+  }
   if (search) {
     whereConditions.push('(c.title LIKE ? OR c.complaint_number LIKE ?)');
     filterParams.push(`%${search}%`, `%${search}%`);

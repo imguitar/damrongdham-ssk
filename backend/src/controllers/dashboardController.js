@@ -46,7 +46,48 @@ const summary = async (req, res, next) => {
       SUM(c.status = 'CLOSED') AS closed,
       SUM(c.status = 'REJECTED') AS rejected,
       SUM(c.status = 'RETURNED') AS returned,
-      SUM(c.is_overdue = 1) AS overdue
+      SUM(
+        c.status = 'IN_PROGRESS'
+        AND (
+          NOT EXISTS (
+            SELECT 1 FROM complaint_assignments ca_center_none
+            WHERE ca_center_none.complaint_id = c.id AND ca_center_none.is_active = 1
+          )
+          OR EXISTS (
+            SELECT 1
+            FROM complaint_assignments ca_center
+            INNER JOIN agencies a_center ON a_center.id = ca_center.agency_id
+            WHERE ca_center.complaint_id = c.id
+              AND ca_center.is_active = 1
+              AND a_center.is_center = 1
+          )
+        )
+      ) AS center_in_progress,
+      SUM(
+        c.status = 'IN_PROGRESS'
+        AND EXISTS (
+          SELECT 1
+          FROM complaint_assignments ca_agency
+          INNER JOIN agencies a_agency ON a_agency.id = ca_agency.agency_id
+          WHERE ca_agency.complaint_id = c.id
+            AND ca_agency.is_active = 1
+            AND a_agency.is_center = 0
+        )
+      ) AS agency_in_progress,
+      SUM(
+        c.due_date IS NOT NULL
+        AND DATEDIFF(c.due_date, CURDATE()) BETWEEN 0 AND 3
+        AND c.is_overdue = 0
+        AND c.status NOT IN ('CLOSED','REJECTED')
+      ) AS near_due,
+      SUM(
+        (c.is_overdue = 1 OR (c.due_date IS NOT NULL AND c.due_date < CURDATE()))
+        AND c.status NOT IN ('CLOSED','REJECTED')
+      ) AS overdue,
+      SUM(c.escalation_level > 0 AND c.status NOT IN ('CLOSED','REJECTED')) AS escalated,
+      SUM(c.escalation_level = 1 AND c.status NOT IN ('CLOSED','REJECTED')) AS escalation_l1,
+      SUM(c.escalation_level = 2 AND c.status NOT IN ('CLOSED','REJECTED')) AS escalation_l2,
+      SUM(c.escalation_level = 3 AND c.status NOT IN ('CLOSED','REJECTED')) AS escalation_l3
     FROM complaints c`;
 
     sql = injectAgencyJoin(sql, vals, req.user.role, req.user.agency_id, agency_id);
@@ -251,7 +292,7 @@ const overdue = async (req, res, next) => {
 // Roles: officer, chief, admin — complaints with due_date within 3 days
 const nearDue = async (req, res, next) => {
   try {
-    const { category_id } = req.query;
+    const { date_from, date_to, category_id } = req.query;
     const vals = [];
 
     let sql = `SELECT c.id, c.complaint_number, c.title, c.status, c.priority,
@@ -267,6 +308,8 @@ const nearDue = async (req, res, next) => {
       AND c.is_overdue = 0
       AND c.status NOT IN ('CLOSED','REJECTED')`;
 
+    if (date_from)   { sql += ' AND c.created_at >= ?'; vals.push(`${date_from} 00:00:00`); }
+    if (date_to)     { sql += ' AND c.created_at <= ?'; vals.push(`${date_to} 23:59:59`); }
     if (category_id) { sql += ' AND c.category_id = ?'; vals.push(Number(category_id)); }
     sql += ' ORDER BY days_remaining ASC LIMIT 100';
 
@@ -279,6 +322,7 @@ const nearDue = async (req, res, next) => {
 // Returns complaints with escalation_level 1, 2, or 3 (not yet closed/rejected)
 const escalated = async (req, res, next) => {
   try {
+    const { date_from, date_to } = req.query;
     const effectiveAgencyId = AGENCY_ROLES.includes(req.user.role) ? req.user.agency_id : null;
 
     let sql = `SELECT c.id, c.complaint_number, c.title,
@@ -295,8 +339,14 @@ const escalated = async (req, res, next) => {
       vals.push(Number(effectiveAgencyId));
     }
 
-    sql += ` WHERE c.escalation_level > 0
-        AND c.status NOT IN ('CLOSED','REJECTED')
+    const where = [
+      'c.escalation_level > 0',
+      "c.status NOT IN ('CLOSED','REJECTED')",
+    ];
+    if (date_from) { where.push('c.created_at >= ?'); vals.push(`${date_from} 00:00:00`); }
+    if (date_to)   { where.push('c.created_at <= ?'); vals.push(`${date_to} 23:59:59`); }
+
+    sql += ` WHERE ${where.join(' AND ')}
       ORDER BY c.escalation_level DESC, c.last_progress_at ASC`;
 
     const [rows] = await pool.query(sql, vals);

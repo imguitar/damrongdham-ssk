@@ -23,6 +23,10 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import DownloadIcon from '@mui/icons-material/Download';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import CategoryIcon from '@mui/icons-material/Category';
+import BusinessIcon from '@mui/icons-material/Business';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   LineChart, Line,
@@ -669,7 +673,10 @@ const ReportPage = () => {
           value={tab} onChange={(_, v) => setTab(v)}
           variant="scrollable" scrollButtons="auto"
         >
-          {tabLabels.map((l, i) => <Tab key={i} label={l} />)}
+          <Tab icon={<CalendarMonthIcon sx={{ color: '#1565C0' }} />} iconPosition="start" label="รายเดือน" />
+          <Tab icon={<CategoryIcon sx={{ color: '#7B1FA2' }} />} iconPosition="start" label="ตามประเภทเรื่อง" />
+          <Tab icon={<BusinessIcon sx={{ color: '#00838F' }} />} iconPosition="start" label="ตามหน่วยงาน" />
+          <Tab icon={<WarningAmberIcon sx={{ color: '#E65100' }} />} iconPosition="start" label="เรื่องเกินกำหนด" />
         </Tabs>
       </Paper>
 

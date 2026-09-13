@@ -52,11 +52,13 @@ const ComplaintListPage = () => {
   const initFilters = location.state?.status
     ? { ...EMPTY_FILTERS, status: location.state.status }
     : EMPTY_FILTERS;
+  const initialDashboardFilter = location.state?.dashboardFilter || null;
 
   const [complaints, setComplaints] = useState([]);
   const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 25, totalPages: 0 });
   const [filters, setFilters] = useState(initFilters);
   const [activeFilters, setActiveFilters] = useState(initFilters);
+  const [dashboardFilter, setDashboardFilter] = useState(initialDashboardFilter);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -78,12 +80,13 @@ const ComplaintListPage = () => {
     },
   ];
 
-  const load = useCallback((page = 1, applied = activeFilters) => {
+  const load = useCallback((page = 1, applied = activeFilters, appliedDashboardFilter = dashboardFilter) => {
     setLoading(true);
     setError(null);
     const params = {
       page,
       limit: pagination.limit,
+      ...(appliedDashboardFilter?.params || {}),
       ...(applied.search ? { search: applied.search } : {}),
       ...(applied.status ? { status: applied.status } : {}),
       ...(applied.priority ? { priority: applied.priority } : {}),
@@ -96,19 +99,28 @@ const ComplaintListPage = () => {
       })
       .catch((err) => setError(extractError(err, 'โหลดรายการเรื่องร้องเรียนไม่สำเร็จ')))
       .finally(() => setLoading(false));
-  }, [activeFilters, pagination.limit]); // eslint-disable-line
+  }, [activeFilters, dashboardFilter, pagination.limit]); // eslint-disable-line
 
   useEffect(() => { load(1); }, []); // eslint-disable-line
 
   const handleSearch = () => {
+    setDashboardFilter(null);
     setActiveFilters(filters);
-    load(1, filters);
+    load(1, filters, null);
   };
 
   const handleClear = () => {
+    setDashboardFilter(null);
     setFilters(EMPTY_FILTERS);
     setActiveFilters(EMPTY_FILTERS);
-    load(1, EMPTY_FILTERS);
+    load(1, EMPTY_FILTERS, null);
+    navigate(location.pathname, { replace: true, state: null });
+  };
+
+  const clearDashboardFilter = () => {
+    setDashboardFilter(null);
+    load(1, activeFilters, null);
+    navigate(location.pathname, { replace: true, state: null });
   };
 
   const columns = [
@@ -174,6 +186,18 @@ const ComplaintListPage = () => {
       />
 
       {error && <ErrorAlert message={error} sx={{ mb: 2 }} />}
+
+      {dashboardFilter && (
+        <Box mb={1.5} display="flex" alignItems="center" gap={1} flexWrap="wrap">
+          <Typography variant="body2" color="text.secondary">ตัวกรองจาก Dashboard:</Typography>
+          <Chip
+            label={dashboardFilter.label}
+            color="primary"
+            variant="outlined"
+            onDelete={clearDashboardFilter}
+          />
+        </Box>
+      )}
 
       <FilterBar
         filters={filters}

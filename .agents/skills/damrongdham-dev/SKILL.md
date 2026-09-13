@@ -1,255 +1,73 @@
 ---
 name: damrongdham-dev
-description: คู่มือการทำงานของ AI สำหรับโปรเจกต์ Web Application ระบบร้องเรียนศูนย์ดำรงธรรมจังหวัด (Damrongdham SSK)
+description: กฎธุรกิจ stack และ source map สำหรับพัฒนา รีวิว ทดสอบ และจัดทำเอกสาร Damrongdham SSK (Sisaket E-CMS/DCMS) รวม Complaint, Citizen, LINE และ Deployment พร้อมเลือก Common Skills ตามงาน ใช้เฉพาะ repository นี้
 ---
 
-# SKILL: Damrongdham SSK AI Assistant
-
-## 1. Purpose
-
-ไฟล์นี้คือคู่มือ (Instruction Manual) สำหรับ AI เพื่อใช้เป็นแนวทางในการพัฒนาโปรเจกต์ Damrongdham SSK (ระบบร้องเรียนศูนย์ดำรงธรรมจังหวัด) โดยครอบคลุมถึง Tech Stack, มาตรฐานการเขียนโค้ด, กติกาการทำงานตาม Phase, ข้อห้าม, และรูปแบบการตอบกลับ
-
-AI **ต้องอ่านไฟล์นี้ทุกครั้งก่อนเริ่มทำงาน** และยึดถือกติกานี้อย่างเคร่งครัด
-
----
-
-## 2. Project Working Principles
-
-* **Tech Stack**: React 18 + Vite 5 + MUI 5 (Frontend), Node.js 20 LTS + Express 4 (Backend), MySQL 8 (Database), Docker Compose (Dev) → Prod 2 targets: **On-premise/Ubuntu Docker** (`docker-compose.prod.yml` + Nginx, ใช้ root `Dockerfile`) และ **Shared Server (pm2 + nginx subpath)** — production จริงปัจจุบันรันแบบหลัง บน `thaidevhub.site/damrongdham-ssk/`
-* **Scope**: ศูนย์ดำรงธรรม **จังหวัดศรีสะเกษ** — Master Data (อำเภอ/ตำบล/ประเภทเรื่อง/หน่วยงาน) ตาม `docs/planning/05-database-design.md` §8
-* **Architecture**: 3-Layer Architecture สำหรับ Backend (Route → Controller → Service → Model)
-* **Workflow**: ทำงานเป็น Phase ตามที่กำหนดใน `docs/planning/10-implementation-plan.md`
-* **Core Rule**: **ห้ามเขียนโค้ดนอกเหนือจากที่กำหนดใน Phase ปัจจุบัน**
-* **Context First**: อ้างอิงเอกสารใน `docs/planning/` ก่อนตัดสินใจ
-
----
-
-## 3. AI General Rules
-
-1.  **Read Context First**: อ่าน `docs/planning/PROJECT_CONTEXT.md` และ `docs/planning/10-implementation-plan.md` ก่อนเริ่มเขียนโค้ดทุกครั้ง
-2.  **No Assumption**: หาก Requirement ไม่ชัดเจน **ต้องถามผู้ใช้ก่อน** ห้ามคิดหรือเดาเอาเอง
-3.  **Strict Phase Control**: ทำเฉพาะงานใน Phase ที่ได้รับมอบหมาย ห้ามทำเกินขอบเขต
-4.  **No Unapproved Architecture Changes**: ห้ามเปลี่ยน Architecture, Tech Stack หรือ Database Schema ยกเว้นมีเหตุผลทางเทคนิคที่จำเป็นและได้รับอนุมัติจากผู้ใช้แล้ว
-5.  **Language**: สื่อสารกับผู้ใช้เป็นภาษาไทย (ยกเว้น Code และ Technical Terms)
-
----
-
-## 4. Planning Rules
-
-1.  การวางแผนทั้งหมดจะอยู่ในโฟลเดอร์ `docs/planning/`
-2.  ห้ามแก้ไขเอกสาร Planning เดิม (01-10) เว้นแต่พบข้อผิดพลาดร้ายแรงและได้รับอนุญาต
-3.  หากระหว่างพัฒนาพบข้อจำกัดทางเทคนิคที่ต้องแก้แผน ให้สร้างเอกสารอัปเดต หรือปรับปรุงเอกสารเดิมโดยมี Commit Message ที่ชัดเจน
-
----
-
-## 5. Implementation by Phase Rules
-
-1.  เริ่มทำแต่ละ Phase เมื่อผู้ใช้สั่งให้เริ่มเท่านั้น (เช่น "เริ่ม Phase 1 ได้")
-2.  ก่อนเขียนโค้ดในแต่ละ Phase:
-    *   ระบุขอบเขตของงานใน Phase นั้น
-    *   ระบุ Dependency ว่าต้องอิงกับ Phase ก่อนหน้าอย่างไร
-    *   ระบุรายการไฟล์ที่จะสร้างหรือแก้ไข
-3.  หลังเขียนโค้ดในแต่ละ Phase:
-    *   สรุปวิธีรัน (Run Instructions)
-    *   สรุปวิธีทดสอบ (Testing Instructions)
-    *   สรุป Acceptance Criteria Checklist
-    *   เสนอ Git Commit Message
-    *   สร้าง Phase Completion Report
-4.  **ต้องผ่าน Acceptance Criteria ของ Phase ปัจจุบันให้หมดก่อน จึงจะย้ายไป Phase ถัดไปได้**
-
----
-
-## 6. Frontend Development Rules
-
-1.  **Framework**: React + Vite
-2.  **UI Library**: MUI (Material UI) เท่านั้น ห้ามใช้ Tailwind CSS หรือ Bootstrap
-3.  **Language**: JavaScript (`.js`, `.jsx`) — ไม่ใช้ TypeScript
-4.  **State Management**: ใช้ React Context API สำหรับ Global State เบื้องต้น — ห้ามใช้ Redux, Zustand ยกเว้นจำเป็นจริงๆ
-5.  **API Client**: ใช้ `axios` พร้อม Interceptors สำหรับ Authentication (JWT)
-6.  **Component Structure**: แยก UI Components ให้ Reusable และจัดหมวดหมู่ตาม `docs/planning/09-project-docker-architecture.md`
-7.  **Naming Convention**:
-    *   Components/Pages: PascalCase (e.g., `ComplaintList.jsx`)
-    *   Hooks/Utils: camelCase (e.g., `useAuth.js`, `formatDate.js`)
-
----
-
-## 7. Backend Development Rules
-
-1.  **Framework**: Node.js + Express
-2.  **Architecture**: แยก Logic เป็น Routes → Controllers → Services → Models
-3.  **Language**: JavaScript (`.js`) — ไม่ใช้ TypeScript
-4.  **Authentication**: ใช้ JWT (`jsonwebtoken`) และ bcrypt สำหรับรหัสผ่าน
-5.  **Validation**: ตรวจสอบ Request Body/Params/Query ก่อนส่งเข้า Controller เสมอ
-6.  **Error Handling**: ใช้ Global Error Handler Middleware ให้ API คืนค่า Error Response ที่มีรูปแบบเดียวกัน
-7.  **Naming Convention**:
-    *   Files/Functions/Variables: camelCase (e.g., `authController.js`, `createComplaint`)
-
----
-
-## 8. Database Development Rules
-
-1.  **Database**: MySQL 8.0
-2.  **Driver**: `mysql2` (ใช้ Connection Pool + Promise) — **ห้ามใช้ ORM (Sequelize, Prisma, etc.)**
-3.  **Encoding**: ใช้ `utf8mb4` และ `utf8mb4_unicode_ci` สำหรับทุกตารางเพื่อรองรับภาษาไทย
-4.  **Naming Convention**:
-    *   Tables/Columns: snake_case (e.g., `complaint_categories`, `created_at`)
-5.  **SQL Scripts**: วางคำสั่ง `CREATE TABLE` และ Seed Data ไว้ใน `db/init/` (ปัจจุบันคือ `db/init/01-init.sql`) — โฟลเดอร์ชื่อ `db/` ไม่ใช่ `database/` และ mount เข้า `/docker-entrypoint-initdb.d`
-6.  **Transactions**: ใช้ Database Transaction (`START TRANSACTION`, `COMMIT`, `ROLLBACK`) สำหรับคำสั่งที่อัปเดตหลายตารางพร้อมกัน
-
----
-
-## 9. API Development Rules
-
-1.  อ้างอิงและปฏิบัติตาม API Contract ใน `docs/planning/06-api-contract.md`
-2.  RESTful Standard: ใช้ HTTP Methods (GET, POST, PUT, PATCH, DELETE) และ Status Codes ให้ถูกต้อง
-3.  Response Format (Success):
-    ```json
-    {
-      "success": true,
-      "data": { ... }
-    }
-    ```
-4.  Response Format (Error):
-    ```json
-    {
-      "success": false,
-      "error": {
-        "code": "ERROR_CODE",
-        "message": "Error description"
-      }
-    }
-    ```
-
----
-
-## 10. Docker Development Rules
-
-1.  **Dev Environment**: ใช้ `docker-compose.yml` (Frontend, Backend, DB, phpMyAdmin) — ports: frontend `5173`, backend `5001`, MySQL host `3307`→`3306`, phpMyAdmin `8081`→`80`
-2.  **Prod Environment — 2 targets:**
-    *   **Target A — On-premise/Ubuntu Docker**: `docker-compose.prod.yml` รัน `app` (build จากroot `Dockerfile`) + `db` (MySQL) + `nginx` (`nginx/default.conf` ทำ SSL + reverse proxy → app:5001). env จาก `.env.production`
-    *   **Target B — Shared Server (pm2 + nginx subpath)**: ไม่ใช้ Docker/container เลย — รันตรงบน host ด้วย `pm2` ต่อกับ MySQL ที่ติดตั้งบนเครื่อง, frontend build เป็น static วางใต้ `/var/www/html/<app>/`, nginx ที่ใช้ร่วมกับแอปอื่นบนเครื่องทำ subpath routing (`location /<subpath>/` และ `/<subpath>/api/`). ดูขั้นตอนเต็มที่ `docs/deployment/DEPLOYMENT.md` Target B
-    *   ⚠️ ถ้าแก้โครงสร้าง/พฤติกรรมของแอปที่กระทบ deploy (เช่น path ที่ hardcode, base URL) ต้องเช็คว่าไม่พังทั้งสอง target — โดยเฉพาะ Target B ที่ frontend ต้องรองรับ subpath ผ่าน `import.meta.env.BASE_URL` และ `VITE_API_BASE_URL` (ดู `frontend/vite.config.js`, `frontend/src/main.jsx`)
-3.  **Volumes/Storage**: Dev — Map Volume สำหรับ Source Code (Hot Reload) + `db/init`. Target A ใช้ Docker volume `app_uploads` (ถาวร); Target B ใช้ `backend/uploads/` ตรงบน filesystem ของ host
-4.  **Networking**: Target A — Service สื่อสารผ่าน Docker Internal Network ไม่ใช่ `localhost`. Target B — backend ฟัง `localhost:<port>` บน host แล้วให้ nginx proxy เข้ามา ไม่เปิด port นั้นสู่ public โดยตรง
-5.  **Environment Variables**: ห้ามใส่ Secret หรือ Config ในโค้ดโดยตรง ให้ใช้ไฟล์ `.env` (ตัวอย่างเก็บใน `.env.example`); Target A ตั้งค่าใน `.env.production`, Target B ตั้งค่าใน `backend/.env` + `frontend/.env.production` โดยตรงบนเครื่อง server
-
----
-
-## 11. Testing Rules
-
-1.  **Manual Test Instructions**: ทุก Phase ต้องมีวิธีทดสอบที่ทำตามได้จริง
-2.  **Backend APIs**: เสนอ `curl` commands สำหรับการทดสอบ API ที่สร้างใหม่
-3.  **Workflow Validation**: ทดสอบขอบเขตสถานะ (Transitions) ให้ตรงกับที่กำหนดไว้
-4.  **Docker Tests**: ทดสอบ Clean Start (`docker compose down -v` → `docker compose up -d`) ในจุดสำคัญ (เช่น Phase 1, Phase 2)
-
----
-
-## 12. Debugging Rules
-
-1.  **Isolate Issue**: หาสาเหตุของ Bug ก่อนเริ่มแก้ไขโค้ด
-2.  **Focus on Scope**: แก้ Bug เฉพาะส่วนที่เกี่ยวข้อง ห้ามเพิ่ม Feature หรือเปลี่ยน Logic โดยไม่จำเป็นระหว่างแก้ Bug
-3.  **Log It**: ถ้าแก้ Bug ที่เกิดจาก Design Flaw ให้บันทึกลง Report
-4.  **Verify Fix**: ระบุวิธีทดสอบเพื่อยืนยันว่า Bug ถูกแก้ไขแล้ว และไม่กระทบกับฟังก์ชันอื่น
-
----
-
-## 13. Documentation Rules
-
-1.  อัปเดต `README.md` หากมีขั้นตอนการรัน หรือ Dependencies ที่เปลี่ยนไป
-2.  อธิบายโค้ดที่ซับซ้อนด้วย Comment สั้นๆ ภาษาอังกฤษ
-3.  หากมีการแก้ไข API Contract หรือ Database Schema แบบฉุกเฉิน (และได้รับอนุมัติแล้ว) ต้องเข้าไปอัปเดตในไฟล์ `docs/planning/` ที่เกี่ยวข้องด้วย
-
----
-
-## 14. Git Commit Rules
-
-ใช้รูปแบบ Conventional Commits:
-
-```
-<type>: <description>
-```
-
-**Types ที่อนุญาต:**
-*   `feat`: เพิ่ม Feature หรือจบ Phase
-*   `fix`: แก้ไข Bug
-*   `docs`: สร้างหรือแก้ไขเอกสาร
-*   `chore`: ปรับปรุง Config, Docker, Dependencies
-*   `refactor`: ปรับโครงสร้างโค้ด โดยไม่เปลี่ยน Logic ภายนอก
-
-**ตัวอย่าง:**
-*   `docs: create implementation plan (phase 10)`
-*   `feat: complete phase 1 project setup`
-*   `fix: resolve database connection timeout issue`
-
----
-
-## 15. Security Rules
-
-1.  **No Plaintext Passwords**: รหัสผ่านต้องถูกเข้ารหัสด้วย `bcrypt` ก่อนบันทึกลง Database
-2.  **JWT Protection**: API ที่ต้องการสิทธิ์ต้องมี Middleware สำหรับตรวจสอบ JWT Token เสมอ
-3.  **Role Authorization**: ต้องเช็คสิทธิ์ (Role) ในระดับ API Controller/Middleware ไม่ใช่แค่ซ่อนปุ่มใน UI
-4.  **Input Validation**: ตรวจสอบ Input จากผู้ใช้เสมอ ป้องกัน SQL Injection และ XSS
-
----
-
-## 16. Forbidden Actions
-
-**⛔ AI ห้ามทำสิ่งเหล่านี้โดยเด็ดขาด ⛔**
-
-1.  เขียนโค้ดข้าม Phase ที่ยังไม่ได้รับมอบหมาย
-2.  ใช้ ORM (Sequelize, Prisma, TypeORM, ฯลฯ)
-3.  ใช้ TypeScript (บังคับใช้เฉพาะ JavaScript)
-4.  ใช้ State Management Libraries ภายนอก (Redux, Zustand) ยกเว้นผ่านการอนุมัติ
-5.  ใช้ UI Framework อื่นนอกจาก MUI
-6.  ใส่ Secret Keys, Passwords จริงลงใน Source Code (ให้ใช้ `.env`)
-7.  ลบโค้ดหรือไฟล์ที่ทำงานได้ดีอยู่แล้วโดยไม่อธิบายเหตุผล
-8.  ข้ามการทำ Acceptance Criteria Checklist
-
----
-
-## 17. Required Response Format
-
-เมื่อเริ่มต้นทำ Phase ใหม่ AI ต้องตอบด้วยรูปแบบนี้:
-
-```markdown
-## Phase X: [ชื่อ Phase]
-
-### ขอบเขต (Scope)
-- [สรุปงานที่จะทำใน Phase นี้]
-
-### ไฟล์ที่จะสร้างหรือแก้ไข (Files to create/modify)
-- `path/to/file1.js` (สร้างใหม่)
-- `path/to/file2.js` (แก้ไข)
-
-### Code Implementation
-[แสดงเฉพาะโค้ดของไฟล์ที่จำเป็น ใช้คำสั่งเขียนไฟล์หากเกี่ยวข้อง]
-```
-
----
-
-## 18. Phase Completion Report Format
-
-เมื่อผู้ใช้ยืนยัน หรือ AI พัฒนาและทดสอบ (หากทำได้) เสร็จแล้ว AI ต้องสรุปด้วยรูปแบบนี้:
-
-```markdown
-## Phase Completion Report: Phase X
-
-### สรุปผลงาน (Summary)
-[อธิบายสั้นๆ ว่าทำอะไรสำเร็จไปบ้าง]
-
-### วิธีรันและวิธีทดสอบ (Run & Test Instructions)
-1. `[Command สำหรับรัน]`
-2. `[วิธีทดสอบ/Curl command]`
-
-### Acceptance Criteria Checklist
-- [x] ข้อ 1
-- [x] ข้อ 2
-
-### Git Commit Message
-`[แนะนำ Git Commit Message สำหรับ Phase นี้]`
-
-### ข้อเสนอแนะ / ปัญหาที่พบ (Optional)
-[ถ้ามี]
-
-**พร้อมดำเนินการ Phase ถัดไป (Phase Y) หรือไม่?**
-```
+# Damrongdham SSK
+
+## ขอบเขตและกฎร่วม
+
+คู่มือเฉพาะระบบร้องเรียนจังหวัดศรีสะเกษ สื่อสารภาษาไทยและควบคุมขอบเขตตามงานที่ผู้ใช้สั่ง ไม่บังคับเปิด Phase สำหรับ Maintenance
+รักษา React/JSX, MUI, Context, Express/CommonJS และ MySQL/mysql2 Raw SQL ตามโปรเจกต์ ไม่เพิ่ม TypeScript, ORM หรือ framework อื่นโดยไม่ได้รับอนุมัติ
+Staff/Citizen เป็นคนละ principal; authorization, agency scope และ anonymous masking ต้องบังคับจาก Backend ไม่พึ่งปุ่มหรือ route guard
+อย่าฝัง Secret หรือใช้ฐานข้อมูลจริงเป็น test fixture รักษา transaction/audit/idempotency ที่เกี่ยวข้อง และตรวจ subpath เมื่อแก้ URL
+การอนุญาตในคำขอผู้ใช้มีผลเหนือแนวทางใน Skill; ไม่ขออนุมัติซ้ำสำหรับงานที่ได้รับมอบหมายแล้ว
+
+## วิธีเลือกอ่าน
+
+1. ตรวจ Working Tree และขอบเขตคำขอ เลือก Common Skill ตามตารางด้านล่าง ไม่ต้องเปิด software-maintenance หรือทุก Skill กับทุกงาน
+2. ใช้ตารางด้านล่างเลือก Project Reference และอ่านให้ครบก่อนทำงานส่วนนั้น งานข้ามระบบต้องอ่านหลายรายการตามผลกระทบ ไม่โหลดทั้งโฟลเดอร์ทุกครั้ง
+3. Path ใน backtick ของ Project Reference อ้าง repository root ส่วน Markdown link resolve จากไฟล์ปัจจุบัน
+4. หลักฐานจากโค้ด/Tests บอก current behavior ส่วน Requirement ที่อนุมัติบอก intended behavior; โค้ดอาจมีบั๊กและ Manual อาจเก่า ให้แจ้งความต่าง ไม่ยกโค้ดเป็นข้อกำหนดเหนือ Requirement
+5. เมื่อพบ concern ใหม่ระหว่างทำงาน ให้โหลด Reference เพิ่มก่อนเปลี่ยนส่วนนั้น
+
+## Common Skill ตามประเภทงาน
+
+| งาน | Common Skill | ขอบเขต |
+|---|---|---|
+| สำรวจ วินิจฉัย รีวิว refactor เอกสาร | [Software Maintenance](../software-maintenance/SKILL.md) | กระบวนการและหลักฐาน ไม่ใช่คู่มือทุกสาขา |
+| ออกแบบ/รีวิว layout, KPI, charts | [UI Dashboard Design](../ui-dashboard-design/SKILL.md) | ภาพและ interaction ไม่เปลี่ยนนิยามข้อมูล |
+| เขียน JSX, form, state, route, client | [Frontend Development](../frontend-development/SKILL.md) | Implementation ตาม React/MUI เดิม |
+| Endpoint, workflow, query, export | [Backend API Development](../backend-api-development/SKILL.md) | Contract, transaction, scope และข้อมูล |
+| Schema, index, migration, backfill | [Database Migrations](../database-migrations/SKILL.md) | ใช้เมื่อมี schema/data migration จริง |
+| วาง/เพิ่ม/รันทดสอบ | [Testing QA](../testing-qa/SKILL.md) | ตามความเสี่ยง อ่าน Project Testing ก่อน DB tests |
+| Security review หรือ boundary เสี่ยง | [Security Review](../security-review/SKILL.md) | ไม่ขยายเป็น audit ทุกครั้งที่แตะ permission |
+| LINE/OAuth/webhook/outbox/worker | [Integration Development](../integration-development/SKILL.md) | หลักทั่วไป คู่กับ Project LINE |
+| เตรียม/ดำเนินการ release ตามคำขอ | [Deployment Release](../deployment-release/SKILL.md) | ไม่อนุมานอำนาจ deploy จากคำขอเตรียมแผน |
+
+## Project Reference ตามงาน
+
+| งาน/Trigger | Project Reference ที่ต้องอ่าน | ขยายเมื่อ |
+|---|---|---|
+| อธิบายระบบ, เริ่ม feature หลายส่วน, เอกสารขัดกับโค้ด | [บริบทและแหล่งข้อมูล](references/project-context.md) | เปิด source ของฟีเจอร์ที่อ้าง |
+| Login, Citizen, Role, Agency, Anonymous, public projection | [Domain และ Security](references/domain-and-security.md) | LINE เมื่อ link identity; Backend เมื่อแก้ API |
+| รับเรื่อง, assign, return, close, progress, due date, settings | [Workflow/SLA/Escalation](references/workflow-sla.md) | Security สำหรับ actor; Database เมื่อ schema เปลี่ยน |
+| หน้าเว็บ, form, route, API client, layout | [Frontend](references/frontend.md) | [UI Design](../ui-dashboard-design/SKILL.md) เมื่อออกแบบ/รีวิวภาพและ interaction; Security เมื่อ field/action/guard เปลี่ยน; Reporting เมื่อ aggregate |
+| Endpoint, Controller, Service, Model, attachments | [Backend/API](references/backend-api.md) | Security สำหรับ scope; Workflow สำหรับ state; Database สำหรับ persistence |
+| SQL, migration, seed, สังกัดผู้ใช้, system_settings | [Database/Migrations](references/database-migrations.md) | Deployment เมื่อ upgrade; Testing ก่อนรัน DB tests |
+| LINE Login, chatbot, webhook, info request, outbox, groups | [LINE/Notifications](references/line-notifications.md) | Security สำหรับ ownership; Deployment สำหรับ callback/worker |
+| Dashboard, Excel, filters, บทสรุปผู้บริหาร | [Reporting](references/reporting.md) | [UI Design](../ui-dashboard-design/SKILL.md) เมื่อจัดหน้า/KPI/กราฟ; Workflow สำหรับ metric; Security สำหรับ scope/PII |
+| Test, acceptance, regression, build | [Testing](references/testing.md) | ตรวจ helper ก่อน DB-backed test |
+| Deploy, PM2, Docker, proxy, OAuth URL, persistent storage | [Deployment](references/deployment.md) | Database เมื่อมี migration; LINE เมื่อเปลี่ยน worker/callback |
+
+## ตัวอย่างการเลือก Reference ข้ามส่วน
+
+- “แก้ปุ่มรับเรื่องของ Agency”: Frontend + Backend + Domain/Security + Workflow และ targeted Testing
+- “ปรับเกณฑ์เร่งรัด”: Workflow/SLA + Backend + Frontend; Database เพิ่มเมื่อ schema เปลี่ยน ไม่สร้าง migration เพียงเพราะค่า settings เปลี่ยน
+- “Export ไม่ตรงกับ filter”: Project Reporting + Backend + Domain/Security; Common Backend Queries/Exports และ Frontend เมื่อ client ส่ง filter ผิด ไม่สร้าง migration หาก schema ไม่เปลี่ยน
+- “LINE callback หลัง deploy ใช้ไม่ได้”: LINE + Deployment + Domain/Security และ Common Debugging
+- “เขียนคู่มือภาพรวม”: Project Context + Common Delivery และ source ที่รองรับคำกล่าว ไม่รัน integration suite เพียงเพื่อเขียน Markdown
+
+## การใช้ Common Skill กับงานอื่น
+
+Common Skills ทั้ง 9 ในตารางเป็น sibling Skills อิสระ ไม่มี dependency ย้อนกลับมายัง Damrongdham หรือระหว่าง Common Skills
+คัดลอกทั้งโฟลเดอร์นั้นไปยัง `.agents/skills/` ของ repository อื่นได้ แล้วใช้ stack/config/ข้อกำหนดของปลายทาง
+หากย้าย Damrongdham Skill ให้ย้ายพร้อม Common Skills ที่เชื่อมในตารางเพื่อรักษาลิงก์; อย่าคัดลอกกฎจังหวัด Role หรือ MySQL ของระบบนี้ไปบังคับ Common Skill
+ไม่ต้องสร้างสำเนา Common Reference ใน Project Reference; ให้ Project Reference เก็บเฉพาะข้อจำกัดและ source map ของระบบ
+
+## ตรวจรับและส่งมอบ
+
+ตรวจตามความเสี่ยงของงาน ระบุ passed/failed/skipped/not run จริง โดยเฉพาะ DB tests ที่ skip เมื่อ DB ไม่พร้อม
+เมื่อเปลี่ยน behavior ให้ปรับ Manual/LINE/Deployment/Testing document ที่เกี่ยวข้อง; Planning ใช้รักษา traceability เมื่ออยู่ใน scope
+ใช้ Conventional Commits ตามชนิดงาน เช่น feat/fix/docs/refactor/test/chore/build/ci/perf; commit/push/deploy ตามอำนาจจากผู้ใช้
+ส่งมอบผลลัพธ์ ไฟล์สำคัญ และหลักฐานการตรวจอย่างกระชับ ไม่ใช้ Phase Completion Template เว้นผู้ใช้สั่งงานเป็น Phase

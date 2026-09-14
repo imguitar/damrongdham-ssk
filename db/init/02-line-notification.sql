@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS `notification_outbox` (
   `citizen_id`      INT          NOT NULL,
   `complaint_id`    INT,
   `channel`         VARCHAR(20)  NOT NULL DEFAULT 'line',
-  `payload`         JSON         NOT NULL,                -- template inputs (no PII beyond ref/status)
+  `payload`         JSON         NOT NULL,                -- public-safe template inputs; may include staff-confirmed message
   `status`          ENUM('pending','processing','sent','failed','retry','cancelled')
                                  NOT NULL DEFAULT 'pending',
   `attempt_count`   INT          NOT NULL DEFAULT 0,

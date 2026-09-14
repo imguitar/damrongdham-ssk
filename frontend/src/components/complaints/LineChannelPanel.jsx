@@ -35,6 +35,7 @@ const EVENT_LABELS = {
   COMPLAINT_MORE_INFO_REQUIRED: 'ขอข้อมูลเพิ่มเติม',
   COMPLAINT_RESOLVED: 'แจ้งผลดำเนินการ',
   COMPLAINT_CLOSED: 'แจ้งปิดเรื่อง',
+  COMPLAINT_CUSTOM_MESSAGE: 'ข้อความจากเจ้าหน้าที่',
 };
 
 const REQUEST_STATUS = {
@@ -45,13 +46,20 @@ const REQUEST_STATUS = {
 
 const eventLabel = (t) => EVENT_LABELS[t] || t;
 
-const LineChannelPanel = ({ complaintId, canRequestInfo = false, canNotify = false }) => {
+const LineChannelPanel = ({
+  complaintId,
+  canRequestInfo = false,
+  canNotify = false,
+  canSendMessage = false,
+}) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
   const [busy, setBusy] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({ message: '', due_date: '' });
+  const [customMessage, setCustomMessage] = useState('');
+  const [customConfirmOpen, setCustomConfirmOpen] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -98,6 +106,31 @@ const LineChannelPanel = ({ complaintId, canRequestInfo = false, canNotify = fal
     if (ok) {
       setDialogOpen(false);
       setForm({ message: '', due_date: '' });
+    }
+  };
+
+  const openCustomConfirmation = () => {
+    if (!customMessage.trim()) {
+      alertWarning('กรุณาระบุข้อความที่ต้องการส่ง');
+      return;
+    }
+    setCustomConfirmOpen(true);
+  };
+
+  const submitCustomMessage = async () => {
+    const message = customMessage.trim();
+    if (!message) {
+      setCustomConfirmOpen(false);
+      alertWarning('กรุณาระบุข้อความที่ต้องการส่ง');
+      return;
+    }
+    const ok = await act(
+      () => complaintApi.sendLineMessage(complaintId, { message }),
+      'ส่งข้อความเข้าคิวแล้ว ระบบจะส่งภายใน 1 นาที'
+    );
+    if (ok) {
+      setCustomMessage('');
+      setCustomConfirmOpen(false);
     }
   };
 
@@ -181,7 +214,7 @@ const LineChannelPanel = ({ complaintId, canRequestInfo = false, canNotify = fal
                   size="small"
                   variant="contained"
                   startIcon={<SendIcon />}
-                  disabled={busy || !citizen?.linked || citizen?.oa_friend === false}
+                  disabled={busy || !citizen?.linked || citizen?.oa_friend === false || !citizen?.notifications_enabled}
                   onClick={() => act(() => complaintApi.notifyLine(complaintId), 'ส่งการแจ้งสถานะเข้าคิวแล้ว')}
                 >
                   ส่งแจ้งสถานะปัจจุบันอีกครั้ง
@@ -228,6 +261,45 @@ const LineChannelPanel = ({ complaintId, canRequestInfo = false, canNotify = fal
           </CardContent>
         </Card>
       </Grid>
+
+      {/* ข้อความที่เจ้าหน้าที่กำหนดเอง */}
+      {canSendMessage && (
+        <Grid item xs={12}>
+          <Card>
+            <CardContent>
+              <Typography variant="subtitle1" fontWeight={700} mb={1}>
+                ส่งข้อความเพิ่มเติมถึงผู้ร้อง
+              </Typography>
+              <Alert severity="warning" sx={{ mb: 2 }}>
+                ข้อความนี้จะส่งออกนอกระบบถึงผู้ร้องทาง LINE โปรดตรวจผู้รับและเนื้อหาก่อนส่ง
+                และห้ามใส่บันทึกภายในหรือข้อมูลส่วนบุคคลของบุคคลอื่น
+              </Alert>
+              <TextField
+                fullWidth
+                multiline
+                minRows={4}
+                label="ข้อความเพิ่มเติมจากเจ้าหน้าที่"
+                placeholder="พิมพ์ข้อความที่ต้องการแจ้งผู้ร้อง"
+                value={customMessage}
+                onChange={(e) => setCustomMessage(e.target.value)}
+                inputProps={{ maxLength: 1000 }}
+                helperText={`${customMessage.length}/1000 ตัวอักษร`}
+                disabled={busy || !citizen?.linked || citizen?.oa_friend === false || !citizen?.notifications_enabled}
+              />
+              <Box display="flex" justifyContent="flex-end" mt={1.5}>
+                <Button
+                  variant="contained"
+                  startIcon={<SendIcon />}
+                  onClick={openCustomConfirmation}
+                  disabled={busy || !customMessage.trim() || !citizen?.linked || citizen?.oa_friend === false || !citizen?.notifications_enabled}
+                >
+                  ตรวจสอบและส่งข้อความ
+                </Button>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      )}
 
       {/* คำขอข้อมูลเพิ่มเติม */}
       <Grid item xs={12}>
@@ -363,6 +435,45 @@ const LineChannelPanel = ({ complaintId, canRequestInfo = false, canNotify = fal
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)} disabled={busy}>ยกเลิก</Button>
           <Button variant="contained" onClick={submitRequest} disabled={busy}>ส่งคำขอ</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog: ยืนยันข้อความที่กำหนดเองก่อนส่งออกนอกระบบ */}
+      <Dialog
+        open={customConfirmOpen}
+        onClose={() => { if (!busy) setCustomConfirmOpen(false); }}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>ยืนยันส่งข้อความถึงผู้ร้อง</DialogTitle>
+        <DialogContent>
+          <Alert severity="info" sx={{ mb: 2 }}>
+            เมื่อยืนยัน ระบบจะนำข้อความเข้าคิว LINE และส่งภายในประมาณ 1 นาที
+          </Alert>
+          <Typography variant="body2" color="text.secondary" mb={0.75}>
+            ตัวอย่างข้อความที่จะส่ง
+          </Typography>
+          <Box
+            sx={{
+              p: 1.5,
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 1,
+              bgcolor: 'grey.50',
+              whiteSpace: 'pre-wrap',
+              overflowWrap: 'anywhere',
+              maxHeight: 280,
+              overflowY: 'auto',
+            }}
+          >
+            <Typography variant="body2">{customMessage.trim()}</Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCustomConfirmOpen(false)} disabled={busy}>กลับไปแก้ไข</Button>
+          <Button variant="contained" startIcon={<SendIcon />} onClick={submitCustomMessage} disabled={busy}>
+            ยืนยันส่งข้อความ
+          </Button>
         </DialogActions>
       </Dialog>
     </Grid>

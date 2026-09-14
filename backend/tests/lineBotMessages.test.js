@@ -89,4 +89,14 @@ describe('template ข้อความ push (outbox)', () => {
     expect(t).toContain(tpl.statusLabel('CLOSED'));
     expect(t.length).toBeLessThan(400);
   });
+
+  it('ข้อความที่เจ้าหน้าที่กำหนดเองถูกห่อด้วยเลขที่เรื่องและลิงก์ที่ต้องยืนยันตัวตน', () => {
+    const t = tpl.buildByEvent('COMPLAINT_CUSTOM_MESSAGE', {
+      complaintNumber: 'DC-202608-0004',
+      customMessage: 'เจ้าหน้าที่จะลงพื้นที่ในวันที่ 10 สิงหาคม 2569',
+    });
+    expect(t).toContain('DC-202608-0004');
+    expect(t).toContain('เจ้าหน้าที่จะลงพื้นที่');
+    expect(t).toContain('/citizen/complaints/DC-202608-0004');
+  });
 });

@@ -60,6 +60,8 @@ router.post('/:id/info-requests/:reqId/resend', authorize(...REQUEST_INFO_ROLES)
 router.patch('/:id/info-requests/:reqId/cancel', authorize(...REQUEST_INFO_ROLES), lineComplaintController.cancelInfoRequest);
 // ส่งแจ้งผล/สถานะซ้ำทาง LINE (ไม่เปลี่ยนสถานะเรื่อง)
 router.post('/:id/line/notify',                authorize(...CENTER_ROLES), lineComplaintController.notifyStatus);
+// ส่งข้อความที่เจ้าหน้าที่กำหนดเอง (หน่วยงานต้องเป็นผู้รับผิดชอบเรื่องนั้น)
+router.post('/:id/line/messages',              authorize(...STAFF_ROLES), lineComplaintController.sendCustomMessage);
 
 // ── Reveal identity — super_admin only ─────────────────────────────────────────
 router.post('/:id/reveal-identity', authorize('super_admin'), complaintController.revealIdentity);

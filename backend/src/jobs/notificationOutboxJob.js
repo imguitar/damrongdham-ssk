@@ -24,6 +24,8 @@ const EVENT_PREF_MAP = {
   COMPLAINT_RESOLVED:           'notify_resolved',
   COMPLAINT_MORE_INFO_REQUIRED: 'notify_more_info_required',
   COMPLAINT_PROGRESS_UPDATED:   'notify_progress_update',
+  // ข้อความที่เจ้าหน้าที่กำหนดเองเคารพสวิตช์ LINE หลัก แต่ไม่ผูกกับ event toggle อื่น
+  COMPLAINT_CUSTOM_MESSAGE:     null,
 };
 
 // No preference row → default ON (all channels/events enabled)

@@ -32,5 +32,11 @@ describe('notificationOutboxJob.isEnabled', () => {
     expect(EVENT_PREF_MAP.COMPLAINT_PROGRESS_UPDATED).toBe('notify_progress_update');
     expect(EVENT_PREF_MAP.COMPLAINT_RESOLVED).toBe('notify_resolved');
     expect(EVENT_PREF_MAP.COMPLAINT_MORE_INFO_REQUIRED).toBe('notify_more_info_required');
+    expect(EVENT_PREF_MAP.COMPLAINT_CUSTOM_MESSAGE).toBeNull();
+  });
+
+  it('custom staff messages respect the main LINE switch without borrowing another event toggle', () => {
+    expect(isEnabled({ line_enabled: 1, notify_status_change: 0 }, 'COMPLAINT_CUSTOM_MESSAGE')).toBe(true);
+    expect(isEnabled({ line_enabled: 0, notify_status_change: 1 }, 'COMPLAINT_CUSTOM_MESSAGE')).toBe(false);
   });
 });

@@ -728,6 +728,7 @@ const ComplaintDetailPage = () => {
           complaintId={id}
           canRequestInfo={isCenter || isAgency}
           canNotify={isCenter}
+          canSendMessage={isCenter || isAgency}
         />
       )}
 

@@ -51,6 +51,12 @@ const buildComplaintClosedMessage = ({ complaintNumber }) =>
   `🔔 ปิดเรื่องร้องเรียน\n\nเลขที่เรื่อง: ${complaintNumber}\nเรื่องของท่านได้รับการปิดเรียบร้อยแล้ว ขอบคุณที่ใช้บริการ` +
   footer(complaintNumber);
 
+// customMessage = ข้อความที่เจ้าหน้าที่ที่มีสิทธิ์พิมพ์จากหน้าเรื่อง
+// Controller จำกัดความยาวไว้ 1,000 ตัวอักษร; slice ซ้ำเพื่อป้องกัน payload จากแหล่งอื่น
+const buildComplaintCustomMessage = ({ complaintNumber, customMessage }) =>
+  `📨 ข้อความจากศูนย์ดำรงธรรม\n\nเลขที่เรื่อง: ${complaintNumber}\n\n${String(customMessage || '').slice(0, 1000)}` +
+  footer(complaintNumber);
+
 // ── Staff (group) messages ────────────────────────────────────────────────────
 // Internal — may include reference/category/agency/due, but NEVER citizen PII
 // (name / id card), because staff groups can contain people outside the team.
@@ -87,6 +93,7 @@ const buildByEvent = (eventType, data) => {
     case 'COMPLAINT_MORE_INFO_REQUIRED':return buildComplaintMoreInfoMessage(data);
     case 'COMPLAINT_RESOLVED':          return buildComplaintResolvedMessage(data);
     case 'COMPLAINT_CLOSED':            return buildComplaintClosedMessage(data);
+    case 'COMPLAINT_CUSTOM_MESSAGE':     return buildComplaintCustomMessage(data);
     default:                            return null;
   }
 };
@@ -102,4 +109,5 @@ module.exports = {
   buildComplaintMoreInfoMessage,
   buildComplaintResolvedMessage,
   buildComplaintClosedMessage,
+  buildComplaintCustomMessage,
 };

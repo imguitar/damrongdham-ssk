@@ -55,6 +55,19 @@ afterAll(async () => {
     expect(res._s.statusCode).toBe(403);
   });
 
+  it('หน่วยงานที่ไม่ได้รับมอบหมายเรื่องนี้ ส่งข้อความที่กำหนดเองไม่ได้ (403)', async () => {
+    const res = mkRes();
+    await ctrl.sendCustomMessage(
+      mkReq({
+        user: { id: agencyUserId, role: 'agency_officer', agency_id: agencyId },
+        params: { id: String(complaintA.id) },
+        body: { message: 'ข้อความทดสอบ' },
+      }),
+      res, next()
+    );
+    expect(res._s.statusCode).toBe(403);
+  });
+
   it('หน่วยงานที่ไม่ได้รับมอบหมาย ดูแผง LINE ของเรื่องไม่ได้ (403)', async () => {
     const res = mkRes();
     await ctrl.getOverview(
@@ -163,5 +176,47 @@ afterAll(async () => {
       [complaintA.id]
     );
     expect(rows[0].total).toBe(1);
+  });
+
+  it('ข้อความที่เจ้าหน้าที่กำหนดเองถูก trim และกดซ้ำในนาทีเดียวกันไม่สร้างคิวซ้ำ', async () => {
+    const send = async () => {
+      const res = mkRes();
+      await ctrl.sendCustomMessage(
+        mkReq({
+          user: { id: officerId, role: 'officer', agency_id: null },
+          params: { id: String(complaintA.id) },
+          body: { message: '  กรุณาติดต่อกลับภายในเวลาราชการ  ' },
+        }),
+        res, next()
+      );
+      return res._s.statusCode;
+    };
+    expect(await send()).toBe(200);
+    expect(await send()).toBe(200);
+
+    const [rows] = await pool.query(
+      `SELECT payload FROM notification_outbox
+       WHERE complaint_id = ? AND event_type = 'COMPLAINT_CUSTOM_MESSAGE'`,
+      [complaintA.id]
+    );
+    expect(rows).toHaveLength(1);
+    const payload = typeof rows[0].payload === 'string' ? JSON.parse(rows[0].payload) : rows[0].payload;
+    expect(payload.customMessage).toBe('กรุณาติดต่อกลับภายในเวลาราชการ');
+  });
+
+  it('ไม่รับข้อความที่ว่างหรือยาวเกิน 1,000 ตัวอักษร', async () => {
+    for (const message of ['   ', 'ก'.repeat(1001)]) {
+      const res = mkRes();
+      await ctrl.sendCustomMessage(
+        mkReq({
+          user: { id: officerId, role: 'officer', agency_id: null },
+          params: { id: String(complaintA.id) },
+          body: { message },
+        }),
+        res, next()
+      );
+      expect(res._s.statusCode).toBe(400);
+      expect(res._s.body.error.code).toBe('VALIDATION_ERROR');
+    }
   });
 });

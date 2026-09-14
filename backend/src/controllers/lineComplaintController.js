@@ -1,5 +1,6 @@
 'use strict';
 
+const crypto = require('crypto');
 const pool = require('../config/database');
 const complaintModel = require('../models/complaintModel');
 const infoRequestModel = require('../models/infoRequestModel');
@@ -13,7 +14,7 @@ const { formatThaiDate } = require('../utils/thaiDate');
 const { success, error } = require('../utils/response');
 
 // ระบบหลังบ้าน — ส่วน LINE ของเรื่องร้องเรียน:
-// ขอข้อมูลเพิ่มเติม / ดูประวัติข้อความ / เอกสารที่ประชาชนส่งเพิ่ม / ส่งแจ้งผลซ้ำ
+// ขอข้อมูลเพิ่มเติม / ดูประวัติข้อความ / เอกสารที่ประชาชนส่งเพิ่ม / ส่งข้อความถึงผู้ร้อง
 // ทุก endpoint ตรวจสิทธิ์เข้าถึง "เรื่องนั้น" ก่อนเสมอ (RBAC เดิม + ownership ของหน่วยงาน)
 
 const AGENCY_ROLES = ['agency_officer', 'agency_head'];
@@ -339,7 +340,69 @@ const notifyStatus = async (req, res, next) => {
   }
 };
 
+// POST /api/complaints/:id/line/messages — ส่งข้อความที่เจ้าหน้าที่กำหนดเองถึงผู้ร้อง
+// ส่งผ่าน outbox เดิมเพื่อให้ได้ retry/idempotency/log แบบเดียวกับ notification อื่น
+const sendCustomMessage = async (req, res, next) => {
+  try {
+    const complaint = await loadComplaint(req, res);
+    if (!complaint) return undefined;
+
+    const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
+    if (!message) {
+      return error(res, 'VALIDATION_ERROR', 'กรุณาระบุข้อความที่ต้องการส่ง', 400);
+    }
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      return error(res, 'VALIDATION_ERROR', `ข้อความต้องไม่เกิน ${MAX_MESSAGE_LENGTH} ตัวอักษร`, 400);
+    }
+
+    const owner = await complaintOwner(complaint.id);
+    if (!owner.citizen_id) {
+      return error(res, 'LINE_NOT_LINKED', 'เรื่องนี้ไม่มีผู้ร้องที่ผูกบัญชีในระบบ', 400);
+    }
+    const identity = await identityModel.findByCitizen(owner.citizen_id, 'line');
+    if (!identity) {
+      return error(res, 'LINE_NOT_LINKED', 'ผู้ร้องยังไม่ได้ผูกบัญชี LINE จึงส่งข้อความไม่ได้', 400);
+    }
+
+    const pref = await prefModel.getByCitizen(owner.citizen_id);
+    if (pref && !pref.line_enabled) {
+      return error(res, 'LINE_NOTIFICATIONS_DISABLED', 'ผู้ร้องปิดรับการแจ้งเตือนทาง LINE ไว้', 400);
+    }
+
+    // payload เดียวกันจากผู้ส่งคนเดิมภายในนาทีเดียวกันจะสร้างคิวเพียงรายการเดียว
+    const minuteBucket = new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '');
+    const messageHash = crypto.createHash('sha256').update(message).digest('hex').slice(0, 16);
+    await outboxSvc.enqueue(null, {
+      eventType: 'COMPLAINT_CUSTOM_MESSAGE',
+      citizenId: owner.citizen_id,
+      complaintId: complaint.id,
+      complaintNumber: owner.complaint_number,
+      idempotencyKey: `complaint:${complaint.id}:custom:${req.user.id}:${minuteBucket}:${messageHash}`,
+      extra: { customMessage: message },
+    });
+
+    // ไม่เก็บเนื้อหาข้อความใน audit เพื่อลดการทำสำเนาข้อมูลส่วนบุคคลโดยไม่จำเป็น
+    writeAuditLog({
+      userId: req.user.id,
+      action: 'LINE_CUSTOM_MESSAGE_QUEUED',
+      resource: 'complaints',
+      resourceId: complaint.id,
+      details: {
+        complaint_number: owner.complaint_number,
+        event_type: 'COMPLAINT_CUSTOM_MESSAGE',
+        message_length: message.length,
+      },
+      ipAddress: req.ip,
+      userAgent: req.get('user-agent'),
+    });
+
+    return success(res, { message: 'ส่งข้อความเข้าคิวแล้ว ระบบจะส่งภายใน 1 นาที' });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   getOverview, createInfoRequest, listInfoRequests,
-  resendInfoRequest, cancelInfoRequest, notifyStatus,
+  resendInfoRequest, cancelInfoRequest, notifyStatus, sendCustomMessage,
 };

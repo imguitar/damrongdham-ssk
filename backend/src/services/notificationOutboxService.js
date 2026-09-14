@@ -13,7 +13,7 @@ const enqueue = async (conn, { eventType, citizenId, complaintId, complaintNumbe
   const payload = JSON.stringify({
     complaintNumber: complaintNumber || null,
     status: status || null,
-    // extra: ข้อมูลเพิ่มเติมสำหรับ template (ต้องไม่มี PII/ข้อมูลอ่อนไหว)
+    // extra: ข้อมูล public-safe ที่จำเป็นต่อ template; customMessage มาจากเจ้าหน้าที่ที่ยืนยันก่อนส่ง
     ...(extra || {}),
   });
   await q.query(

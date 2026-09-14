@@ -41,7 +41,7 @@ LINE Messaging API  ──►  POST /api/line/webhook   (ตรวจ X-Line-Sig
 notificationOutboxJob (cron ทุก 1 นาที) → LINE push → notification_logs
 ```
 
-## 2. สิ่งที่ LINE ทำได้ (5 ภารกิจหลัก)
+## 2. สิ่งที่ LINE ทำได้ (6 ภารกิจหลัก)
 
 | # | ภารกิจ | ทางเข้า | ปลายทางในระบบเดิม |
 |---|---|---|---|
@@ -50,6 +50,7 @@ notificationOutboxJob (cron ทุก 1 นาที) → LINE push → notifica
 | 3 | ติดตามสถานะ | Rich Menu "ติดตามสถานะ" | `complaints.status` + `complaint_updates(is_public=1)` |
 | 4 | ขอ/ส่งข้อมูลเอกสารเพิ่มเติม | เจ้าหน้าที่กดในระบบหลังบ้าน → ประชาชนตอบในแชต | `complaint_info_requests` / `complaint_info_responses` |
 | 5 | แจ้งผลการดำเนินการ | อัตโนมัติเมื่อสถานะเปลี่ยน + ปุ่มส่งซ้ำ | `notification_outbox` → `notification_logs` |
+| 6 | ส่งข้อความเพิ่มเติมที่เจ้าหน้าที่กำหนด | ช่องพิมพ์ในแท็บ LINE + หน้ายืนยันก่อนส่ง | `notification_outbox` → `notification_logs` |
 
 ## 3. ขั้นตอนรับเรื่อง (wizard)
 
@@ -93,6 +94,7 @@ notificationOutboxJob (cron ทุก 1 นาที) → LINE push → notifica
 | POST | `/api/complaints/:id/info-requests/:reqId/resend` | ศูนย์ + หน่วยงานที่ถือเรื่อง | ส่งคำขอซ้ำ (มี audit log) |
 | PATCH | `/api/complaints/:id/info-requests/:reqId/cancel` | ศูนย์ + หน่วยงานที่ถือเรื่อง | ยกเลิกคำขอ |
 | POST | `/api/complaints/:id/line/notify` | ศูนย์ | ส่งแจ้งสถานะปัจจุบันซ้ำ (ไม่เปลี่ยนสถานะเรื่อง) |
+| POST | `/api/complaints/:id/line/messages` | ศูนย์ + หน่วยงานที่ถือเรื่อง | ส่งข้อความที่เจ้าหน้าที่กำหนดเองเข้าคิว LINE (สูงสุด 1,000 ตัวอักษร) |
 | GET | `/public/privacy` (frontend) | public | ประกาศความเป็นส่วนตัวฉบับเต็มที่ลิงก์จากแชต |
 
 Response format เป็นแบบเดียวกับระบบเดิม (`{ success, data }` / `{ success, error: { code, message } }`)
@@ -182,11 +184,13 @@ Deploy: ไม่มี dependency ใหม่ ไม่เปลี่ยน s
 - ไฟล์แนบ: ดาวน์โหลดผ่าน channel token ฝั่ง server → ตรวจ MIME + ขนาด (≤10 MB, jpg/png/pdf/doc/docx)
   → **เปลี่ยนชื่อไฟล์ที่ระบบสร้างเอง** → เก็บใน private storage เดิม → **ไม่มี public URL**
   ดาวน์โหลดได้เฉพาะเจ้าหน้าที่ที่ผ่าน auth เท่านั้น
-- ข้อความ push มีเฉพาะเลขที่เรื่อง + สถานะ + ลิงก์ (ไม่มีชื่อผู้ถูกร้อง ข้อมูลอ่อนไหว หรือบันทึกภายใน)
+- ข้อความแจ้งเตือนอัตโนมัติมีเฉพาะเลขที่เรื่อง + สถานะ + ลิงก์ (ไม่มีชื่อผู้ถูกร้อง ข้อมูลอ่อนไหว หรือบันทึกภายใน)
+- ข้อความที่เจ้าหน้าที่กำหนดเองจำกัด 1,000 ตัวอักษร มีหน้าตรวจทานก่อนส่ง และห่อด้วยเลขที่เรื่องกับลิงก์เข้าหน้ารายละเอียดที่ตรวจสิทธิ์อีกครั้ง
+- ช่องข้อความเตือนห้ามใส่บันทึกภายในหรือข้อมูลส่วนบุคคลของบุคคลอื่น; ระบบไม่ทำสำเนาเนื้อหาลง notification log หรือ audit log แต่เก็บเนื้อหาใน payload ของ outbox สำหรับการส่งและ retry
 - เรื่องปกปิดตัวตน: ชื่อบัญชี LINE ไม่แสดงต่อผู้ที่ไม่มีสิทธิ์เห็นข้อมูลผู้ร้อง
 - Log ไม่มี access token / channel secret / เนื้อหาข้อความของผู้ร้อง (บันทึกเฉพาะประเภท event + error)
 - Audit log: `LINE_COMPLAINT_CREATED`, `INFO_REQUEST_CREATED/RESENT/CANCELLED`,
-  `LINE_INFO_RESPONSE_SUBMITTED`, `LINE_NOTIFY_RESENT`
+  `LINE_INFO_RESPONSE_SUBMITTED`, `LINE_NOTIFY_RESENT`, `LINE_CUSTOM_MESSAGE_QUEUED`
 - Retention: ร่างบทสนทนา 60 นาที · webhook event id 30 วัน · แถวบทสนทนาที่ไม่ใช้งาน 90 วัน
 
 ## 9b. การเป็นเพื่อนกับ OA (เงื่อนไขของการแจ้งเตือน)
@@ -207,6 +211,7 @@ Deploy: ไม่มี dependency ใหม่ ไม่เปลี่ยน s
   (ยังไม่ตั้ง access token หรือเครือข่ายมีปัญหา) — กรณี `null` จะ**ไม่แสดงคำเตือน** เพื่อไม่ให้เข้าใจผิด
 - ข้อความที่ `failed` ไปแล้วจะไม่ส่งย้อนหลังอัตโนมัติเมื่อผู้ใช้มาเพิ่มเพื่อนภายหลัง —
   เจ้าหน้าที่กด "ส่งแจ้งสถานะปัจจุบันอีกครั้ง" ได้ในแท็บ LINE
+- การส่งข้อความที่กำหนดเองจะปิดใช้งานเมื่อยังไม่ผูก LINE, ไม่ได้เป็นเพื่อน OA หรือผู้ร้องปิดการแจ้งเตือน LINE
 - ให้ผู้ใช้เจอหน้าเชิญเพิ่มเพื่อนตั้งแต่ตอนล็อกอิน: ตั้ง `LINE_LOGIN_BOT_PROMPT=aggressive`
   **และ** ผูก OA เข้ากับ Login channel ที่ **LINE Login → Linked LINE Official Account**
 

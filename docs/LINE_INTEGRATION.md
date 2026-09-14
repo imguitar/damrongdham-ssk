@@ -36,14 +36,15 @@ Frontend CitizenLineCallbackPage → เก็บ token → /me → เข้า
 
 ### Notification flow (แจ้งเตือน)
 ```
-เจ้าหน้าที่เปลี่ยนสถานะ / โพสต์ progress แบบ public
-      ▼  (ภายใน DB transaction เดียวกัน)
+เจ้าหน้าที่เปลี่ยนสถานะ / โพสต์ progress แบบ public / ยืนยันส่งข้อความเพิ่มเติม
+      ▼
 complaintService.changeStatus / complaintUpdateController
-      │  UPDATE complaint + INSERT status log + INSERT notification_outbox
-      ▼  COMMIT
+      │  business action: INSERT outbox ใน transaction เดียวกัน
+      │  manual send: ตรวจสิทธิ์และ preference แล้ว INSERT outbox
+      ▼
 notificationOutboxJob (node-cron ทุก 1 นาที)
       │  claim pending/retry → เช็ค LINE identity + preference
-      │  build template (privacy-safe) → LINE push
+      │  build template (ข้อความระบบหรือข้อความที่เจ้าหน้าที่ตรวจทานแล้ว) → LINE push
       ▼
 LINE Messaging API (/v2/bot/message/push) → ประชาชนได้รับข้อความ
       │  บันทึก notification_logs (sent/failed)
@@ -169,12 +170,12 @@ docker-compose ส่งค่าเหล่านี้เข้า backend co
 
 ## 11. Notification Flow (รายละเอียด)
 
-- **Event ที่สร้าง outbox**: ทุก status transition (`COMPLAINT_STATUS_CHANGED`, `COMPLAINT_CLOSED`) + progress ที่ `is_public=1` (`COMPLAINT_PROGRESS_UPDATED`)
+- **Event ที่สร้าง outbox**: ทุก status transition (`COMPLAINT_STATUS_CHANGED`, `COMPLAINT_CLOSED`) + progress ที่ `is_public=1` (`COMPLAINT_PROGRESS_UPDATED`) + ข้อความเพิ่มเติมที่เจ้าหน้าที่ยืนยันส่ง (`COMPLAINT_CUSTOM_MESSAGE`)
 - **Public vs Internal**: เจ้าหน้าที่ toggle "แสดงต่อประชาชน" ตอนโพสต์ → `PROGRESS`+`is_public=1` (แจ้ง) / ปิด → `REVIEW_NOTE`+`is_public=0` (ไม่แจ้ง)
-- **Preference**: ประชาชนคุม on/off รายเหตุการณ์ที่หน้า "ตั้งค่าการแจ้งเตือน" (`notification_preferences`)
+- **Preference**: ประชาชนคุม on/off รายเหตุการณ์ที่หน้า "ตั้งค่าการแจ้งเตือน" (`notification_preferences`); ข้อความที่เจ้าหน้าที่กำหนดเองเคารพสวิตช์ LINE หลัก
 - **Idempotency**: `notification_outbox.idempotency_key` (UNIQUE) + `X-Line-Retry-Key` (UUID derive จาก key) — กันส่งซ้ำสองชั้น
 - **Retry**: retryable (429/5xx/network) → backoff `1m,5m,15m,1h,3h` สูงสุด 5 ครั้ง → `failed` (dead-letter). Non-retryable (4xx) → `failed` ทันที
-- **Privacy (§18)**: ข้อความมีแค่ **เลขที่เรื่อง + สถานะ + ลิงก์** — ไม่มีบัตร ปชช./ข้อมูลอ่อนไหว/ชื่อผู้ถูกร้อง/internal note
+- **Privacy (§18)**: ข้อความอัตโนมัติมีแค่ **เลขที่เรื่อง + สถานะ + ลิงก์**; ข้อความที่เจ้าหน้าที่กำหนดเองมีคำเตือนและหน้ายืนยันก่อนส่ง และต้องไม่มีบัตร ปชช./ข้อมูลอ่อนไหวของบุคคลอื่น/internal note
 
 ---
 

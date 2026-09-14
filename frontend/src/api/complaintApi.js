@@ -35,6 +35,7 @@ export const downloadAttachment = (attachId) =>
 // LINE channel — สถานะการผูกบัญชี, ประวัติข้อความ, คำขอข้อมูลเพิ่มเติม, เอกสารจากประชาชน
 export const getLineOverview = (id) => axiosInstance.get(`/complaints/${id}/line`);
 export const notifyLine = (id) => axiosInstance.post(`/complaints/${id}/line/notify`);
+export const sendLineMessage = (id, data) => axiosInstance.post(`/complaints/${id}/line/messages`, data);
 export const getInfoRequests = (id) => axiosInstance.get(`/complaints/${id}/info-requests`);
 export const createInfoRequest = (id, data) => axiosInstance.post(`/complaints/${id}/info-requests`, data);
 export const resendInfoRequest = (id, reqId) =>

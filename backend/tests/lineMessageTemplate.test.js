@@ -27,6 +27,7 @@ describe('lineMessageTemplate', () => {
       'COMPLAINT_MORE_INFO_REQUIRED',
       'COMPLAINT_RESOLVED',
       'COMPLAINT_CLOSED',
+      'COMPLAINT_CUSTOM_MESSAGE',
     ];
     for (const ev of events) {
       const msg = tpl.buildByEvent(ev, { complaintNumber: REF, status: 'NEW' });
@@ -42,5 +43,22 @@ describe('lineMessageTemplate', () => {
   it('statusLabel falls back to the raw code when unknown', () => {
     expect(tpl.statusLabel('IN_PROGRESS')).toBe('อยู่ระหว่างดำเนินการ');
     expect(tpl.statusLabel('WEIRD')).toBe('WEIRD');
+  });
+
+  it('custom message contains the staff text, reference, and authenticated detail URL', () => {
+    const msg = tpl.buildComplaintCustomMessage({
+      complaintNumber: REF,
+      customMessage: 'กรุณาติดต่อเจ้าหน้าที่กลับภายในเวลาราชการ',
+    });
+    expect(msg).toContain('ข้อความจากศูนย์ดำรงธรรม');
+    expect(msg).toContain('กรุณาติดต่อเจ้าหน้าที่กลับภายในเวลาราชการ');
+    expect(msg).toContain(REF);
+    expect(msg).toContain(`/citizen/complaints/${REF}`);
+  });
+
+  it('custom message template defensively limits the staff-entered text to 1,000 characters', () => {
+    const msg = tpl.buildComplaintCustomMessage({ complaintNumber: REF, customMessage: 'ก'.repeat(1001) });
+    expect(msg).toContain('ก'.repeat(1000));
+    expect(msg).not.toContain('ก'.repeat(1001));
   });
 });

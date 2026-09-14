@@ -59,6 +59,14 @@ const CitizenLayout = () => {
               >
                 ยื่นเรื่องใหม่
               </Button>
+              <Button
+                component={RouterLink}
+                to="/citizen/manual"
+                size="small"
+                sx={{ color: 'white', display: { xs: 'none', sm: 'inline-flex' } }}
+              >
+                คู่มือ
+              </Button>
               <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ color: 'white' }}>
                 <AccountCircleIcon />
               </IconButton>
@@ -80,6 +88,11 @@ const CitizenLayout = () => {
                   onClick={() => { setAnchorEl(null); navigate('/citizen/notifications'); }}
                 >
                   ตั้งค่าการแจ้งเตือน
+                </MenuItem>
+                <MenuItem
+                  onClick={() => { setAnchorEl(null); navigate('/citizen/manual'); }}
+                >
+                  คู่มือการใช้งาน
                 </MenuItem>
                 <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
                   ออกจากระบบ

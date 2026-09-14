@@ -19,6 +19,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import BusinessIcon from '@mui/icons-material/Business';
 import SettingsIcon from '@mui/icons-material/Settings';
 import HistoryIcon from '@mui/icons-material/History';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
 
 import { useAuth } from '../../contexts/AuthContext';
 import { ADMIN_HEADER_HEIGHT, MINI_DRAWER_WIDTH, ROLES, DRAWER_WIDTH } from '../../utils/constants';
@@ -73,6 +74,14 @@ const MENU_ITEMS = [
     icon: <ChatIcon />,
     iconColor: '#00A84F',
     path: '/line-notifications',
+    roles: ALL_STAFF,
+  },
+  {
+    id: 'manual',
+    label: 'คู่มือการใช้งาน',
+    icon: <MenuBookIcon />,
+    iconColor: '#6D4C41',
+    path: '/manual',
     roles: ALL_STAFF,
   },
 ];

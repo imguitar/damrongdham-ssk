@@ -53,6 +53,7 @@ import AuditLogPage  from '../pages/audit/AuditLogPage';
 
 // ── Phase 12 pages ────────────────────────────────────────────────────────────
 import NotificationPage from '../pages/notifications/NotificationPage';
+const UserManualPage = lazy(() => import('../pages/manual/UserManualPage'));
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -82,6 +83,7 @@ const AppRoutes = () => (
       <Route path="/public/success"        element={<PublicSuccessPage />} />
       {/* ประกาศความเป็นส่วนตัวฉบับเต็ม — ลิงก์จากข้อความใน LINE */}
       <Route path="/public/privacy"        element={<PrivacyNoticePage />} />
+      <Route path="/public/manual"         element={<UserManualPage audience="public" />} />
     </Route>
 
     {/* ── Citizen section (CitizenLayout) ─────────────────────────────── */}
@@ -98,6 +100,7 @@ const AppRoutes = () => (
         <Route path="/citizen/complaints/:complaint_number"        element={<CitizenComplaintDetailPage />} />
         <Route path="/citizen/profile"                             element={<CitizenProfilePage />} />
         <Route path="/citizen/notifications"                       element={<CitizenNotificationSettingsPage />} />
+        <Route path="/citizen/manual"                              element={<UserManualPage audience="citizen" />} />
       </Route>
     </Route>
 
@@ -143,6 +146,7 @@ const AppRoutes = () => (
         {/* All authenticated */}
         <Route path="/profile"            element={<ProfilePage />} />
         <Route path="/line-notifications" element={<LineNotificationPage />} />
+        <Route path="/manual"             element={<UserManualPage />} />
         <Route path="/change-password"    element={<ChangePasswordPage />} />
       </Route>
     </Route>

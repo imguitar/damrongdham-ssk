@@ -1,6 +1,7 @@
-import { Outlet } from 'react-router-dom';
+import { Link as RouterLink, Outlet } from 'react-router-dom';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -12,6 +13,9 @@ const PublicLayout = () => (
         <Typography variant="h6" fontWeight={700} sx={{ flexGrow: 1 }}>
           Sisaket E-Complaint Management System
         </Typography>
+        <Button component={RouterLink} to="/public/manual" sx={{ color: 'common.white', whiteSpace: 'nowrap' }}>
+          คู่มือ
+        </Button>
       </Toolbar>
     </AppBar>
 

@@ -127,7 +127,7 @@ const ComplaintForm = ({
           <>
             <Grid item xs={12} sm={6}>
               <SelectField
-                label="ประเภทงานบริการ *"
+                label="ประเภทงานบริการ"
                 name="service_type_id"
                 value={form.service_type_id}
                 onChange={handleChange}
@@ -140,7 +140,7 @@ const ComplaintForm = ({
             </Grid>
             <Grid item xs={12} sm={6}>
               <SelectField
-                label="ลักษณะเรื่อง *"
+                label="ลักษณะเรื่อง"
                 name="complaint_nature_id"
                 value={form.complaint_nature_id}
                 onChange={handleChange}
@@ -153,7 +153,7 @@ const ComplaintForm = ({
             </Grid>
             <Grid item xs={12} sm={6}>
               <SelectField
-                label="ช่องทางรับเรื่อง *"
+                label="ช่องทางรับเรื่อง"
                 name="channel_id"
                 value={form.channel_id}
                 onChange={handleChange}
@@ -230,7 +230,7 @@ const ComplaintForm = ({
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <SelectField
-                label="ประเภทผู้ร้องเรียน *"
+                label="ประเภทผู้ร้องเรียน"
                 name="complainant_type_id"
                 value={form.complainant_type_id}
                 onChange={handleChange}

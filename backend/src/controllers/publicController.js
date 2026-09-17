@@ -71,7 +71,8 @@ const trackComplaint = async (req, res, next) => {
     if (!code) return error(res, 'NOT_FOUND', 'ไม่พบเรื่องร้องเรียน', 404);
     const data = await complaintModel.findByTrackingCode(code);
     if (!data) return error(res, 'NOT_FOUND', 'ไม่พบเรื่องร้องเรียน', 404);
-    return success(res, { complaint: data });
+    const { id: _id, ...complaint } = data; // ไม่เปิดเผย id ภายใน (เรียงลำดับ เดาได้)
+    return success(res, { complaint });
   } catch (err) {
     next(err);
   }

@@ -102,7 +102,8 @@ const getMyComplaint = async (req, res, next) => {
       return error(res, 'FORBIDDEN', 'ไม่มีสิทธิ์ดูเรื่องนี้', 403);
     }
 
-    return success(res, { complaint: data });
+    const { id: _id, ...complaint } = data;
+    return success(res, { complaint });
   } catch (err) {
     next(err);
   }

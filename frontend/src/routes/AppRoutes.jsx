@@ -36,6 +36,7 @@ import PublicSuccessPage   from '../pages/public/PublicSuccessPage';
 import PrivacyNoticePage   from '../pages/public/PrivacyNoticePage';
 
 // ── Citizen pages ─────────────────────────────────────────────────────────────
+import CitizenStartPage           from '../pages/citizen/CitizenStartPage';
 import CitizenLoginPage           from '../pages/citizen/CitizenLoginPage';
 import CitizenLineCallbackPage    from '../pages/citizen/CitizenLineCallbackPage';
 import CitizenRegisterPage        from '../pages/citizen/CitizenRegisterPage';
@@ -73,6 +74,8 @@ const AppRoutes = () => (
   <Routes>
     {/* ── Login — standalone ──────────────────────────────────────────── */}
     <Route path="/login"         element={<LoginPage />} />
+    {/* หน้าเลือกโหมดก่อนเข้าสู่ระบบ: ยื่นทันที / เข้าสู่ระบบ / ติดตามสถานะ */}
+    <Route path="/citizen"       element={<CitizenStartPage />} />
     <Route path="/citizen/login" element={<CitizenLoginPage />} />
     <Route path="/citizen/line/callback" element={<CitizenLineCallbackPage />} />
 
@@ -94,7 +97,6 @@ const AppRoutes = () => (
       {/* Protected citizen pages */}
       <Route element={<CitizenProtectedRoute />}>
         <Route path="/citizen/complete-profile"                    element={<CitizenCompleteProfilePage />} />
-        <Route path="/citizen"                                     element={<Navigate to="/citizen/complaints" replace />} />
         <Route path="/citizen/complaints"                          element={<CitizenComplaintListPage />} />
         <Route path="/citizen/complaints/new"                      element={<CitizenComplaintCreatePage />} />
         <Route path="/citizen/complaints/:complaint_number"        element={<CitizenComplaintDetailPage />} />

@@ -24,7 +24,7 @@ const CitizenLayout = () => {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/citizen/login');
+    navigate('/citizen');
   };
 
   return (

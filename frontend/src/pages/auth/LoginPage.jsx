@@ -156,7 +156,7 @@ const LoginPage = () => {
           <Stack spacing={1.25} alignItems="center">
             <Link
               component={RouterLink}
-              to="/citizen/login"
+              to="/citizen"
               underline="hover"
               sx={{ fontWeight: 600 }}
             >

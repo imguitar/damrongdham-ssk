@@ -211,21 +211,12 @@ const CitizenLoginPage = () => {
             </Typography>
             <Link
               component={RouterLink}
-              to="/public/complaints/new"
+              to="/citizen"
               variant="body2"
               color="text.secondary"
               underline="hover"
             >
-              ยื่นเรื่องโดยไม่สมัครสมาชิก →
-            </Link>
-            <Link
-              component={RouterLink}
-              to="/public/track"
-              variant="body2"
-              color="text.secondary"
-              underline="hover"
-            >
-              ติดตามสถานะเรื่องร้องเรียน
+              ← เลือกรูปแบบอื่น (ยื่นเรื่องทันที / ติดตามสถานะ)
             </Link>
           </Stack>
         </Paper>

@@ -65,7 +65,7 @@ const create = async ({
   citizenId, isAnonymous,
   provinceId, districtId, subdistrictId, postalCode, incidentAddress,
   latitude, longitude,
-  priority, source, receivedBy,
+  priority, source, receivedBy, referenceNumber,
 }) => {
   const conn = await pool.getConnection();
   try {
@@ -75,7 +75,7 @@ const create = async ({
 
     const insert = (trackingCode) => conn.query(
       `INSERT INTO complaints (
-         complaint_number, tracking_code, title, description,
+         complaint_number, tracking_code, reference_number, title, description,
          complainant_type_id, complainant_name, complainant_id_card,
          complainant_phone, complainant_address, complainant_email,
          citizen_id, is_anonymous,
@@ -86,7 +86,7 @@ const create = async ({
          is_overdue, escalation_level,
          created_at, updated_at
        ) VALUES (
-         ?, ?, ?, ?,
+         ?, ?, ?, ?, ?,
          ?, ?, ?,
          ?, ?, ?,
          ?, ?,
@@ -98,7 +98,7 @@ const create = async ({
          NOW(), NOW()
        )`,
       [
-        complaintNumber, trackingCode, title, description,
+        complaintNumber, trackingCode, referenceNumber || null, title, description,
         complainantTypeId, complainantName || null, complainantIdCard || null,
         complainantPhone, complainantAddress || null, complainantEmail || null,
         citizenId || null, isAnonymous ? 1 : 0,

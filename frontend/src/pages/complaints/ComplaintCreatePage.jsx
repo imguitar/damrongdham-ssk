@@ -23,6 +23,7 @@ const INITIAL = {
   channel_id: '',
   category_id: '',
   priority: 'MEDIUM',
+  reference_number: '',
   is_anonymous: false,
   complainant_name: '',
   complainant_id_card: '',
@@ -76,6 +77,7 @@ const ComplaintCreatePage = () => {
         province_id: Number(form.province_id) || undefined,
         district_id: Number(form.district_id) || undefined,
         subdistrict_id: Number(form.subdistrict_id) || undefined,
+        reference_number: form.reference_number.trim() || undefined,
         source: 'STAFF',
       };
       const res = await complaintApi.create(payload);
@@ -124,6 +126,7 @@ const ComplaintCreatePage = () => {
             disabled={loading || masterData.loading}
             showComplainantInfo
             showAnonymous
+            showReferenceNumber
           />
 
           <Box mt={3}>

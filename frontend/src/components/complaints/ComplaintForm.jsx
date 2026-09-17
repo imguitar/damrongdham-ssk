@@ -38,6 +38,7 @@ const ComplaintForm = ({
   showAnonymous = false,
   lockChannel = false,
   showClassification = true,
+  showReferenceNumber = false,
   defaultComplainantType,
   lockedFields = [],
   complainantExtra,
@@ -192,6 +193,23 @@ const ComplaintForm = ({
                 <MenuItem value="HIGH">สูง</MenuItem>
               </Select>
             </FormControl>
+          </Grid>
+        )}
+        {/* เลขเอกสารอ้างอิงจากระบบภายในหน่วยงาน — เฉพาะแบบฟอร์มเจ้าหน้าที่ */}
+        {showReferenceNumber && (
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="เลขเอกสารอ้างอิง (ระบบภายในหน่วยงาน)"
+              name="reference_number"
+              value={form.reference_number ?? ''}
+              onChange={handleChange}
+              disabled={disabled}
+              error={Boolean(errors.reference_number)}
+              helperText={errors.reference_number || 'ไม่บังคับ — เช่น เลขหนังสือรับของหน่วยงาน'}
+              size="small"
+              inputProps={{ maxLength: 100 }}
+            />
           </Grid>
         )}
       </Grid>

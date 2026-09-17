@@ -10,6 +10,9 @@ const { writeAuditLog } = require('../middleware/auditLog');
 const { success, successList, error } = require('../utils/response');
 const { parsePagination, paginationMeta } = require('../utils/pagination');
 
+// เลขเอกสารอ้างอิงจากระบบภายในหน่วยงาน
+const REFERENCE_NUMBER_MAX = 100;
+
 const AGENCY_ROLES = ['agency_officer', 'agency_head'];
 
 const list = async (req, res, next) => {
@@ -58,8 +61,13 @@ const create = async (req, res, next) => {
       complainant_name, complainant_id_card, complainant_phone,
       complainant_address, complainant_email, is_anonymous,
       province_id, district_id, subdistrict_id, postal_code, incident_address,
-      latitude, longitude, priority,
+      latitude, longitude, priority, reference_number,
     } = req.body;
+
+    const referenceNumber = String(reference_number ?? '').trim();
+    if (referenceNumber.length > REFERENCE_NUMBER_MAX) {
+      return error(res, 'VALIDATION_ERROR', `เลขเอกสารอ้างอิงยาวได้ไม่เกิน ${REFERENCE_NUMBER_MAX} ตัวอักษร`, 400);
+    }
 
     const id = await complaintModel.create({
       title, description,
@@ -85,6 +93,7 @@ const create = async (req, res, next) => {
       priority: priority || 'MEDIUM',
       source: 'STAFF',
       receivedBy: req.user.id,
+      referenceNumber: referenceNumber || null,
     });
 
     const complaint = await complaintModel.findById(id);
@@ -303,7 +312,6 @@ const selfHandle = async (req, res, next) => {
 };
 
 // PATCH /:id/reference-number — เลขเอกสารอ้างอิงจากระบบภายในของหน่วยงาน
-const REFERENCE_NUMBER_MAX = 100;
 const updateReferenceNumber = async (req, res, next) => {
   try {
     const complaint = req.complaint;

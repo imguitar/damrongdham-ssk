@@ -86,11 +86,11 @@ const PublicTrackPage = () => {
               fullWidth
               label="รหัสติดตาม (เช่น K7P3)"
               value={trackingCode}
-              onChange={(e) => setTrackingCode(e.target.value.replace(/[^a-z0-9]/gi, '').toUpperCase())}
+              onChange={(e) => setTrackingCode(e.target.value.replace(/[^a-z0-9]/gi, '').toUpperCase().slice(0, 4))}
               onKeyDown={(e) => e.key === 'Enter' && handleTrack()}
               disabled={loading}
               size="small"
-              inputProps={{ maxLength: 4, autoCapitalize: 'characters', style: { letterSpacing: 4, fontWeight: 600 } }}
+              inputProps={{ autoCapitalize: 'characters', style: { letterSpacing: 4, fontWeight: 600 } }}
             />
             <Button
               variant="contained"

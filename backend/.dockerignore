@@ -1,0 +1,7 @@
+# ห้ามคัดลอก node_modules จากเครื่อง host (macOS) เข้า image — native module เช่น bcrypt จะรันบน Linux ไม่ได้
+node_modules
+npm-debug.log*
+.env
+.env.*
+uploads
+coverage

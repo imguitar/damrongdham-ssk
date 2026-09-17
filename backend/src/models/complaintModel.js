@@ -278,7 +278,8 @@ const findByIdUnmasked = async (id) => {
 const findByTrackingCode = async (trackingCode) => {
   const [[row]] = await pool.query(
     `SELECT c.id, c.tracking_code, c.title, c.status, c.priority,
-            c.is_overdue, c.due_date, c.created_at, c.updated_at,
+            c.is_anonymous, c.is_overdue, c.due_date, c.created_at, c.updated_at,
+            c.rejection_reason, c.closed_summary,
             cat.name AS category_name, ch.name AS channel_name
      FROM complaints c
      LEFT JOIN complaint_categories cat ON cat.id = c.category_id

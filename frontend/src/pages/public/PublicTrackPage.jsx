@@ -134,7 +134,7 @@ const PublicTrackPage = () => {
               <Box
                 mt={2}
                 p={1.5}
-                bgcolor="success.50"
+                bgcolor="success.lighter"
                 borderRadius={1}
                 border="1px solid"
                 borderColor="success.light"
@@ -149,7 +149,7 @@ const PublicTrackPage = () => {
               <Box
                 mt={2}
                 p={1.5}
-                bgcolor="error.50"
+                bgcolor="error.lighter"
                 borderRadius={1}
                 border="1px solid"
                 borderColor="error.light"

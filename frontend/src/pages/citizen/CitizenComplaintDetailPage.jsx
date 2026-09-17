@@ -55,7 +55,7 @@ const CitizenComplaintDetailPage = () => {
         </Button>
         <Typography variant="h6" fontWeight={700}>รหัสติดตาม {complaint.tracking_code}</Typography>
         <StatusChip status={complaint.status} />
-        {complaint.is_anonymous && <Chip label="ปกปิดตัวตน" size="small" color="warning" variant="outlined" />}
+        {!!complaint.is_anonymous && <Chip label="ปกปิดตัวตน" size="small" color="warning" variant="outlined" />}
       </Box>
 
       <Card>
@@ -72,13 +72,13 @@ const CitizenComplaintDetailPage = () => {
           <InfoRow label="ช่องทาง" value={complaint.channel_name} />
 
           {complaint.status === 'CLOSED' && complaint.closed_summary && (
-            <Box mt={2} p={1.5} bgcolor="success.50" borderRadius={1} border="1px solid" borderColor="success.light">
+            <Box mt={2} p={1.5} bgcolor="success.lighter" borderRadius={1} border="1px solid" borderColor="success.light">
               <Typography variant="caption" color="success.dark" fontWeight={600} display="block">ผลการดำเนินการ</Typography>
               <Typography variant="body2">{complaint.closed_summary}</Typography>
             </Box>
           )}
           {complaint.status === 'REJECTED' && complaint.rejection_reason && (
-            <Box mt={2} p={1.5} bgcolor="error.50" borderRadius={1} border="1px solid" borderColor="error.light">
+            <Box mt={2} p={1.5} bgcolor="error.lighter" borderRadius={1} border="1px solid" borderColor="error.light">
               <Typography variant="caption" color="error.dark" fontWeight={600} display="block">เหตุผลที่ไม่รับเรื่อง</Typography>
               <Typography variant="body2">{complaint.rejection_reason}</Typography>
             </Box>

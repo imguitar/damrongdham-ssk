@@ -16,6 +16,7 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import ChatIcon from '@mui/icons-material/Chat';
 import PeopleIcon from '@mui/icons-material/People';
+import GroupsIcon from '@mui/icons-material/Groups';
 import BusinessIcon from '@mui/icons-material/Business';
 import SettingsIcon from '@mui/icons-material/Settings';
 import HistoryIcon from '@mui/icons-material/History';
@@ -94,6 +95,14 @@ const ADMIN_MENU_ITEMS = [
     iconColor: '#00838F',
     path: '/users',
     roles: ADMIN_ROLES,
+  },
+  {
+    id: 'citizen-members',
+    label: 'สมาชิกประชาชน',
+    icon: <GroupsIcon />,
+    iconColor: '#AD1457',
+    path: '/citizen-members',
+    roles: [SUPER_ADMIN],
   },
   {
     id: 'agencies',

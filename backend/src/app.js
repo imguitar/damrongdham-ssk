@@ -16,6 +16,7 @@ const complaintRouter = require('./routes/complaintRoutes');
 const masterDataRouter = require('./routes/masterDataRoutes');
 const publicRouter = require('./routes/publicRoutes');
 const citizenRouter = require('./routes/citizenRoutes');
+const citizenAdminRouter = require('./routes/citizenAdminRoutes');
 const assignmentRouter = require('./routes/assignmentRoutes');
 const agencyRouter = require('./routes/agencyRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -67,6 +68,7 @@ app.use('/api/audit-logs', auditLogRouter);
 app.use('/api/notifications', notificationRouter);
 app.use('/api/line', lineWebhookRouter);
 app.use('/api/admin/line-groups', lineGroupRouter);
+app.use('/api/admin/citizens', citizenAdminRouter);
 app.use('/api/settings', settingRouter);
 
 // ============================================

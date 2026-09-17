@@ -27,6 +27,7 @@ const ComplaintPrintPage  = lazy(() => import('../pages/complaints/ComplaintPrin
 import UserListPage  from '../pages/users/UserListPage';
 import UserFormPage  from '../pages/users/UserFormPage';
 import AgencyListPage from '../pages/agencies/AgencyListPage';
+import CitizenMemberListPage from '../pages/citizenMembers/CitizenMemberListPage';
 import SettingsPage   from '../pages/settings/SettingsPage';
 import LineNotificationPage from '../pages/settings/LineNotificationPage';
 
@@ -149,6 +150,11 @@ const AppRoutes = () => (
           <Route path="/settings"       element={<SettingsPage />} />
           <Route path="/settings/*"     element={<SettingsPage />} />
           <Route path="/audit-logs"     element={<AuditLogPage />} />
+        </Route>
+
+        {/* Super admin only — สมาชิกประชาชน (แยกจากผู้ใช้งานเจ้าหน้าที่) */}
+        <Route element={<ProtectedRoute allowedRoles={[SUPER_ADMIN]} />}>
+          <Route path="/citizen-members" element={<CitizenMemberListPage />} />
         </Route>
 
         {/* All authenticated */}

@@ -48,9 +48,7 @@ const PRINT_CSS = `
   .cp-table tr { break-inside: avoid; }
   .cp-table td.pre { white-space: pre-wrap; word-break: break-word; }
   .cp-muted { color: #777; padding: 0 8px; }
-  .cp-sign { display: flex; justify-content: space-around; margin-top: 36px; break-inside: avoid; text-align: center; font-size: 13px; }
-  .cp-sign div { width: 42%; }
-  .cp-foot { margin-top: 18px; padding-top: 6px; border-top: 1px solid #ccc; font-size: 11px; color: #666; display: flex; justify-content: space-between; gap: 12px; }
+  .cp-foot { margin-top: 24px; padding-top: 6px; border-top: 1px solid #ccc; font-size: 11px; color: #666; display: flex; justify-content: space-between; gap: 12px; }
   @media print {
     .no-print { display: none !important; }
     .cp-root { background: #fff; padding: 0; min-height: 0; }
@@ -279,19 +277,6 @@ const ComplaintPrintPage = () => {
             </table>
           ) : <p className="cp-muted">ไม่มีไฟล์แนบ</p>}
         </section>
-
-        <div className="cp-sign">
-          <div>
-            ลงชื่อ ........................................................<br />
-            (........................................................)<br />
-            เจ้าหน้าที่ผู้รับผิดชอบ
-          </div>
-          <div>
-            ลงชื่อ ........................................................<br />
-            (........................................................)<br />
-            ผู้ตรวจสอบ / หัวหน้า
-          </div>
-        </div>
 
         <div className="cp-foot">
           <span>เอกสารนี้มีข้อมูลส่วนบุคคล ใช้เพื่อการปฏิบัติงานเท่านั้น</span>

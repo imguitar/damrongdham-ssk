@@ -74,17 +74,19 @@ const ActionDialog = ({ open, onClose, onConfirm, title, fields = [], loading })
   const handleChange = (key) => (e) => setValues((p) => ({ ...p, [key]: e.target.value }));
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent sx={{ pt: 2 }}>
         {fields.map((f) => {
           if (f.type === 'text' || f.type === 'textarea') {
+            // หมายเหตุ/เหตุผลมักยาวหลายบรรทัด — ขยายช่องให้พิมพ์สะดวก (ขยายต่อได้อัตโนมัติ)
             return (
               <TextField
                 key={f.key}
                 fullWidth
-                multiline={f.type === 'textarea'}
-                minRows={f.type === 'textarea' ? 3 : 1}
+                multiline
+                minRows={f.type === 'textarea' ? 6 : 4}
+                maxRows={16}
                 label={f.label}
                 required={f.required}
                 value={values[f.key] ?? ''}
@@ -639,7 +641,8 @@ const ComplaintDetailPage = () => {
                   <TextField
                     fullWidth
                     multiline
-                    minRows={3}
+                    minRows={6}
+                    maxRows={20}
                     placeholder="บันทึกความคืบหน้าหรือหมายเหตุ..."
                     value={updateText}
                     onChange={(e) => setUpdateText(e.target.value)}

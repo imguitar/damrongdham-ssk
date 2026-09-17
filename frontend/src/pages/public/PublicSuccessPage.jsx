@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -5,6 +6,10 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CheckIcon from '@mui/icons-material/Check';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import PrintIcon from '@mui/icons-material/Print';
+import ComplaintReceiptPrint from '../../components/complaints/ComplaintReceiptPrint';
 import SearchIcon from '@mui/icons-material/Search';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 
@@ -12,6 +17,28 @@ const PublicSuccessPage = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const trackingCode = state?.tracking_code;
+  const receipt = state?.receipt;
+  const [copied, setCopied] = useState(false);
+
+  const copyTrackingCode = async () => {
+    try {
+      await navigator.clipboard.writeText(trackingCode);
+    } catch {
+      // clipboard API ใช้ไม่ได้ (เช่น เปิดผ่าน http) — ใช้วิธีเลือกข้อความแล้วคัดลอกแทน
+      const el = document.createElement('textarea');
+      el.value = trackingCode;
+      el.setAttribute('readonly', '');
+      el.style.position = 'fixed';
+      el.style.opacity = '0';
+      document.body.appendChild(el);
+      el.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(el);
+      if (!ok) return;
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <Box maxWidth={600} mx="auto" mt={4}>
@@ -32,15 +59,38 @@ const PublicSuccessPage = () => {
                 border: '2px solid',
                 borderColor: 'primary.main',
                 borderRadius: 2,
-                p: 2,
+                p: { xs: 2, sm: 3 },
                 mb: 3,
               }}
             >
-              <Typography variant="caption" color="text.secondary">รหัสติดตามเรื่องร้องเรียน</Typography>
-              <Typography variant="h3" component="p" fontWeight={700} color="primary.main" letterSpacing={8}>
+              <Typography variant="h6" component="p" fontWeight={600} color="text.secondary">
+                รหัสติดตามเรื่องร้องเรียน
+              </Typography>
+              <Typography
+                variant="h2"
+                component="p"
+                fontWeight={700}
+                color="primary.main"
+                sx={{ letterSpacing: { xs: 8, sm: 12 }, fontSize: { xs: '3rem', sm: '3.75rem' }, my: 1 }}
+              >
                 {trackingCode}
               </Typography>
-              <Typography variant="body2" color="text.secondary" mt={0.5}>
+              <Box display="flex" gap={1} justifyContent="center" flexWrap="wrap" mb={1.5}>
+                <Button
+                  variant={copied ? 'contained' : 'outlined'}
+                  color={copied ? 'success' : 'primary'}
+                  startIcon={copied ? <CheckIcon /> : <ContentCopyIcon />}
+                  onClick={copyTrackingCode}
+                >
+                  {copied ? 'คัดลอกแล้ว' : 'คัดลอกรหัส'}
+                </Button>
+                {receipt && (
+                  <Button variant="outlined" startIcon={<PrintIcon />} onClick={() => window.print()}>
+                    พิมพ์คำร้อง
+                  </Button>
+                )}
+              </Box>
+              <Typography variant="subtitle1" component="p" fontWeight={700} sx={{ color: 'error.dark' }}>
                 กรุณาบันทึกรหัสนี้ไว้ และไม่เปิดเผยให้ผู้อื่นทราบ
               </Typography>
             </Box>
@@ -69,6 +119,7 @@ const PublicSuccessPage = () => {
           </Box>
         </CardContent>
       </Card>
+      {trackingCode && receipt && <ComplaintReceiptPrint trackingCode={trackingCode} receipt={receipt} />}
     </Box>
   );
 };

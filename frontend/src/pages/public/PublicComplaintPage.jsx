@@ -25,6 +25,8 @@ const INITIAL = {
   postal_code: '', incident_address: '', latitude: '', longitude: '',
 };
 
+const nameOf = (list, id) => list?.find((x) => String(x.id) === String(id))?.name || '';
+
 const PublicComplaintPage = () => {
   const navigate = useNavigate();
   const masterData = useMasterData({ usePublic: true });
@@ -63,19 +65,37 @@ const PublicComplaintPage = () => {
       const trackingCode = res.data?.data?.tracking_code;
       const complaintId = res.data?.data?.id;
 
+      let uploadedNames = [];
       if (pendingFiles.length && complaintId) {
-        await Promise.all(
+        const uploaded = await Promise.all(
           pendingFiles.map((file) => {
             const fd = new FormData();
             fd.append('file', file);
             fd.append('complaint_id', complaintId);
-            return publicApi.uploadAttachment(fd).catch(() => {});
+            return publicApi.uploadAttachment(fd).then(() => file.name).catch(() => null);
           })
         );
+        uploadedNames = uploaded.filter(Boolean);
       }
 
+      // สำเนาข้อมูลที่ยื่น สำหรับให้ผู้ร้องพิมพ์เก็บไว้ในหน้าสำเร็จ (ไม่ดึงจาก API สาธารณะ)
+      const [districts, subdistricts] = await Promise.all([
+        form.province_id ? masterData.fetchDistricts(Number(form.province_id)).catch(() => []) : [],
+        form.district_id ? masterData.fetchSubdistricts(form.district_id).catch(() => []) : [],
+      ]);
+      const receipt = {
+        ...form,
+        submitted_at: new Date().toISOString(),
+        complainant_type_name: nameOf(masterData.complainantTypes, form.complainant_type_id),
+        category_name: nameOf(masterData.categories, form.category_id),
+        province_name: nameOf(masterData.provinces, form.province_id),
+        district_name: nameOf(districts, form.district_id),
+        subdistrict_name: nameOf(subdistricts, form.subdistrict_id),
+        attachments: uploadedNames,
+      };
+
       toastSuccess('ส่งเรื่องร้องเรียนสำเร็จ');
-      navigate('/public/success', { state: { tracking_code: trackingCode } });
+      navigate('/public/success', { state: { tracking_code: trackingCode, receipt } });
     } catch (err) {
       alertError(err, { title: 'ส่งเรื่องร้องเรียนไม่สำเร็จ' });
     } finally {

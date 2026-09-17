@@ -68,14 +68,19 @@ const ComplaintForm = ({
     md.fetchSubdistricts?.(form.district_id).then(setSubdistricts).catch(() => {});
   }, [form.district_id]); // eslint-disable-line
 
+  // รหัสไปรษณีย์ของอำเภอที่เลือก (ทุกตำบลในอำเภอใช้รหัสเดียวกัน) — ไม่มีข้อมูลให้กรอกเอง
+  const districtPostalCode = (districtId) =>
+    districts.find((d) => String(d.id) === String(districtId))?.postal_code || '';
+  const autoPostalCode = Boolean(form.district_id && districtPostalCode(form.district_id));
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
       // Reset dependent selects
-      ...(name === 'province_id' ? { district_id: '', subdistrict_id: '' } : {}),
-      ...(name === 'district_id' ? { subdistrict_id: '' } : {}),
+      ...(name === 'province_id' ? { district_id: '', subdistrict_id: '', postal_code: '' } : {}),
+      ...(name === 'district_id' ? { subdistrict_id: '', postal_code: districtPostalCode(value) } : {}),
     }));
   };
 
@@ -110,7 +115,8 @@ const ComplaintForm = ({
             fullWidth
             required
             multiline
-            minRows={3}
+            minRows={8}
+            maxRows={20}
             label="รายละเอียด"
             name="description"
             value={form.description ?? ''}
@@ -378,7 +384,8 @@ const ComplaintForm = ({
             onChange={handleChange}
             disabled={disabled}
             size="small"
-            inputProps={{ maxLength: 5 }}
+            inputProps={{ maxLength: 5, inputMode: 'numeric', readOnly: autoPostalCode }}
+            helperText={autoPostalCode ? 'กำหนดอัตโนมัติตามอำเภอ' : undefined}
           />
         </Grid>
         <Grid item xs={12} sm={8}>

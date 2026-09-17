@@ -3,6 +3,7 @@
 const citizenModel = require('../models/citizenModel');
 const authService = require('../services/authService');
 const { success, error } = require('../utils/response');
+const { digitsOnly, isValidThaiIdCard, isValidThaiPhone } = require('../utils/thaiValidators');
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -22,6 +23,14 @@ const register = async (req, res, next) => {
       return error(res, 'VALIDATION_ERROR', 'รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร', 400);
     }
 
+    // สมัครด้วยอีเมล: บังคับเลขบัตรประชาชนและเบอร์โทรศัพท์
+    if (!isValidThaiIdCard(id_card)) {
+      return error(res, 'VALIDATION_ERROR', 'กรุณาระบุเลขบัตรประชาชน 13 หลักให้ถูกต้อง', 400);
+    }
+    if (!isValidThaiPhone(phone)) {
+      return error(res, 'VALIDATION_ERROR', 'กรุณาระบุเบอร์โทรศัพท์ให้ถูกต้อง (ขึ้นต้นด้วย 0, 9–10 หลัก)', 400);
+    }
+
     const existing = await citizenModel.findByEmail(email);
     if (existing) {
       return error(res, 'EMAIL_EXISTS', 'อีเมลนี้ถูกใช้งานแล้ว', 409);
@@ -29,7 +38,8 @@ const register = async (req, res, next) => {
 
     const passwordHash = await authService.hashPassword(password);
     const citizenId = await citizenModel.create({
-      email, passwordHash, fullName: full_name, phone, idCard: id_card, address,
+      email, passwordHash, fullName: full_name,
+      phone: digitsOnly(phone), idCard: digitsOnly(id_card), address,
     });
 
     const citizen = await citizenModel.findById(citizenId);

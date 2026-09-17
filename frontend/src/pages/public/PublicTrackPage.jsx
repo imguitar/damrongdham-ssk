@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -8,6 +9,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import HomeIcon from '@mui/icons-material/Home';
 import SearchIcon from '@mui/icons-material/Search';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import * as publicApi from '../../api/publicApi';
@@ -59,6 +61,17 @@ const PublicTrackPage = () => {
 
   return (
     <Box maxWidth={640} mx="auto">
+      <Button
+        component={RouterLink}
+        to="/citizen"
+        variant="outlined"
+        size="small"
+        startIcon={<HomeIcon />}
+        sx={{ mb: 2 }}
+      >
+        กลับหน้าหลัก
+      </Button>
+
       <Box textAlign="center" mb={3}>
         <Typography variant="h5" fontWeight={700}>ติดตามสถานะเรื่องร้องเรียน</Typography>
         <Typography variant="body2" color="text.secondary" mt={0.5}>

@@ -15,12 +15,13 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useCitizenAuth } from '../../contexts/CitizenAuthContext';
 import * as citizenApi from '../../api/citizenApi';
 import { alertError, toastSuccess } from '../../utils/alert';
+import { digitsOnly, isValidThaiIdCard, isValidThaiPhone } from '../../utils/thaiValidators';
 
 const CitizenRegisterPage = () => {
   const { citizen, login } = useCitizenAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    full_name: '', email: '', password: '', confirm_password: '', phone: '',
+    full_name: '', id_card: '', email: '', password: '', confirm_password: '', phone: '',
   });
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -29,14 +30,21 @@ const CitizenRegisterPage = () => {
   if (citizen) return <Navigate to="/citizen/complaints" replace />;
 
   const handleChange = (e) => {
-    setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    // เลขบัตร/เบอร์โทร รับเฉพาะตัวเลข
+    const clean = name === 'id_card' || name === 'phone' ? digitsOnly(value) : value;
+    setForm((p) => ({ ...p, [name]: clean }));
     setFieldErrors((p) => ({ ...p, [e.target.name]: '' }));
   };
 
   const validate = () => {
     const e = {};
     if (!form.full_name.trim()) e.full_name = 'กรุณาระบุชื่อ-นามสกุล';
+    if (!form.id_card) e.id_card = 'กรุณาระบุเลขบัตรประชาชน';
+    else if (!isValidThaiIdCard(form.id_card)) e.id_card = 'เลขบัตรประชาชนไม่ถูกต้อง (13 หลัก)';
     if (!form.email.trim()) e.email = 'กรุณาระบุอีเมล';
+    if (!form.phone) e.phone = 'กรุณาระบุเบอร์โทรศัพท์';
+    else if (!isValidThaiPhone(form.phone)) e.phone = 'เบอร์โทรศัพท์ไม่ถูกต้อง (ขึ้นต้นด้วย 0, 9–10 หลัก)';
     if (form.password.length < 6) e.password = 'รหัสผ่านอย่างน้อย 6 ตัวอักษร';
     if (form.password !== form.confirm_password) e.confirm_password = 'รหัสผ่านไม่ตรงกัน';
     setFieldErrors(e);
@@ -52,7 +60,8 @@ const CitizenRegisterPage = () => {
         full_name: form.full_name.trim(),
         email: form.email.trim(),
         password: form.password,
-        phone: form.phone.trim() || undefined,
+        id_card: form.id_card,
+        phone: form.phone,
       });
       // Auto-login after register
       await login(form.email.trim(), form.password);
@@ -85,6 +94,16 @@ const CitizenRegisterPage = () => {
             </Grid>
             <Grid item xs={12}>
               <TextField
+                fullWidth label="เลขบัตรประชาชน *" name="id_card"
+                value={form.id_card} onChange={handleChange}
+                disabled={loading} size="small"
+                inputProps={{ inputMode: 'numeric', maxLength: 13 }}
+                error={Boolean(fieldErrors.id_card)}
+                helperText={fieldErrors.id_card || 'ตัวเลข 13 หลัก'}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
                 fullWidth label="อีเมล *" name="email" type="email"
                 value={form.email} onChange={handleChange}
                 disabled={loading} size="small"
@@ -93,9 +112,11 @@ const CitizenRegisterPage = () => {
             </Grid>
             <Grid item xs={12}>
               <TextField
-                fullWidth label="เบอร์โทรศัพท์" name="phone"
+                fullWidth label="เบอร์โทรศัพท์ *" name="phone" type="tel"
                 value={form.phone} onChange={handleChange}
                 disabled={loading} size="small"
+                inputProps={{ inputMode: 'numeric', maxLength: 10 }}
+                error={Boolean(fieldErrors.phone)} helperText={fieldErrors.phone}
               />
             </Grid>
             <Grid item xs={12}>

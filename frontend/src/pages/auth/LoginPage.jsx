@@ -15,7 +15,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useAuth } from '../../contexts/AuthContext';
 import { alertError, alertWarning, toastSuccess } from '../../utils/alert';
-import appIcon from '../../components/icons/app-icon-v2.png';
+import appIcon from '../../components/icons/app-icon-v3.png';
 
 const LoginPage = () => {
   const { user, login } = useAuth();

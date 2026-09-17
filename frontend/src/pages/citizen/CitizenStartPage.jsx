@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useCitizenAuth } from '../../contexts/CitizenAuthContext';
-import appIcon from '../../components/icons/app-icon-v2.png';
+import appIcon from '../../components/icons/app-icon-v3.png';
 import {
   QuickSubmitIllustration,
   MemberLoginIllustration,
@@ -188,7 +188,7 @@ const CitizenStartPage = () => {
           <Box textAlign="center">
             <Typography variant="h3" component="h1" fontWeight={700}>
               ร้องเรียน / ร้องทุกข์{' '}
-              <Box component="span" sx={{ whiteSpace: 'nowrap' }}>ศูนย์ดำรงธรรม</Box>
+              <Box component="span" sx={{ whiteSpace: 'nowrap' }}>ศูนย์ดำรงธรรมจังหวัดศรีสะเกษ</Box>
             </Typography>
             <Typography variant="body1" color="text.secondary" mt={0.75}>
               เลือกรูปแบบการใช้งานที่เหมาะกับคุณ

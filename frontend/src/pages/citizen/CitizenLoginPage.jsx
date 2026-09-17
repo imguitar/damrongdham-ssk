@@ -15,7 +15,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useCitizenAuth } from '../../contexts/CitizenAuthContext';
 import { alertError, alertWarning, toastSuccess } from '../../utils/alert';
-import appIcon from '../../components/icons/app-icon-v2.png';
+import appIcon from '../../components/icons/app-icon-v3.png';
 
 // Friendly Thai messages for backend LINE error codes (details logged server-side)
 const LINE_ERROR_MESSAGES = {

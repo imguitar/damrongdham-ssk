@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
-import appIcon from '../../components/icons/app-icon-v2.png';
+import appIcon from '../../components/icons/app-icon-v3.png';
 import * as complaintApi from '../../api/complaintApi';
 import { useAuth } from '../../contexts/AuthContext';
 import { PRIORITY_LABELS, ROLES, STATUS_LABELS } from '../../utils/constants';

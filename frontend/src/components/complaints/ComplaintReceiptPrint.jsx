@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import appIcon from '../icons/app-icon-v2.png';
+import appIcon from '../icons/app-icon-v3.png';
 import { formatDateTime } from '../../utils/formatters';
 
 // สำเนาคำร้องสำหรับผู้ร้องพิมพ์เก็บไว้ — แสดงเฉพาะตอนพิมพ์ (window.print)

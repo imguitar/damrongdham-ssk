@@ -28,6 +28,8 @@ router.get('/:id', authorize(...STAFF_ROLES),  requireComplaintAccess, complaint
 router.put('/:id', authorize(...STAFF_ROLES),  requireComplaintAccess, complaintController.update);
 // เลขเอกสารอ้างอิงภายในหน่วยงาน (ศูนย์ + หน่วยงานที่ถือเรื่อง)
 router.patch('/:id/reference-number', authorize(...STAFF_ROLES), requireComplaintAccess, complaintController.updateReferenceNumber);
+// บันทึก audit เมื่อพิมพ์/ส่งออก PDF รายละเอียดเรื่อง
+router.post('/:id/print-log', authorize(...STAFF_ROLES), requireComplaintAccess, complaintController.logPrint);
 
 // ── Status Workflow ─────────────────────────────────────────────────────────────
 // T-01: NEW → SCREENING, T-12: RETURNED → SCREENING

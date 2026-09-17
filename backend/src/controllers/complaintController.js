@@ -342,6 +342,24 @@ const updateReferenceNumber = async (req, res, next) => {
   }
 };
 
+// POST /:id/print-log — บันทึกการพิมพ์/ส่งออก PDF (เอกสารมีข้อมูลส่วนบุคคลของผู้ร้อง)
+const logPrint = async (req, res, next) => {
+  try {
+    writeAuditLog({
+      userId: req.user.id,
+      action: 'PRINT_COMPLAINT',
+      resource: 'complaints',
+      resourceId: req.complaint.id,
+      details: { complaint_number: req.complaint.complaint_number },
+      ipAddress: req.ip,
+      userAgent: req.get('user-agent'),
+    });
+    return success(res, { logged: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // DELETE /:id — super_admin only
 const remove = async (req, res, next) => {
   try {
@@ -366,4 +384,4 @@ const remove = async (req, res, next) => {
   }
 };
 
-module.exports = { list, getById, create, update, updateReferenceNumber, getTimeline, getUpdates, revealIdentity, screen, reject, assign, review, close, sendBack, selfHandle, remove };
+module.exports = { list, getById, create, update, updateReferenceNumber, logPrint, getTimeline, getUpdates, revealIdentity, screen, reject, assign, review, close, sendBack, selfHandle, remove };

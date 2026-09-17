@@ -27,6 +27,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import EditIcon from '@mui/icons-material/Edit';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
+import PrintIcon from '@mui/icons-material/Print';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import ComplaintTimeline from '../../components/common/ComplaintTimeline';
 import FileUpload from '../../components/common/FileUpload';
@@ -415,6 +416,13 @@ const ComplaintDetailPage = () => {
           )}
         </Box>
         <Box display="flex" gap={1}>
+          <Button
+            variant="outlined"
+            startIcon={<PrintIcon />}
+            onClick={() => window.open(`${import.meta.env.BASE_URL}complaints/${id}/print`, '_blank', 'noopener')}
+          >
+            พิมพ์ / PDF
+          </Button>
           {isCenter && !['CLOSED', 'REJECTED'].includes(st) && (
             <Button
               variant="outlined"

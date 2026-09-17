@@ -7,6 +7,8 @@ export const update = (id, data) => axiosInstance.put(`/complaints/${id}`, data)
 export const updateReferenceNumber = (id, reference_number) =>
   axiosInstance.patch(`/complaints/${id}/reference-number`, { reference_number });
 
+export const logPrint = (id) => axiosInstance.post(`/complaints/${id}/print-log`);
+
 // Workflow transitions
 export const screen = (id, data) => axiosInstance.patch(`/complaints/${id}/screen`, data);
 export const reject = (id, data) => axiosInstance.patch(`/complaints/${id}/reject`, data);

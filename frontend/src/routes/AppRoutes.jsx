@@ -21,6 +21,7 @@ import ComplaintListPage   from '../pages/complaints/ComplaintListPage';
 const ComplaintCreatePage = lazy(() => import('../pages/complaints/ComplaintCreatePage'));
 const ComplaintDetailPage = lazy(() => import('../pages/complaints/ComplaintDetailPage'));
 const ComplaintEditPage   = lazy(() => import('../pages/complaints/ComplaintEditPage'));
+const ComplaintPrintPage  = lazy(() => import('../pages/complaints/ComplaintPrintPage'));
 
 // ── Admin pages ───────────────────────────────────────────────────────────────
 import UserListPage  from '../pages/users/UserListPage';
@@ -108,6 +109,11 @@ const AppRoutes = () => (
 
     {/* ── Protected admin routes ───────────────────────────────────────── */}
     <Route element={<ProtectedRoute allowedRoles={ALL_STAFF} />}>
+      {/* หน้าพิมพ์ / PDF — ไม่มี sidebar/topbar */}
+      <Route element={<ProtectedRoute allowedRoles={COMPLAINT_ROLES} />}>
+        <Route path="/complaints/:id/print" element={<ComplaintPrintPage />} />
+      </Route>
+
       <Route element={<AdminLayout />}>
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardPage />} />

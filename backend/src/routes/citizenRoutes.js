@@ -4,6 +4,7 @@ const router = require('express').Router();
 const { citizenAuthenticate } = require('../middleware/citizenAuth');
 const { upload } = require('../config/upload');
 const { validateComplaint } = require('../middleware/validate');
+const { applyCitizenComplaintDefaults } = require('../middleware/citizenComplaintDefaults');
 const { rateLimit } = require('../middleware/rateLimit');
 const citizenController = require('../controllers/citizenController');
 const lineAuthController = require('../controllers/lineAuthController');
@@ -26,7 +27,7 @@ router.get('/notification-preferences', citizenController.getNotificationPrefere
 router.patch('/notification-preferences', citizenController.updateNotificationPreferences);
 
 // Complaints
-router.post('/complaints', validateComplaint, citizenController.submitComplaint);
+router.post('/complaints', applyCitizenComplaintDefaults, validateComplaint, citizenController.submitComplaint);
 router.get('/complaints', citizenController.listMyComplaints);
 router.get('/complaints/:complaint_number', citizenController.getMyComplaint);
 

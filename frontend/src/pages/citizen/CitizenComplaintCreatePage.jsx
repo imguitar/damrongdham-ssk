@@ -4,31 +4,58 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
+import Checkbox from '@mui/material/Checkbox';
 import CircularProgress from '@mui/material/CircularProgress';
 import Divider from '@mui/material/Divider';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import Typography from '@mui/material/Typography';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SaveIcon from '@mui/icons-material/Save';
 import ComplaintForm from '../../components/complaints/ComplaintForm';
 import FileUpload from '../../components/common/FileUpload';
 import useMasterData from '../../hooks/useMasterData';
+import { useCitizenAuth } from '../../contexts/CitizenAuthContext';
 import * as citizenApi from '../../api/citizenApi';
 import { alertError, alertWarning, toastSuccess } from '../../utils/alert';
 
 const INITIAL = {
   title: '', description: '',
-  service_type_id: '', complaint_nature_id: '', complainant_type_id: '',
-  channel_id: '', category_id: '', priority: 'MEDIUM',
+  complainant_type_id: '', category_id: '',
   is_anonymous: false,
-  complainant_phone: '',
+  complainant_name: '', complainant_id_card: '', complainant_phone: '',
+  complainant_address: '', complainant_email: '',
   province_id: '', district_id: '', subdistrict_id: '',
   postal_code: '', incident_address: '', latitude: '', longitude: '',
 };
 
+// ข้อมูลผู้ร้องที่ดึงจากบัญชีที่ login
+const profileToComplainant = (c) => ({
+  complainant_name: c?.full_name || '',
+  complainant_id_card: c?.id_card || '',
+  complainant_phone: c?.phone || '',
+  complainant_address: c?.address || '',
+  complainant_email: c?.email || '',
+});
+const EMPTY_COMPLAINANT = profileToComplainant(null);
+
 const CitizenComplaintCreatePage = () => {
   const navigate = useNavigate();
+  const { citizen } = useCitizenAuth();
   const masterData = useMasterData({ usePublic: true });
-  const [form, setForm] = useState(INITIAL);
+  const [useProfile, setUseProfile] = useState(true);
+  const [form, setForm] = useState(() => ({ ...INITIAL, ...profileToComplainant(citizen) }));
+
+  // ใช้ข้อมูลจากบัญชี: ล็อกเฉพาะช่องที่มีข้อมูลในโปรไฟล์ (ช่องว่างยังกรอกเองได้)
+  const profileValues = profileToComplainant(citizen);
+  const lockedFields = useProfile
+    ? Object.keys(profileValues).filter((k) => profileValues[k])
+    : [];
+
+  const handleToggleOwnInfo = (e) => {
+    const manual = e.target.checked;
+    setUseProfile(!manual);
+    setForm((p) => ({ ...p, ...(manual ? EMPTY_COMPLAINANT : profileToComplainant(citizen)) }));
+  };
   const [pendingFiles, setPendingFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -37,10 +64,7 @@ const CitizenComplaintCreatePage = () => {
     const e = {};
     if (!form.title?.trim()) e.title = 'กรุณาระบุหัวเรื่อง';
     if (!form.description?.trim()) e.description = 'กรุณาระบุรายละเอียด';
-    if (!form.service_type_id) e.service_type_id = 'กรุณาเลือกประเภทงานบริการ';
-    if (!form.complaint_nature_id) e.complaint_nature_id = 'กรุณาเลือกลักษณะเรื่อง';
     if (!form.complainant_type_id) e.complainant_type_id = 'กรุณาเลือกประเภทผู้ร้อง';
-    if (!form.channel_id) e.channel_id = 'กรุณาเลือกช่องทางรับเรื่อง';
     if (!form.complainant_phone?.trim()) e.complainant_phone = 'กรุณาระบุเบอร์โทรศัพท์';
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -55,10 +79,7 @@ const CitizenComplaintCreatePage = () => {
     try {
       const payload = {
         ...form,
-        service_type_id: Number(form.service_type_id) || undefined,
-        complaint_nature_id: Number(form.complaint_nature_id) || undefined,
         complainant_type_id: Number(form.complainant_type_id) || undefined,
-        channel_id: Number(form.channel_id) || undefined,
         category_id: Number(form.category_id) || undefined,
         province_id: Number(form.province_id) || undefined,
         district_id: Number(form.district_id) || undefined,
@@ -107,6 +128,22 @@ const CitizenComplaintCreatePage = () => {
             disabled={loading || masterData.loading}
             showComplainantInfo
             showAnonymous
+            showClassification={false}
+            defaultComplainantType="บุคคลธรรมดา"
+            lockedFields={lockedFields}
+            complainantExtra={
+              <FormControlLabel
+                sx={{ mt: -1.5 }}
+                control={
+                  <Checkbox
+                    checked={!useProfile}
+                    onChange={handleToggleOwnInfo}
+                    disabled={loading}
+                  />
+                }
+                label="ไม่ใช้ข้อมูลจากบัญชีที่เข้าสู่ระบบ (กรอกข้อมูลผู้ร้องเอง)"
+              />
+            }
           />
           <Divider sx={{ my: 3 }} />
           <Typography variant="subtitle1" fontWeight={700} color="primary" mb={1}>ไฟล์แนบ</Typography>

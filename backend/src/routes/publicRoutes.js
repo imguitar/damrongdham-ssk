@@ -3,6 +3,7 @@
 const router = require('express').Router();
 const { upload } = require('../config/upload');
 const { validateComplaint } = require('../middleware/validate');
+const { applyCitizenComplaintDefaults } = require('../middleware/citizenComplaintDefaults');
 const { rateLimit } = require('../middleware/rateLimit');
 const publicController = require('../controllers/publicController');
 
@@ -27,7 +28,7 @@ router.get('/master-data/complainant-types', publicController.getPublicComplaina
 router.get('/master-data/subdistricts', publicController.getPublicSubdistricts);
 
 // Public complaint submission (no auth)
-router.post('/complaints', submitLimiter, validateComplaint, publicController.submitComplaint);
+router.post('/complaints', submitLimiter, applyCitizenComplaintDefaults, validateComplaint, publicController.submitComplaint);
 router.post('/complaints/attachments', uploadLimiter, upload.single('file'), publicController.uploadPublicAttachment);
 
 // Public complaint tracking (no auth)

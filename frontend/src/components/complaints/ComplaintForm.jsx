@@ -37,11 +37,23 @@ const ComplaintForm = ({
   showComplainantInfo = true,
   showAnonymous = false,
   lockChannel = false,
+  showClassification = true,
+  defaultComplainantType,
+  lockedFields = [],
+  complainantExtra,
 }) => {
   const [districts, setDistricts] = useState([]);
   const [subdistricts, setSubdistricts] = useState([]);
 
   const md = masterData || {};
+  const isLocked = (name) => lockedFields.includes(name);
+
+  // เลือกประเภทผู้ร้องเริ่มต้น (เช่น บุคคลธรรมดา) เมื่อโหลด master data เสร็จ
+  useEffect(() => {
+    if (!defaultComplainantType || form.complainant_type_id || !md.complainantTypes?.length) return;
+    const found = md.complainantTypes.find((t) => t.name === defaultComplainantType);
+    if (found) setForm((prev) => ({ ...prev, complainant_type_id: found.id }));
+  }, [md.complainantTypes, defaultComplainantType]); // eslint-disable-line
 
   // Load districts when province changes
   useEffect(() => {
@@ -109,46 +121,52 @@ const ComplaintForm = ({
           />
         </Grid>
 
-        <Grid item xs={12} sm={6}>
-          <SelectField
-            label="ประเภทงานบริการ *"
-            name="service_type_id"
-            value={form.service_type_id}
-            onChange={handleChange}
-            options={md.serviceTypes || []}
-            required
-            error={Boolean(errors.service_type_id)}
-            helperText={errors.service_type_id}
-            disabled={disabled}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <SelectField
-            label="ลักษณะเรื่อง *"
-            name="complaint_nature_id"
-            value={form.complaint_nature_id}
-            onChange={handleChange}
-            options={md.complaintNatures || []}
-            required
-            error={Boolean(errors.complaint_nature_id)}
-            helperText={errors.complaint_nature_id}
-            disabled={disabled}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <SelectField
-            label="ช่องทางรับเรื่อง *"
-            name="channel_id"
-            value={form.channel_id}
-            onChange={handleChange}
-            options={md.channels || []}
-            required
-            error={Boolean(errors.channel_id)}
-            helperText={errors.channel_id}
-            disabled={disabled || lockChannel}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
+        {/* ประเภทงานบริการ / ลักษณะเรื่อง / ช่องทาง / ความสำคัญ — เจ้าหน้าที่เป็นผู้กำหนด
+            ฟอร์มประชาชนซ่อนไว้ (backend ใส่ค่าเริ่มต้นให้) */}
+        {showClassification && (
+          <>
+            <Grid item xs={12} sm={6}>
+              <SelectField
+                label="ประเภทงานบริการ *"
+                name="service_type_id"
+                value={form.service_type_id}
+                onChange={handleChange}
+                options={md.serviceTypes || []}
+                required
+                error={Boolean(errors.service_type_id)}
+                helperText={errors.service_type_id}
+                disabled={disabled}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <SelectField
+                label="ลักษณะเรื่อง *"
+                name="complaint_nature_id"
+                value={form.complaint_nature_id}
+                onChange={handleChange}
+                options={md.complaintNatures || []}
+                required
+                error={Boolean(errors.complaint_nature_id)}
+                helperText={errors.complaint_nature_id}
+                disabled={disabled}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <SelectField
+                label="ช่องทางรับเรื่อง *"
+                name="channel_id"
+                value={form.channel_id}
+                onChange={handleChange}
+                options={md.channels || []}
+                required
+                error={Boolean(errors.channel_id)}
+                helperText={errors.channel_id}
+                disabled={disabled || lockChannel}
+              />
+            </Grid>
+          </>
+        )}
+        <Grid item xs={12} sm={showClassification ? 6 : 12}>
           <SelectField
             label="ประเภทเรื่อง (หมวดหมู่)"
             name="category_id"
@@ -158,22 +176,24 @@ const ComplaintForm = ({
             disabled={disabled}
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
-          <FormControl fullWidth size="small">
-            <InputLabel>ความสำคัญ</InputLabel>
-            <Select
-              name="priority"
-              value={form.priority ?? 'MEDIUM'}
-              label="ความสำคัญ"
-              onChange={handleChange}
-              disabled={disabled}
-            >
-              <MenuItem value="LOW">ต่ำ</MenuItem>
-              <MenuItem value="MEDIUM">ปานกลาง</MenuItem>
-              <MenuItem value="HIGH">สูง</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
+        {showClassification && (
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth size="small">
+              <InputLabel>ความสำคัญ</InputLabel>
+              <Select
+                name="priority"
+                value={form.priority ?? 'MEDIUM'}
+                label="ความสำคัญ"
+                onChange={handleChange}
+                disabled={disabled}
+              >
+                <MenuItem value="LOW">ต่ำ</MenuItem>
+                <MenuItem value="MEDIUM">ปานกลาง</MenuItem>
+                <MenuItem value="HIGH">สูง</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+        )}
       </Grid>
 
       <Divider />
@@ -198,6 +218,8 @@ const ComplaintForm = ({
               label="ปกปิดตัวตน (ชื่อ-ที่อยู่ จะไม่แสดงต่อเจ้าหน้าที่)"
             />
           )}
+
+          {complainantExtra}
 
           {form.is_anonymous && (
             <Alert severity="info" sx={{ mt: -1 }}>
@@ -227,7 +249,7 @@ const ComplaintForm = ({
                 name="complainant_phone"
                 value={form.complainant_phone ?? ''}
                 onChange={handleChange}
-                disabled={disabled}
+                disabled={disabled || isLocked('complainant_phone')}
                 error={Boolean(errors.complainant_phone)}
                 helperText={errors.complainant_phone || 'บังคับกรอก (รวมกรณีปกปิดตัวตน)'}
                 size="small"
@@ -244,7 +266,7 @@ const ComplaintForm = ({
                     name="complainant_name"
                     value={form.complainant_name ?? ''}
                     onChange={handleChange}
-                    disabled={disabled}
+                    disabled={disabled || isLocked('complainant_name')}
                     size="small"
                   />
                 </Grid>
@@ -255,7 +277,7 @@ const ComplaintForm = ({
                     name="complainant_id_card"
                     value={form.complainant_id_card ?? ''}
                     onChange={handleChange}
-                    disabled={disabled}
+                    disabled={disabled || isLocked('complainant_id_card')}
                     size="small"
                     inputProps={{ maxLength: 13 }}
                   />
@@ -268,7 +290,7 @@ const ComplaintForm = ({
                     type="email"
                     value={form.complainant_email ?? ''}
                     onChange={handleChange}
-                    disabled={disabled}
+                    disabled={disabled || isLocked('complainant_email')}
                     size="small"
                   />
                 </Grid>
@@ -281,7 +303,7 @@ const ComplaintForm = ({
                     name="complainant_address"
                     value={form.complainant_address ?? ''}
                     onChange={handleChange}
-                    disabled={disabled}
+                    disabled={disabled || isLocked('complainant_address')}
                     size="small"
                   />
                 </Grid>

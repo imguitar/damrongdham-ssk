@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -17,8 +16,7 @@ import { alertError, alertWarning, toastSuccess } from '../../utils/alert';
 
 const INITIAL = {
   title: '', description: '',
-  service_type_id: '', complaint_nature_id: '', complainant_type_id: '',
-  channel_id: '', category_id: '', priority: 'MEDIUM',
+  complainant_type_id: '', category_id: '',
   is_anonymous: false,
   complainant_name: '', complainant_id_card: '', complainant_phone: '',
   complainant_address: '', complainant_email: '',
@@ -26,33 +24,19 @@ const INITIAL = {
   postal_code: '', incident_address: '', latitude: '', longitude: '',
 };
 
-const STAFF_ROLES = ['super_admin', 'admin', 'officer', 'chief', 'agency_head', 'agency_officer', 'executive'];
-
 const PublicComplaintPage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const isCitizen = !user || !STAFF_ROLES.includes(user.role);
   const masterData = useMasterData({ usePublic: true });
   const [form, setForm] = useState(INITIAL);
   const [pendingFiles, setPendingFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // Set SSK E-CMS as default channel when channels load
-  useEffect(() => {
-    if (!masterData.channels?.length || form.channel_id) return;
-    const ssk = masterData.channels.find((c) => c.name === 'SSK E-CMS');
-    if (ssk) setForm((p) => ({ ...p, channel_id: ssk.id }));
-  }, [masterData.channels]); // eslint-disable-line
-
   const validate = () => {
     const e = {};
     if (!form.title?.trim()) e.title = 'กรุณาระบุหัวเรื่อง';
     if (!form.description?.trim()) e.description = 'กรุณาระบุรายละเอียด';
-    if (!form.service_type_id) e.service_type_id = 'กรุณาเลือกประเภทงานบริการ';
-    if (!form.complaint_nature_id) e.complaint_nature_id = 'กรุณาเลือกลักษณะเรื่อง';
     if (!form.complainant_type_id) e.complainant_type_id = 'กรุณาเลือกประเภทผู้ร้อง';
-    if (!form.channel_id) e.channel_id = 'กรุณาเลือกช่องทางรับเรื่อง';
     if (!form.complainant_phone?.trim()) e.complainant_phone = 'กรุณาระบุเบอร์โทรศัพท์';
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -67,10 +51,7 @@ const PublicComplaintPage = () => {
     try {
       const payload = {
         ...form,
-        service_type_id: Number(form.service_type_id) || undefined,
-        complaint_nature_id: Number(form.complaint_nature_id) || undefined,
         complainant_type_id: Number(form.complainant_type_id) || undefined,
-        channel_id: Number(form.channel_id) || undefined,
         category_id: Number(form.category_id) || undefined,
         province_id: Number(form.province_id) || undefined,
         district_id: Number(form.district_id) || undefined,
@@ -120,7 +101,8 @@ const PublicComplaintPage = () => {
             disabled={loading || masterData.loading}
             showComplainantInfo
             showAnonymous
-            lockChannel={isCitizen}
+            showClassification={false}
+            defaultComplainantType="บุคคลธรรมดา"
           />
 
           <Divider sx={{ my: 3 }} />

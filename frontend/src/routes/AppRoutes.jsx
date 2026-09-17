@@ -74,6 +74,9 @@ const ADMIN_ROLES  = [SUPER_ADMIN, ADMIN];
 const AppRoutes = () => (
   <Suspense fallback={<LoadingSpinner fullPage />}>
   <Routes>
+    {/* หน้าแรก (/) → หน้าเริ่มต้นของประชาชน; เจ้าหน้าที่เข้าผ่าน /login หรือ /dashboard */}
+    <Route path="/" element={<Navigate to="/citizen" replace />} />
+
     {/* ── Login — standalone ──────────────────────────────────────────── */}
     <Route path="/login"         element={<LoginPage />} />
     {/* หน้าเลือกโหมดก่อนเข้าสู่ระบบ: ยื่นทันที / เข้าสู่ระบบ / ติดตามสถานะ */}
@@ -116,7 +119,6 @@ const AppRoutes = () => (
       </Route>
 
       <Route element={<AdminLayout />}>
-        <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardPage />} />
 
         {/* Complaints — staff who work on cases (executive excluded — matches backend) */}

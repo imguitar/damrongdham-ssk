@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -7,6 +7,7 @@ import CardContent from '@mui/material/CardContent';
 import CircularProgress from '@mui/material/CircularProgress';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
+import HomeIcon from '@mui/icons-material/Home';
 import SaveIcon from '@mui/icons-material/Save';
 import FileUpload from '../../components/common/FileUpload';
 import ComplaintForm from '../../components/complaints/ComplaintForm';
@@ -84,6 +85,17 @@ const PublicComplaintPage = () => {
 
   return (
     <Box maxWidth={800} mx="auto">
+      <Button
+        component={RouterLink}
+        to="/citizen"
+        variant="outlined"
+        size="small"
+        startIcon={<HomeIcon />}
+        sx={{ mb: 2 }}
+      >
+        กลับหน้าหลัก
+      </Button>
+
       <Box textAlign="center" mb={3}>
         <Typography variant="h5" fontWeight={700}>ยื่นเรื่องร้องเรียน</Typography>
         <Typography variant="body2" color="text.secondary" mt={0.5}>

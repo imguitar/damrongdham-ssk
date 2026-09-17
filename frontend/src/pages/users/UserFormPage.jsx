@@ -19,6 +19,8 @@ import ErrorAlert from '../../components/common/ErrorAlert';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import * as userApi from '../../api/userApi';
 import * as agencyApi from '../../api/agencyApi';
+import { useAuth } from '../../contexts/AuthContext';
+import { ROLES } from '../../utils/constants';
 import { alertError, alertWarning, extractError, toastSuccess } from '../../utils/alert';
 
 // Backend roles (from DB)
@@ -44,6 +46,12 @@ const UserFormPage = () => {
   const { id } = useParams();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
+  const isSelf = isEdit && String(id) === String(currentUser?.id);
+  // admin กำหนดบทบาท super_admin ไม่ได้
+  const roleOptions = currentUser?.role === ROLES.ADMIN
+    ? BACKEND_ROLES.filter((r) => r.value !== ROLES.SUPER_ADMIN)
+    : BACKEND_ROLES;
 
   const [form, setForm] = useState(EMPTY_FORM);
   const [agencies, setAgencies] = useState([]);
@@ -180,11 +188,16 @@ const UserFormPage = () => {
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth required size="small" error={Boolean(errors.role_code)}>
                 <InputLabel>บทบาท</InputLabel>
-                <Select name="role_code" value={form.role_code} label="บทบาท" onChange={handleChange} disabled={saving}>
-                  {BACKEND_ROLES.map((r) => (
+                <Select name="role_code" value={form.role_code} label="บทบาท" onChange={handleChange} disabled={saving || isSelf}>
+                  {roleOptions.map((r) => (
                     <MenuItem key={r.value} value={r.value}>{r.label} ({r.value})</MenuItem>
                   ))}
                 </Select>
+                {isSelf && (
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, ml: 1.5 }}>
+                    ไม่สามารถเปลี่ยนบทบาทของตนเองได้
+                  </Typography>
+                )}
               </FormControl>
             </Grid>
             {showAgency && (

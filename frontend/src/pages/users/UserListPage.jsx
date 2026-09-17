@@ -18,7 +18,8 @@ import ErrorAlert from '../../components/common/ErrorAlert';
 import PageHeader from '../../components/common/PageHeader';
 import * as userApi from '../../api/userApi';
 import * as agencyApi from '../../api/agencyApi';
-import { ROLE_LABELS } from '../../utils/constants';
+import { useAuth } from '../../contexts/AuthContext';
+import { ROLE_LABELS, ROLES } from '../../utils/constants';
 import { formatDateTime } from '../../utils/formatters';
 import { alertError, extractError, toastSuccess } from '../../utils/alert';
 
@@ -28,6 +29,7 @@ const ROLE_OPTIONS = Object.entries(ROLE_LABELS).map(([v, l]) => ({ value: v, la
 
 const UserListPage = () => {
   const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [agencies, setAgencies] = useState([]);
   const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 25, totalPages: 0 });
@@ -103,24 +105,33 @@ const UserListPage = () => {
       key: 'actions',
       label: '',
       width: 90,
-      render: (row) => (
-        <Box display="flex" gap={0.5}>
-          <Tooltip title="แก้ไข">
-            <IconButton size="small" onClick={(e) => { e.stopPropagation(); navigate(`/users/${row.id}/edit`); }}>
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={row.is_active ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}>
-            <IconButton
-              size="small"
-              color={row.is_active ? 'error' : 'success'}
-              onClick={(e) => { e.stopPropagation(); setToggleTarget(row); }}
-            >
-              {row.is_active ? <ToggleOffIcon fontSize="small" /> : <ToggleOnIcon fontSize="small" />}
-            </IconButton>
-          </Tooltip>
-        </Box>
-      ),
+      render: (row) => {
+        // admin จัดการบัญชี super_admin ไม่ได้ และไม่มีใครปิดใช้งานบัญชีตนเองได้ (backend บังคับซ้ำ)
+        const lockedTarget = currentUser?.role === ROLES.ADMIN && row.role_code === ROLES.SUPER_ADMIN;
+        const isSelf = String(row.id) === String(currentUser?.id);
+        return (
+          <Box display="flex" gap={0.5}>
+            {!lockedTarget && (
+              <Tooltip title="แก้ไข">
+                <IconButton size="small" onClick={(e) => { e.stopPropagation(); navigate(`/users/${row.id}/edit`); }}>
+                  <EditIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
+            {!lockedTarget && !isSelf && (
+              <Tooltip title={row.is_active ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}>
+                <IconButton
+                  size="small"
+                  color={row.is_active ? 'error' : 'success'}
+                  onClick={(e) => { e.stopPropagation(); setToggleTarget(row); }}
+                >
+                  {row.is_active ? <ToggleOffIcon fontSize="small" /> : <ToggleOnIcon fontSize="small" />}
+                </IconButton>
+              </Tooltip>
+            )}
+          </Box>
+        );
+      },
     },
   ];
 

@@ -9,7 +9,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const register = async (req, res, next) => {
   try {
-    const { email, password, full_name, phone, id_card, address } = req.body;
+    const { email, password, full_name, phone, id_card, address, consent } = req.body;
 
     if (!email || !password || !full_name) {
       return error(res, 'VALIDATION_ERROR', 'กรุณาระบุ email, password และ full_name', 400);
@@ -29,6 +29,10 @@ const register = async (req, res, next) => {
     }
     if (!isValidThaiPhone(phone)) {
       return error(res, 'VALIDATION_ERROR', 'กรุณาระบุเบอร์โทรศัพท์ให้ถูกต้อง (ขึ้นต้นด้วย 0, 9–10 หลัก)', 400);
+    }
+
+    if (consent !== true) {
+      return error(res, 'CONSENT_REQUIRED', 'กรุณายอมรับประกาศความเป็นส่วนตัวก่อนสมัครสมาชิก', 400);
     }
 
     const existing = await citizenModel.findByEmail(email);

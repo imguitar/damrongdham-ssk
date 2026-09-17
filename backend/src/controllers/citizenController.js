@@ -178,6 +178,20 @@ const completeProfile = async (req, res, next) => {
   }
 };
 
+// POST /api/citizen/consent — บัญชีเดิมที่ยังไม่เคยยอมรับประกาศความเป็นส่วนตัว
+const acceptConsent = async (req, res, next) => {
+  try {
+    if (req.body?.consent !== true) {
+      return error(res, 'CONSENT_REQUIRED', 'กรุณายอมรับประกาศความเป็นส่วนตัว', 400);
+    }
+    await citizenModel.recordConsent(req.citizen.id);
+    const citizen = await citizenModel.findById(req.citizen.id);
+    return success(res, { citizen });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // GET /api/citizen/notification-preferences
 const getNotificationPreferences = async (req, res, next) => {
   try {
@@ -205,6 +219,6 @@ const updateNotificationPreferences = async (req, res, next) => {
 };
 
 module.exports = {
-  updateProfile, completeProfile, submitComplaint, listMyComplaints, getMyComplaint, uploadAttachment,
+  updateProfile, completeProfile, acceptConsent, submitComplaint, listMyComplaints, getMyComplaint, uploadAttachment,
   getNotificationPreferences, updateNotificationPreferences,
 };

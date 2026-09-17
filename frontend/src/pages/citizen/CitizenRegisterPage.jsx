@@ -14,6 +14,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useCitizenAuth } from '../../contexts/CitizenAuthContext';
 import * as citizenApi from '../../api/citizenApi';
+import PrivacyConsentCheckbox from '../../components/citizen/PrivacyConsentCheckbox';
 import { alertError, toastSuccess } from '../../utils/alert';
 import { digitsOnly, isValidThaiIdCard, isValidThaiPhone } from '../../utils/thaiValidators';
 
@@ -23,6 +24,7 @@ const CitizenRegisterPage = () => {
   const [form, setForm] = useState({
     full_name: '', id_card: '', email: '', password: '', confirm_password: '', phone: '',
   });
+  const [consent, setConsent] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
@@ -47,6 +49,7 @@ const CitizenRegisterPage = () => {
     else if (!isValidThaiPhone(form.phone)) e.phone = 'เบอร์โทรศัพท์ไม่ถูกต้อง (ขึ้นต้นด้วย 0, 9–10 หลัก)';
     if (form.password.length < 6) e.password = 'รหัสผ่านอย่างน้อย 6 ตัวอักษร';
     if (form.password !== form.confirm_password) e.confirm_password = 'รหัสผ่านไม่ตรงกัน';
+    if (!consent) e.consent = 'กรุณายอมรับประกาศความเป็นส่วนตัวก่อนสมัครสมาชิก';
     setFieldErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -62,6 +65,7 @@ const CitizenRegisterPage = () => {
         password: form.password,
         id_card: form.id_card,
         phone: form.phone,
+        consent: true,
       });
       // Auto-login after register
       await login(form.email.trim(), form.password);
@@ -144,6 +148,14 @@ const CitizenRegisterPage = () => {
                 value={form.confirm_password} onChange={handleChange}
                 disabled={loading} size="small"
                 error={Boolean(fieldErrors.confirm_password)} helperText={fieldErrors.confirm_password}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <PrivacyConsentCheckbox
+                checked={consent}
+                onChange={(v) => { setConsent(v); setFieldErrors((p) => ({ ...p, consent: '' })); }}
+                disabled={loading}
+                error={fieldErrors.consent}
               />
             </Grid>
           </Grid>

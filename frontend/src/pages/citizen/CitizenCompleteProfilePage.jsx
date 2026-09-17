@@ -2,13 +2,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
 import CircularProgress from '@mui/material/CircularProgress';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import * as citizenApi from '../../api/citizenApi';
+import PrivacyConsentCheckbox from '../../components/citizen/PrivacyConsentCheckbox';
 import { useCitizenAuth } from '../../contexts/CitizenAuthContext';
 import { alertError, alertWarning, toastSuccess } from '../../utils/alert';
 
@@ -69,16 +68,7 @@ const CitizenCompleteProfilePage = () => {
         <TextField fullWidth label="ที่อยู่ (ไม่บังคับ)" name="address" value={form.address}
           onChange={handleChange} disabled={loading} sx={{ mb: 2 }} size="small" multiline minRows={2} />
 
-        <FormControlLabel
-          control={<Checkbox checked={consent} onChange={(e) => setConsent(e.target.checked)} disabled={loading} />}
-          label={
-            <Typography variant="body2">
-              ข้าพเจ้ายินยอมให้ศูนย์ดำรงธรรมเก็บและใช้ข้อมูลส่วนบุคคลข้างต้น
-              เพื่อการรับเรื่องร้องเรียนและติดต่อกลับ ตาม พ.ร.บ.คุ้มครองข้อมูลส่วนบุคคล
-            </Typography>
-          }
-          sx={{ alignItems: 'flex-start', mb: 2 }}
-        />
+        <PrivacyConsentCheckbox checked={consent} onChange={setConsent} disabled={loading} sx={{ mb: 2 }} />
 
         <Button type="submit" variant="contained" fullWidth size="large" disabled={loading}>
           {loading ? <CircularProgress size={22} color="inherit" /> : 'บันทึกและเข้าใช้งาน'}

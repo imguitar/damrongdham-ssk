@@ -55,6 +55,12 @@ const resolveAgencyForRole = async (roleCode, requestedAgencyId) => {
   return { agencyId: null };
 };
 
+// admin จัดการบัญชี super_admin ไม่ได้ (แก้ไข/ปิดใช้งาน/รีเซ็ตรหัสผ่าน) — กันยึดบัญชีสิทธิ์สูงกว่า
+const isForbiddenTarget = (req, target) =>
+  req.user.role === 'admin' && target.role_code === 'super_admin';
+
+const isSelf = (req) => String(req.params.id) === String(req.user.id);
+
 // GET /api/users
 const list = async (req, res, next) => {
   try {
@@ -138,6 +144,9 @@ const update = async (req, res, next) => {
   try {
     const user = await userModel.findUserById(req.params.id);
     if (!user) return error(res, 'NOT_FOUND', 'ไม่พบผู้ใช้', 404);
+    if (isForbiddenTarget(req, user)) {
+      return error(res, 'FORBIDDEN', 'ไม่มีสิทธิ์แก้ไขผู้ใช้บทบาท super_admin', 403);
+    }
 
     const { full_name, email, phone, role_id, role_code, agency_id } = req.body;
     if (!full_name || (!role_id && !role_code)) {
@@ -149,6 +158,10 @@ const update = async (req, res, next) => {
 
     if (req.user.role === 'admin' && role.code === 'super_admin') {
       return error(res, 'FORBIDDEN', 'ไม่มีสิทธิ์กำหนดบทบาท super_admin', 403);
+    }
+
+    if (isSelf(req) && role.id !== user.role_id) {
+      return error(res, 'BAD_REQUEST', 'ไม่สามารถเปลี่ยนบทบาทของตนเองได้', 400);
     }
 
     const affiliation = await resolveAgencyForRole(role.code, agency_id);
@@ -175,8 +188,14 @@ const update = async (req, res, next) => {
 const toggleStatus = async (req, res, next) => {
   try {
     // Prevent deactivating self
-    if (String(req.params.id) === String(req.user.id)) {
+    if (isSelf(req)) {
       return error(res, 'BAD_REQUEST', 'ไม่สามารถปิดใช้งานบัญชีของตนเองได้', 400);
+    }
+
+    const user = await userModel.findUserById(req.params.id);
+    if (!user) return error(res, 'NOT_FOUND', 'ไม่พบผู้ใช้', 404);
+    if (isForbiddenTarget(req, user)) {
+      return error(res, 'FORBIDDEN', 'ไม่มีสิทธิ์เปลี่ยนสถานะผู้ใช้บทบาท super_admin', 403);
     }
 
     const result = await userModel.toggleUserStatus(req.params.id);
@@ -195,6 +214,9 @@ const resetPassword = async (req, res, next) => {
   try {
     const user = await userModel.findUserById(req.params.id);
     if (!user) return error(res, 'NOT_FOUND', 'ไม่พบผู้ใช้', 404);
+    if (isForbiddenTarget(req, user)) {
+      return error(res, 'FORBIDDEN', 'ไม่มีสิทธิ์รีเซ็ตรหัสผ่านผู้ใช้บทบาท super_admin', 403);
+    }
 
     const tempPassword = generateTempPassword();
     const passwordHash = await bcrypt.hash(tempPassword, SALT_ROUNDS);

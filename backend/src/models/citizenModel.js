@@ -23,8 +23,8 @@ const findById = async (id) => {
 
 const create = async ({ email, passwordHash, fullName, phone, idCard, address }) => {
   const [result] = await pool.query(
-    `INSERT INTO citizens (email, password_hash, full_name, phone, id_card, address)
-     VALUES (?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO citizens (email, password_hash, full_name, phone, id_card, address, consent_at)
+     VALUES (?, ?, ?, ?, ?, ?, NOW())`,
     [email, passwordHash, fullName, phone || null, idCard || null, address || null]
   );
   return result.insertId;
@@ -68,13 +68,26 @@ const completeProfile = async (id, { full_name, phone, id_card, address, email }
   await pool.query(
     `UPDATE citizens
      SET full_name = ?, phone = ?, id_card = ?, address = ?, email = COALESCE(?, email),
-         is_provisional = 0, consent_at = NOW(), updated_at = NOW()
+         is_provisional = 0, consent_at = COALESCE(consent_at, NOW()), updated_at = NOW()
      WHERE id = ?`,
     [full_name, phone || null, id_card || null, address || null, email || null, id]
   );
 };
 
+// บันทึกการยอมรับประกาศความเป็นส่วนตัว — เก็บเวลาครั้งแรกไว้ ไม่เขียนทับ
+const recordConsent = async (id) => {
+  await pool.query(
+    'UPDATE citizens SET consent_at = NOW(), updated_at = NOW() WHERE id = ? AND consent_at IS NULL',
+    [id]
+  );
+};
+
+const hasConsent = async (id) => {
+  const [[row]] = await pool.query('SELECT consent_at FROM citizens WHERE id = ?', [id]);
+  return Boolean(row?.consent_at);
+};
+
 module.exports = {
   findByEmail, findById, create, getPasswordHash, updatePassword, updateLastLogin,
-  updateProfile, completeProfile, setCredentials,
+  updateProfile, completeProfile, setCredentials, recordConsent, hasConsent,
 };

@@ -40,6 +40,7 @@ export const setCredentials = (email, password) =>
 // Profile
 export const updateProfile = (data) => citizenAxios.put('/profile', data);
 export const completeProfile = (data) => citizenAxios.post('/complete-profile', data);
+export const acceptConsent = () => citizenAxios.post('/consent', { consent: true });
 
 // Notification preferences
 export const getNotificationPreferences = () => citizenAxios.get('/notification-preferences');

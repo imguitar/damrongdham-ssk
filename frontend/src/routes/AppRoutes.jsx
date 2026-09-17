@@ -48,6 +48,7 @@ import CitizenComplaintDetailPage from '../pages/citizen/CitizenComplaintDetailP
 import CitizenProfilePage         from '../pages/citizen/CitizenProfilePage';
 import CitizenNotificationSettingsPage from '../pages/citizen/CitizenNotificationSettingsPage';
 import CitizenCompleteProfilePage  from '../pages/citizen/CitizenCompleteProfilePage';
+import CitizenConsentPage          from '../pages/citizen/CitizenConsentPage';
 
 // ── Phase 11 pages (recharts-heavy) ───────────────────────────────────────────
 const DashboardPage = lazy(() => import('../pages/dashboard/DashboardPage'));
@@ -102,6 +103,7 @@ const AppRoutes = () => (
       {/* Protected citizen pages */}
       <Route element={<CitizenProtectedRoute />}>
         <Route path="/citizen/complete-profile"                    element={<CitizenCompleteProfilePage />} />
+        <Route path="/citizen/consent"                             element={<CitizenConsentPage />} />
         <Route path="/citizen/complaints"                          element={<CitizenComplaintListPage />} />
         <Route path="/citizen/complaints/new"                      element={<CitizenComplaintCreatePage />} />
         <Route path="/citizen/complaints/:tracking_code"           element={<CitizenComplaintDetailPage />} />

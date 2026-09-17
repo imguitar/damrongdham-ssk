@@ -37,19 +37,19 @@ const InfoRow = ({ label, value }) => (
 );
 
 const PublicTrackPage = () => {
-  const [complaintNumber, setComplaintNumber] = useState('');
+  const [trackingCode, setTrackingCode] = useState('');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleTrack = async () => {
-    const num = complaintNumber.trim().toUpperCase();
-    if (!num) return;
+    const code = trackingCode.trim().toUpperCase();
+    if (!code) return;
     setLoading(true);
     setError('');
     setResult(null);
     try {
-      const res = await publicApi.trackComplaint(num);
+      const res = await publicApi.trackComplaint(code);
       // API returns { data: { complaint: {...} } }
       setResult(res.data?.data?.complaint || res.data?.data);
     } catch (err) {
@@ -75,7 +75,7 @@ const PublicTrackPage = () => {
       <Box textAlign="center" mb={3}>
         <Typography variant="h5" fontWeight={700}>ติดตามสถานะเรื่องร้องเรียน</Typography>
         <Typography variant="body2" color="text.secondary" mt={0.5}>
-          กรอกเลขที่เรื่องร้องเรียนเพื่อตรวจสอบสถานะ
+          กรอกรหัสติดตาม 4 ตัวอักษรที่ได้รับหลังยื่นเรื่อง
         </Typography>
       </Box>
 
@@ -84,19 +84,19 @@ const PublicTrackPage = () => {
           <Box display="flex" gap={1}>
             <TextField
               fullWidth
-              label="เลขที่เรื่องร้องเรียน (เช่น DC-202606-0001)"
-              value={complaintNumber}
-              onChange={(e) => setComplaintNumber(e.target.value)}
+              label="รหัสติดตาม (เช่น K7P3)"
+              value={trackingCode}
+              onChange={(e) => setTrackingCode(e.target.value.replace(/[^a-z0-9]/gi, '').toUpperCase())}
               onKeyDown={(e) => e.key === 'Enter' && handleTrack()}
               disabled={loading}
               size="small"
-              inputProps={{ style: { textTransform: 'uppercase' } }}
+              inputProps={{ maxLength: 4, autoCapitalize: 'characters', style: { letterSpacing: 4, fontWeight: 600 } }}
             />
             <Button
               variant="contained"
               startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <SearchIcon />}
               onClick={handleTrack}
-              disabled={loading || !complaintNumber.trim()}
+              disabled={loading || trackingCode.length !== 4}
               sx={{ whiteSpace: 'nowrap', px: 3 }}
             >
               ค้นหา
@@ -112,7 +112,7 @@ const PublicTrackPage = () => {
           <CardContent>
             <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
               <Box>
-                <Typography variant="h6" fontWeight={700}>{result.complaint_number}</Typography>
+                <Typography variant="h6" fontWeight={700}>รหัส {result.tracking_code}</Typography>
                 <Typography variant="body2" color="text.secondary" mt={0.5}>
                   {result.title}
                 </Typography>

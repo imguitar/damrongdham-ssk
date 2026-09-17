@@ -302,6 +302,38 @@ const selfHandle = async (req, res, next) => {
   }
 };
 
+// PATCH /:id/reference-number — เลขเอกสารอ้างอิงจากระบบภายในของหน่วยงาน
+const REFERENCE_NUMBER_MAX = 100;
+const updateReferenceNumber = async (req, res, next) => {
+  try {
+    const complaint = req.complaint;
+    const value = String(req.body?.reference_number ?? '').trim();
+    if (value.length > REFERENCE_NUMBER_MAX) {
+      return error(res, 'VALIDATION_ERROR', `เลขเอกสารอ้างอิงยาวได้ไม่เกิน ${REFERENCE_NUMBER_MAX} ตัวอักษร`, 400);
+    }
+
+    await complaintModel.updateReferenceNumber(complaint.id, value || null);
+
+    writeAuditLog({
+      userId: req.user.id,
+      action: 'UPDATE_REFERENCE_NUMBER',
+      resource: 'complaints',
+      resourceId: complaint.id,
+      details: {
+        complaint_number: complaint.complaint_number,
+        from: complaint.reference_number || null,
+        to: value || null,
+      },
+      ipAddress: req.ip,
+      userAgent: req.get('user-agent'),
+    });
+
+    return success(res, { reference_number: value || null });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // DELETE /:id — super_admin only
 const remove = async (req, res, next) => {
   try {
@@ -326,4 +358,4 @@ const remove = async (req, res, next) => {
   }
 };
 
-module.exports = { list, getById, create, update, getTimeline, getUpdates, revealIdentity, screen, reject, assign, review, close, sendBack, selfHandle, remove };
+module.exports = { list, getById, create, update, updateReferenceNumber, getTimeline, getUpdates, revealIdentity, screen, reject, assign, review, close, sendBack, selfHandle, remove };

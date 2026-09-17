@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import tpl from '../src/utils/lineMessageTemplate.js';
 
-const REF = 'SSK-2569-000123';
+const REF = 'K7P3';
 
 describe('lineMessageTemplate', () => {
   it('status message contains reference, Thai status label, and detail URL', () => {
-    const msg = tpl.buildComplaintStatusMessage({ complaintNumber: REF, status: 'IN_PROGRESS' });
+    const msg = tpl.buildComplaintStatusMessage({ trackingCode: REF, status: 'IN_PROGRESS' });
     expect(msg).toContain(REF);
     expect(msg).toContain('อยู่ระหว่างดำเนินการ');
     expect(msg).toContain(`/citizen/complaints/${REF}`);
@@ -13,7 +13,7 @@ describe('lineMessageTemplate', () => {
   });
 
   it('is privacy-safe: no sensitive field labels in output', () => {
-    const msg = tpl.buildComplaintStatusMessage({ complaintNumber: REF, status: 'CLOSED' });
+    const msg = tpl.buildComplaintStatusMessage({ trackingCode: REF, status: 'CLOSED' });
     // template only receives ref + status, so PII can never leak in
     for (const forbidden of ['บัตรประชาชน', 'เลขบัตร', 'id_card', 'internal', 'ผู้ถูกร้อง']) {
       expect(msg).not.toContain(forbidden);
@@ -30,14 +30,14 @@ describe('lineMessageTemplate', () => {
       'COMPLAINT_CUSTOM_MESSAGE',
     ];
     for (const ev of events) {
-      const msg = tpl.buildByEvent(ev, { complaintNumber: REF, status: 'NEW' });
+      const msg = tpl.buildByEvent(ev, { trackingCode: REF, status: 'NEW' });
       expect(typeof msg).toBe('string');
       expect(msg).toContain(REF);
     }
   });
 
   it('buildByEvent returns null for unknown events', () => {
-    expect(tpl.buildByEvent('SOMETHING_ELSE', { complaintNumber: REF })).toBeNull();
+    expect(tpl.buildByEvent('SOMETHING_ELSE', { trackingCode: REF })).toBeNull();
   });
 
   it('statusLabel falls back to the raw code when unknown', () => {
@@ -47,7 +47,7 @@ describe('lineMessageTemplate', () => {
 
   it('custom message contains the staff text, reference, and authenticated detail URL', () => {
     const msg = tpl.buildComplaintCustomMessage({
-      complaintNumber: REF,
+      trackingCode: REF,
       customMessage: 'กรุณาติดต่อเจ้าหน้าที่กลับภายในเวลาราชการ',
     });
     expect(msg).toContain('ข้อความจากศูนย์ดำรงธรรม');
@@ -57,7 +57,7 @@ describe('lineMessageTemplate', () => {
   });
 
   it('custom message template defensively limits the staff-entered text to 1,000 characters', () => {
-    const msg = tpl.buildComplaintCustomMessage({ complaintNumber: REF, customMessage: 'ก'.repeat(1001) });
+    const msg = tpl.buildComplaintCustomMessage({ trackingCode: REF, customMessage: 'ก'.repeat(1001) });
     expect(msg).toContain('ก'.repeat(1000));
     expect(msg).not.toContain('ก'.repeat(1001));
   });

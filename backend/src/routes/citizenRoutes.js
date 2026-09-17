@@ -29,7 +29,7 @@ router.patch('/notification-preferences', citizenController.updateNotificationPr
 // Complaints
 router.post('/complaints', applyCitizenComplaintDefaults, validateComplaint, citizenController.submitComplaint);
 router.get('/complaints', citizenController.listMyComplaints);
-router.get('/complaints/:complaint_number', citizenController.getMyComplaint);
+router.get('/complaints/:tracking_code', citizenController.getMyComplaint);
 
 // Attachments
 router.post('/complaints/attachments', upload.single('file'), citizenController.uploadAttachment);

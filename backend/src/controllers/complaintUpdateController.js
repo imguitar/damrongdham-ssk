@@ -58,7 +58,6 @@ const create = async (req, res, next) => {
           eventType: 'COMPLAINT_PROGRESS_UPDATED',
           citizenId: owner.citizen_id,
           complaintId: complaint.id,
-          complaintNumber: owner.complaint_number,
           idempotencyKey: `complaint:${complaint.id}:progress:update:${id}`,
         });
       }

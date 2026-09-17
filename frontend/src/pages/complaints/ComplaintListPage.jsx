@@ -26,7 +26,7 @@ import { extractError } from '../../utils/alert';
 const WRITE_ROLES = [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.OFFICER];
 
 const FILTER_FIELDS = [
-  { key: 'search', label: 'ค้นหา (หัวเรื่อง/เลขที่)', type: 'text' },
+  { key: 'search', label: 'ค้นหา (หัวเรื่อง/เลขที่/รหัสติดตาม/เลขอ้างอิง)', type: 'text' },
   {
     key: 'status',
     label: 'สถานะ',
@@ -124,7 +124,20 @@ const ComplaintListPage = () => {
   };
 
   const columns = [
-    { key: 'complaint_number', label: 'เลขที่', width: 150 },
+    {
+      key: 'complaint_number',
+      label: 'เลขที่',
+      width: 170,
+      render: (row) => (
+        <Box>
+          <Typography variant="body2" fontWeight={500}>{row.complaint_number}</Typography>
+          <Typography variant="caption" color="text.secondary" display="block">
+            รหัส {row.tracking_code || '-'}
+            {row.reference_number ? ` · อ้างอิง ${row.reference_number}` : ''}
+          </Typography>
+        </Box>
+      ),
+    },
     {
       key: 'title',
       label: 'หัวเรื่อง',

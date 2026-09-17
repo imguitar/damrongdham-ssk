@@ -4,6 +4,8 @@ export const list = (params) => axiosInstance.get('/complaints', { params });
 export const getById = (id) => axiosInstance.get(`/complaints/${id}`);
 export const create = (data) => axiosInstance.post('/complaints', data);
 export const update = (id, data) => axiosInstance.put(`/complaints/${id}`, data);
+export const updateReferenceNumber = (id, reference_number) =>
+  axiosInstance.patch(`/complaints/${id}/reference-number`, { reference_number });
 
 // Workflow transitions
 export const screen = (id, data) => axiosInstance.patch(`/complaints/${id}/screen`, data);

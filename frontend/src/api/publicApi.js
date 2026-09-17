@@ -17,5 +17,5 @@ export const uploadAttachment = (formData) =>
   axiosInstance.post('/public/complaints/attachments', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
-export const trackComplaint = (complaint_number) =>
-  axiosInstance.get(`/public/complaints/track/${complaint_number}`);
+export const trackComplaint = (tracking_code) =>
+  axiosInstance.get(`/public/complaints/track/${encodeURIComponent(tracking_code)}`);

@@ -2,6 +2,9 @@
 
 const pool = require('../config/database');
 const { generateComplaintNumber } = require('../utils/complaintNumber');
+const { generateTrackingCode, isTrackingCodeConflict } = require('../utils/trackingCode');
+
+const MAX_TRACKING_CODE_ATTEMPTS = 20;
 
 // Replaces PII fields with null when complaint is anonymous (PD-2.1)
 const maskAnonymous = (complaint) => {
@@ -18,7 +21,7 @@ const maskAnonymous = (complaint) => {
 };
 
 const SELECT_FIELDS = `
-  c.id, c.complaint_number, c.title, c.description,
+  c.id, c.complaint_number, c.tracking_code, c.reference_number, c.title, c.description,
   c.complainant_name, c.complainant_id_card, c.complainant_phone,
   c.complainant_address, c.complainant_email, c.complainant_type_id,
   c.citizen_id, c.is_anonymous,
@@ -70,9 +73,9 @@ const create = async ({
 
     const complaintNumber = await generateComplaintNumber(conn);
 
-    const [result] = await conn.query(
+    const insert = (trackingCode) => conn.query(
       `INSERT INTO complaints (
-         complaint_number, title, description,
+         complaint_number, tracking_code, title, description,
          complainant_type_id, complainant_name, complainant_id_card,
          complainant_phone, complainant_address, complainant_email,
          citizen_id, is_anonymous,
@@ -83,7 +86,7 @@ const create = async ({
          is_overdue, escalation_level,
          created_at, updated_at
        ) VALUES (
-         ?, ?, ?,
+         ?, ?, ?, ?,
          ?, ?, ?,
          ?, ?, ?,
          ?, ?,
@@ -95,7 +98,7 @@ const create = async ({
          NOW(), NOW()
        )`,
       [
-        complaintNumber, title, description,
+        complaintNumber, trackingCode, title, description,
         complainantTypeId, complainantName || null, complainantIdCard || null,
         complainantPhone, complainantAddress || null, complainantEmail || null,
         citizenId || null, isAnonymous ? 1 : 0,
@@ -106,6 +109,16 @@ const create = async ({
         source || 'STAFF', receivedBy || null,
       ]
     );
+
+    // รหัสติดตามสุ่ม — ชนกับรหัสเดิม (unique) ให้สุ่มใหม่ (error ระดับ statement ไม่ยกเลิก transaction)
+    let result;
+    for (let attempt = 1; !result; attempt += 1) {
+      try {
+        [result] = await insert(generateTrackingCode());
+      } catch (err) {
+        if (!isTrackingCodeConflict(err) || attempt >= MAX_TRACKING_CODE_ATTEMPTS) throw err;
+      }
+    }
 
     const complaintId = result.insertId;
 
@@ -207,8 +220,10 @@ const findAll = async ({
     )`);
   }
   if (search) {
-    whereConditions.push('(c.title LIKE ? OR c.complaint_number LIKE ?)');
-    filterParams.push(`%${search}%`, `%${search}%`);
+    whereConditions.push(
+      '(c.title LIKE ? OR c.complaint_number LIKE ? OR c.tracking_code = ? OR c.reference_number LIKE ?)'
+    );
+    filterParams.push(`%${search}%`, `%${search}%`, String(search).trim().toUpperCase(), `%${search}%`);
   }
   if (date_from) { whereConditions.push('DATE(c.created_at) >= ?'); filterParams.push(date_from); }
   if (date_to) { whereConditions.push('DATE(c.created_at) <= ?'); filterParams.push(date_to); }
@@ -259,17 +274,17 @@ const findByIdUnmasked = async (id) => {
   return row || null;
 };
 
-// For public tracking — returns limited fields, no PII
-const findByNumberForTracking = async (complaintNumber) => {
+// For public tracking — returns limited fields, no PII, no internal complaint_number
+const findByTrackingCode = async (trackingCode) => {
   const [[row]] = await pool.query(
-    `SELECT c.id, c.complaint_number, c.title, c.status, c.priority,
+    `SELECT c.id, c.tracking_code, c.title, c.status, c.priority,
             c.is_overdue, c.due_date, c.created_at, c.updated_at,
             cat.name AS category_name, ch.name AS channel_name
      FROM complaints c
      LEFT JOIN complaint_categories cat ON cat.id = c.category_id
      LEFT JOIN complaint_channels ch    ON ch.id  = c.channel_id
-     WHERE c.complaint_number = ?`,
-    [complaintNumber]
+     WHERE c.tracking_code = ?`,
+    [trackingCode]
   );
   if (!row) return null;
 
@@ -313,6 +328,34 @@ const update = async (id, fields) => {
     params
   );
   return result.affectedRows > 0;
+};
+
+// เลขเอกสารอ้างอิงภายในหน่วยงาน — แก้ได้ทุกสถานะ (รวมเรื่องที่ปิดแล้ว)
+const updateReferenceNumber = async (id, referenceNumber) => {
+  const [result] = await pool.query(
+    'UPDATE complaints SET reference_number = ?, updated_at = NOW() WHERE id = ?',
+    [referenceNumber || null, id]
+  );
+  return result.affectedRows > 0;
+};
+
+// สุ่มรหัสติดตามให้เรื่องเดิมที่ยังไม่มี (เรียกตอน backend เริ่มทำงาน) — คืนจำนวนที่เติม
+const backfillTrackingCodes = async () => {
+  const [rows] = await pool.query('SELECT id FROM complaints WHERE tracking_code IS NULL');
+  for (const { id } of rows) {
+    for (let attempt = 1; ; attempt += 1) {
+      try {
+        await pool.query(
+          'UPDATE complaints SET tracking_code = ? WHERE id = ? AND tracking_code IS NULL',
+          [generateTrackingCode(), id]
+        );
+        break;
+      } catch (err) {
+        if (!isTrackingCodeConflict(err) || attempt >= MAX_TRACKING_CODE_ATTEMPTS) throw err;
+      }
+    }
+  }
+  return rows.length;
 };
 
 // Returns combined status_logs + updates sorted by created_at
@@ -367,7 +410,7 @@ const findByCitizenId = async (citizenId, { limit = 20, offset = 0 }) => {
   );
 
   const [rows] = await pool.query(
-    `SELECT c.id, c.complaint_number, c.title, c.status, c.priority,
+    `SELECT c.id, c.tracking_code, c.title, c.status, c.priority,
             c.is_anonymous, c.is_overdue, c.due_date, c.created_at, c.updated_at,
             cat.name AS category_name
      FROM complaints c
@@ -406,8 +449,10 @@ module.exports = {
   findById,
   findByNumber,
   findByIdUnmasked,
-  findByNumberForTracking,
+  findByTrackingCode,
   update,
+  updateReferenceNumber,
+  backfillTrackingCodes,
   getTimeline,
   findUpdatesByComplaintId,
   deleteById,

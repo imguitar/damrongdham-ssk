@@ -99,7 +99,7 @@ const AppRoutes = () => (
         <Route path="/citizen/complete-profile"                    element={<CitizenCompleteProfilePage />} />
         <Route path="/citizen/complaints"                          element={<CitizenComplaintListPage />} />
         <Route path="/citizen/complaints/new"                      element={<CitizenComplaintCreatePage />} />
-        <Route path="/citizen/complaints/:complaint_number"        element={<CitizenComplaintDetailPage />} />
+        <Route path="/citizen/complaints/:tracking_code"           element={<CitizenComplaintDetailPage />} />
         <Route path="/citizen/profile"                             element={<CitizenProfilePage />} />
         <Route path="/citizen/notifications"                       element={<CitizenNotificationSettingsPage />} />
         <Route path="/citizen/manual"                              element={<UserManualPage audience="citizen" />} />

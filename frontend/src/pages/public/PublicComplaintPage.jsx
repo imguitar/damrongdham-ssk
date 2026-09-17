@@ -59,7 +59,7 @@ const PublicComplaintPage = () => {
         source: 'PUBLIC',
       };
       const res = await publicApi.submitComplaint(payload);
-      const complaintNumber = res.data?.data?.complaint_number;
+      const trackingCode = res.data?.data?.tracking_code;
       const complaintId = res.data?.data?.id;
 
       if (pendingFiles.length && complaintId) {
@@ -74,7 +74,7 @@ const PublicComplaintPage = () => {
       }
 
       toastSuccess('ส่งเรื่องร้องเรียนสำเร็จ');
-      navigate('/public/success', { state: { complaint_number: complaintNumber } });
+      navigate('/public/success', { state: { tracking_code: trackingCode } });
     } catch (err) {
       alertError(err, { title: 'ส่งเรื่องร้องเรียนไม่สำเร็จ' });
     } finally {

@@ -54,8 +54,8 @@ export const unlinkLine = () => citizenAxios.delete('/line/link');
 // Complaints
 export const submitComplaint = (data) => citizenAxios.post('/complaints', data);
 export const listMyComplaints = (params) => citizenAxios.get('/complaints', { params });
-export const getMyComplaint = (complaint_number) =>
-  citizenAxios.get(`/complaints/${complaint_number}`);
+export const getMyComplaint = (tracking_code) =>
+  citizenAxios.get(`/complaints/${encodeURIComponent(tracking_code)}`);
 export const uploadAttachment = (formData) =>
   citizenAxios.post('/complaints/attachments', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },

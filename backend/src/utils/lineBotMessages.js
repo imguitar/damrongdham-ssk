@@ -262,13 +262,13 @@ const summary = (draft = {}) =>
     ]
   );
 
-const submitted = ({ complaintNumber, receivedDate }) => [
+const submitted = ({ trackingCode, receivedDate }) => [
   text(
     'ระบบได้รับเรื่องของท่านแล้ว\n\n' +
-      `เลขที่รับเรื่อง: ${complaintNumber}\n` +
+      `รหัสติดตามเรื่อง: ${trackingCode}\n` +
       `วันที่รับเรื่อง: ${receivedDate}\n` +
       'สถานะ: รับเรื่องแล้ว\n\n' +
-      'ท่านสามารถกด "ติดตามสถานะ" เพื่อตรวจสอบความคืบหน้าได้ตลอดเวลา'
+      'กรุณาเก็บรหัสนี้ไว้ ท่านสามารถกด "ติดตามสถานะ" เพื่อตรวจสอบความคืบหน้าได้ตลอดเวลา'
   ),
   mainMenu('มีเรื่องอื่นให้ช่วยเหลือเพิ่มเติมหรือไม่คะ'),
 ];
@@ -296,11 +296,11 @@ const trackList = (complaints = []) =>
   withQuickReply(
     '🔎 เรื่องร้องเรียนของท่าน\n\n' +
       complaints
-        .map((c, i) => `${i + 1}) ${c.complaint_number}\n   ${c.title}\n   สถานะ: ${statusLabel(c.status)}`)
+        .map((c, i) => `${i + 1}) รหัส ${c.tracking_code}\n   ${c.title}\n   สถานะ: ${statusLabel(c.status)}`)
         .join('\n\n') +
       '\n\nกรุณาเลือกเรื่องที่ต้องการดูรายละเอียด',
     [
-      ...complaints.slice(0, MAX_QUICK_REPLIES - 1).map((c) => qrItem(c.complaint_number, pb('track_view', { id: c.id }), c.complaint_number)),
+      ...complaints.slice(0, MAX_QUICK_REPLIES - 1).map((c) => qrItem(c.tracking_code, pb('track_view', { id: c.id }), c.tracking_code)),
       qrItem('เมนูหลัก', pb('menu')),
     ]
   );
@@ -308,14 +308,14 @@ const trackList = (complaints = []) =>
 // แสดงเฉพาะข้อมูลที่ประชาชนเห็นได้ — ไม่มีบันทึกภายใน/ชื่อผู้ถูกร้อง
 const statusDetail = ({ complaint, agencyName, publicUpdate }) =>
   mainMenu(
-    `🔎 เรื่องเลขที่ ${complaint.complaint_number}\n\n` +
+    `🔎 เรื่องรหัส ${complaint.tracking_code}\n\n` +
       `หัวข้อ: ${complaint.title}\n` +
       `สถานะล่าสุด: ${statusLabel(complaint.status)}\n` +
       `อัปเดตล่าสุด: ${complaint.updated_at_th}\n` +
       `${agencyName ? `หน่วยงานที่รับผิดชอบ: ${agencyName}\n` : ''}` +
       `${complaint.due_date_th ? `กำหนดแล้วเสร็จ: ${complaint.due_date_th}\n` : ''}` +
       `${publicUpdate ? `\nความคืบหน้า:\n${publicUpdate}\n` : ''}` +
-      `\nดูรายละเอียดเพิ่มเติม (ต้องเข้าสู่ระบบ):\n${config.frontendUrl}/citizen/complaints/${encodeURIComponent(complaint.complaint_number)}`
+      `\nดูรายละเอียดเพิ่มเติม (ต้องเข้าสู่ระบบ):\n${config.frontendUrl}/citizen/complaints/${encodeURIComponent(complaint.tracking_code)}`
   );
 
 // ── ขอข้อมูล/เอกสารเพิ่มเติม ────────────────────────────────────────────────
@@ -326,18 +326,18 @@ const infoRequestList = (requests = []) =>
   withQuickReply(
     '📎 คำขอข้อมูลเพิ่มเติมที่รอการตอบกลับ\n\n' +
       requests
-        .map((r) => `• เรื่อง ${r.complaint_number}\n  ${r.message}${r.due_date_th ? `\n  ภายในวันที่ ${r.due_date_th}` : ''}`)
+        .map((r) => `• เรื่องรหัส ${r.tracking_code}\n  ${r.message}${r.due_date_th ? `\n  ภายในวันที่ ${r.due_date_th}` : ''}`)
         .join('\n\n') +
       '\n\nกรุณาเลือกเรื่องที่ต้องการส่งข้อมูล',
     [
-      ...requests.slice(0, MAX_QUICK_REPLIES - 1).map((r) => qrItem(r.complaint_number, pb('info_reply', { id: r.id }), r.complaint_number)),
+      ...requests.slice(0, MAX_QUICK_REPLIES - 1).map((r) => qrItem(r.tracking_code, pb('info_reply', { id: r.id }), r.tracking_code)),
       qrItem('เมนูหลัก', pb('menu')),
     ]
   );
 
-const infoReplyPrompt = ({ complaintNumber, message, dueDateTh }) =>
+const infoReplyPrompt = ({ trackingCode, message, dueDateTh }) =>
   withQuickReply(
-    `📎 ส่งข้อมูลเพิ่มเติม — เรื่อง ${complaintNumber}\n\n` +
+    `📎 ส่งข้อมูลเพิ่มเติม — เรื่องรหัส ${trackingCode}\n\n` +
       `รายการที่เจ้าหน้าที่ขอ:\n${message}\n` +
       `${dueDateTh ? `\nกรุณาส่งภายในวันที่ ${dueDateTh}\n` : ''}` +
       '\nท่านสามารถพิมพ์ข้อความ หรือส่งรูปภาพ/เอกสารเข้ามาในแชตนี้ได้เลยค่ะ\nเมื่อส่งครบแล้วกด "ส่งข้อมูลเสร็จสิ้น"',
@@ -350,9 +350,9 @@ const infoReplyReceived = (count) =>
     [qrItem('✅ ส่งข้อมูลเสร็จสิ้น', pb('info_done')), NAV_CANCEL]
   );
 
-const infoReplyDone = (complaintNumber) =>
+const infoReplyDone = (trackingCode) =>
   mainMenu(
-    `ขอบคุณค่ะ ระบบได้ส่งข้อมูลเพิ่มเติมของท่านให้เจ้าหน้าที่ผู้รับผิดชอบเรื่อง ${complaintNumber} แล้ว\n` +
+    `ขอบคุณค่ะ ระบบได้ส่งข้อมูลเพิ่มเติมของท่านให้เจ้าหน้าที่ผู้รับผิดชอบเรื่องรหัส ${trackingCode} แล้ว\n` +
       'เจ้าหน้าที่จะตรวจสอบและแจ้งความคืบหน้าให้ทราบต่อไป'
   );
 

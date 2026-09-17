@@ -95,7 +95,7 @@ const recordConsent = async (citizenId) => {
 // ── ownership-checked reads ──────────────────────────────────────────────────
 const ownedComplaint = async (complaintId, citizenId) => {
   const [rows] = await pool.query(
-    `SELECT c.id, c.complaint_number, c.title, c.status, c.due_date, c.updated_at, c.closed_summary
+    `SELECT c.id, c.tracking_code, c.title, c.status, c.due_date, c.updated_at, c.closed_summary
      FROM complaints c WHERE c.id = ? AND c.citizen_id = ?`,
     [complaintId, citizenId]
   );
@@ -167,7 +167,7 @@ const runEffect = async ({ lineUserId, out, prevDraft }) => {
         await recordConsent(citizenId);
         const complaint = await intake.createComplaintFromDraft({ citizenId, draft: out.draft, lineUserId });
         out.messages = msg.submitted({
-          complaintNumber: complaint.complaint_number,
+          trackingCode: complaint.tracking_code,
           receivedDate: thDate(complaint.created_at),
         });
         await conversationModel.clear(lineUserId);
@@ -223,9 +223,9 @@ const runEffect = async ({ lineUserId, out, prevDraft }) => {
       const req = citizenId ? await infoRequestModel.findPendingForCitizen(eff.infoRequestId, citizenId) : null;
       if (!req) { out.messages = [msg.noPendingInfoRequests()]; return { persist: true }; }
       out.state = flow.S.INFO_REPLY;
-      out.context = { infoRequestId: req.id, complaintId: req.complaint_id, complaintNumber: req.complaint_number, responseCount: 0 };
+      out.context = { infoRequestId: req.id, complaintId: req.complaint_id, trackingCode: req.tracking_code, responseCount: 0 };
       out.messages = [msg.infoReplyPrompt({
-        complaintNumber: req.complaint_number,
+        trackingCode: req.tracking_code,
         message: req.message,
         dueDateTh: req.due_date ? thDate(req.due_date) : null,
       })];
@@ -287,7 +287,7 @@ const runEffect = async ({ lineUserId, out, prevDraft }) => {
         details: { complaint_id: req.complaint_id, complaint_number: req.complaint_number, items: count, channel: 'line' },
       });
 
-      out.messages = [msg.infoReplyDone(req.complaint_number)];
+      out.messages = [msg.infoReplyDone(req.tracking_code)];
       out.state = flow.S.IDLE;
       out.context = {};
       return { persist: true };

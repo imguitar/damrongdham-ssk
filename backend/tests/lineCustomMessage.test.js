@@ -70,11 +70,12 @@ describe('lineComplaintController.sendCustomMessage', () => {
 
     expect(res._state.statusCode).toBe(200);
     expect(outboxSvc.enqueue).toHaveBeenCalledTimes(1);
+    // ไม่ส่งเลขเอกสารภายในเข้าคิวข้อความถึงประชาชน
+    expect(outboxSvc.enqueue.mock.calls[0][1]).not.toHaveProperty('complaintNumber');
     expect(outboxSvc.enqueue).toHaveBeenCalledWith(null, expect.objectContaining({
       eventType: 'COMPLAINT_CUSTOM_MESSAGE',
       citizenId: 21,
       complaintId: 7,
-      complaintNumber: 'DC-TEST-0001',
       extra: { customMessage: 'กรุณาติดต่อกลับภายในเวลาราชการ' },
       idempotencyKey: expect.stringMatching(/^complaint:7:custom:11:\d{12}:[a-f0-9]{16}$/),
     }));

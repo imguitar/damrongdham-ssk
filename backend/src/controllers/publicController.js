@@ -5,6 +5,7 @@ const attachmentModel = require('../models/attachmentModel');
 const masterDataModel = require('../models/masterDataModel');
 const staffNotifier = require('../services/staffLineNotifier');
 const { success, error } = require('../utils/response');
+const { normalizeTrackingCode } = require('../utils/trackingCode');
 
 // POST /api/public/complaints — Guest submit complaint
 const submitComplaint = async (req, res, next) => {
@@ -46,12 +47,11 @@ const submitComplaint = async (req, res, next) => {
 
     staffNotifier.notifyNewComplaint(id); // staff LINE group (center)
 
-    const complaint = await complaintModel.findByNumberForTracking(
-      (await complaintModel.findById(id)).complaint_number
-    );
+    const complaint = await complaintModel.findById(id);
 
+    // ประชาชนได้รับเฉพาะรหัสติดตาม — complaint_number เป็นเลขเอกสารภายในของเจ้าหน้าที่
     return success(res, {
-      complaint_number: complaint.complaint_number,
+      tracking_code: complaint.tracking_code,
       id,
       status: 'NEW',
       message: 'ยื่นเรื่องร้องเรียนสำเร็จ',
@@ -64,10 +64,12 @@ const submitComplaint = async (req, res, next) => {
   }
 };
 
-// GET /api/public/complaints/track/:complaint_number — Public tracking
+// GET /api/public/complaints/track/:tracking_code — Public tracking (รหัสสุ่ม 4 ตัว)
 const trackComplaint = async (req, res, next) => {
   try {
-    const data = await complaintModel.findByNumberForTracking(req.params.complaint_number);
+    const code = normalizeTrackingCode(req.params.tracking_code);
+    if (!code) return error(res, 'NOT_FOUND', 'ไม่พบเรื่องร้องเรียน', 404);
+    const data = await complaintModel.findByTrackingCode(code);
     if (!data) return error(res, 'NOT_FOUND', 'ไม่พบเรื่องร้องเรียน', 404);
     return success(res, { complaint: data });
   } catch (err) {

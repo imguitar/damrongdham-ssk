@@ -125,12 +125,11 @@ const getOverview = async (req, res, next) => {
 
 // enqueue ข้อความ "ขอข้อมูลเพิ่มเติม" เข้า outbox เดิม (worker เป็นผู้ส่งจริง)
 // payload มีเฉพาะข้อความที่เจ้าหน้าที่พิมพ์ + กำหนดส่ง (ไม่มี PII ของผู้ร้อง)
-const enqueueInfoRequest = async ({ complaintId, complaintNumber, citizenId, infoRequestId, notifyCount, message, dueDate }) => {
+const enqueueInfoRequest = async ({ complaintId, citizenId, infoRequestId, notifyCount, message, dueDate }) => {
   await outboxSvc.enqueue(null, {
     eventType: 'COMPLAINT_MORE_INFO_REQUIRED',
     citizenId,
     complaintId,
-    complaintNumber,
     idempotencyKey: `complaint:${complaintId}:info_request:${infoRequestId}:notify:${notifyCount}`,
     extra: {
       requestDetail: message || null,
@@ -170,7 +169,6 @@ const createInfoRequest = async (req, res, next) => {
     if (owner.citizen_id && identity) {
       await enqueueInfoRequest({
         complaintId: complaint.id,
-        complaintNumber: owner.complaint_number,
         citizenId: owner.citizen_id,
         infoRequestId,
         notifyCount: 0,
@@ -243,7 +241,6 @@ const resendInfoRequest = async (req, res, next) => {
 
     await enqueueInfoRequest({
       complaintId: complaint.id,
-      complaintNumber: infoRequest.complaint_number,
       citizenId: infoRequest.citizen_id,
       infoRequestId: infoRequest.id,
       notifyCount: infoRequest.notify_count,
@@ -319,7 +316,6 @@ const notifyStatus = async (req, res, next) => {
       eventType,
       citizenId: owner.citizen_id,
       complaintId: complaint.id,
-      complaintNumber: owner.complaint_number,
       status: owner.status,
       idempotencyKey: `complaint:${complaint.id}:status:${owner.status}:manual:${minuteBucket}`,
     });
@@ -376,7 +372,6 @@ const sendCustomMessage = async (req, res, next) => {
       eventType: 'COMPLAINT_CUSTOM_MESSAGE',
       citizenId: owner.citizen_id,
       complaintId: complaint.id,
-      complaintNumber: owner.complaint_number,
       idempotencyKey: `complaint:${complaint.id}:custom:${req.user.id}:${minuteBucket}:${messageHash}`,
       extra: { customMessage: message },
     });

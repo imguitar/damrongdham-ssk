@@ -41,7 +41,7 @@ const findByComplaint = async (complaintId) => {
 // คำขอที่ยังรอคำตอบของ "เจ้าของเรื่อง" คนนี้เท่านั้น (ownership enforced in SQL)
 const findPendingByCitizen = async (citizenId) => {
   const [rows] = await pool.query(
-    `SELECT r.*, c.complaint_number
+    `SELECT r.*, c.complaint_number, c.tracking_code
      FROM complaint_info_requests r
      JOIN complaints c ON c.id = r.complaint_id
      WHERE c.citizen_id = ? AND r.status = 'PENDING'
@@ -54,7 +54,7 @@ const findPendingByCitizen = async (citizenId) => {
 // โหลดคำขอพร้อมตรวจสิทธิ์ในคำสั่งเดียว — คืน null ถ้าไม่ใช่เรื่องของ citizen นี้
 const findPendingForCitizen = async (id, citizenId) => {
   const [rows] = await pool.query(
-    `SELECT r.*, c.complaint_number, c.citizen_id
+    `SELECT r.*, c.complaint_number, c.tracking_code, c.citizen_id
      FROM complaint_info_requests r
      JOIN complaints c ON c.id = r.complaint_id
      WHERE r.id = ? AND c.citizen_id = ? AND r.status = 'PENDING'`,

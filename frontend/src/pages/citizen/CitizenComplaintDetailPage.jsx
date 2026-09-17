@@ -30,18 +30,18 @@ const PUBLIC_STATUS_LABELS = {
 };
 
 const CitizenComplaintDetailPage = () => {
-  const { complaint_number } = useParams();
+  const { tracking_code } = useParams();
   const navigate = useNavigate();
   const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    citizenApi.getMyComplaint(complaint_number)
+    citizenApi.getMyComplaint(tracking_code)
       .then((res) => setComplaint(res.data?.data?.complaint || res.data?.data))
       .catch(() => setError('โหลดข้อมูลไม่สำเร็จ'))
       .finally(() => setLoading(false));
-  }, [complaint_number]);
+  }, [tracking_code]);
 
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorAlert message={error} />;
@@ -53,7 +53,7 @@ const CitizenComplaintDetailPage = () => {
         <Button variant="text" startIcon={<ArrowBackIcon />} onClick={() => navigate('/citizen/complaints')}>
           กลับ
         </Button>
-        <Typography variant="h6" fontWeight={700}>{complaint.complaint_number}</Typography>
+        <Typography variant="h6" fontWeight={700}>รหัสติดตาม {complaint.tracking_code}</Typography>
         <StatusChip status={complaint.status} />
         {complaint.is_anonymous && <Chip label="ปกปิดตัวตน" size="small" color="warning" variant="outlined" />}
       </Box>

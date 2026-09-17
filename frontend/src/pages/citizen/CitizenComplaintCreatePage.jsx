@@ -86,7 +86,7 @@ const CitizenComplaintCreatePage = () => {
         subdistrict_id: Number(form.subdistrict_id) || undefined,
       };
       const res = await citizenApi.submitComplaint(payload);
-      const complaintNumber = res.data?.data?.complaint?.complaint_number;
+      const trackingCode = res.data?.data?.complaint?.tracking_code;
       const complaintId = res.data?.data?.complaint?.id;
 
       if (pendingFiles.length && complaintId) {
@@ -101,7 +101,7 @@ const CitizenComplaintCreatePage = () => {
       }
 
       toastSuccess('ส่งเรื่องร้องเรียนสำเร็จ');
-      navigate(`/citizen/complaints/${complaintNumber}`);
+      navigate(`/citizen/complaints/${trackingCode}`);
     } catch (err) {
       alertError(err, { title: 'ส่งเรื่องร้องเรียนไม่สำเร็จ' });
     } finally {

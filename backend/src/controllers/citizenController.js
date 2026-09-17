@@ -6,6 +6,7 @@ const citizenModel = require('../models/citizenModel');
 const prefModel = require('../models/notificationPrefModel');
 const staffNotifier = require('../services/staffLineNotifier');
 const { success, successList, error } = require('../utils/response');
+const { normalizeTrackingCode } = require('../utils/trackingCode');
 const { parsePagination, paginationMeta } = require('../utils/pagination');
 
 // PUT /api/citizen/profile
@@ -65,7 +66,9 @@ const submitComplaint = async (req, res, next) => {
     });
 
     staffNotifier.notifyNewComplaint(id); // staff LINE group (center)
-    const complaint = await complaintModel.findById(id);
+    const created = await complaintModel.findById(id);
+    // ไม่ส่ง complaint_number (เลขเอกสารภายใน) กลับให้ประชาชน
+    const complaint = { id, tracking_code: created.tracking_code, status: created.status };
     return success(res, { complaint }, 201);
   } catch (err) {
     if (err.code === 'ER_NO_REFERENCED_ROW_2') {
@@ -86,10 +89,11 @@ const listMyComplaints = async (req, res, next) => {
   }
 };
 
-// GET /api/citizen/complaints/:complaint_number — citizen's own complaint detail
+// GET /api/citizen/complaints/:tracking_code — citizen's own complaint detail
 const getMyComplaint = async (req, res, next) => {
   try {
-    const data = await complaintModel.findByNumberForTracking(req.params.complaint_number);
+    const code = normalizeTrackingCode(req.params.tracking_code);
+    const data = code ? await complaintModel.findByTrackingCode(code) : null;
     if (!data) return error(res, 'NOT_FOUND', 'ไม่พบเรื่องร้องเรียน', 404);
 
     // Verify this complaint belongs to the citizen

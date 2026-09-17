@@ -20,42 +20,43 @@ const STATUS_LABELS = {
 const statusLabel = (status) => STATUS_LABELS[status] || status;
 
 // Deep link — the page enforces auth + ownership again (never trust URL alone)
-const detailUrl = (complaintNumber) =>
-  `${config.frontendUrl}/citizen/complaints/${encodeURIComponent(complaintNumber)}`;
+const detailUrl = (trackingCode) =>
+  `${config.frontendUrl}/citizen/complaints/${encodeURIComponent(trackingCode)}`;
 
-const footer = (complaintNumber) => `\n\nดูรายละเอียด:\n${detailUrl(complaintNumber)}`;
+const footer = (trackingCode) => `\n\nดูรายละเอียด:\n${detailUrl(trackingCode)}`;
 
 // IMPORTANT (§18): never include ID card, health data, accused names, full
-// allegations, attachments, or internal notes — only reference number + status.
-const buildComplaintStatusMessage = ({ complaintNumber, status }) =>
-  `🔔 แจ้งความคืบหน้าเรื่องร้องเรียน\n\nเลขที่เรื่อง: ${complaintNumber}\nสถานะใหม่:\n${statusLabel(status)}` +
-  footer(complaintNumber);
+// allegations, attachments, or internal notes — only the public tracking code + status.
+// Never the internal complaint_number (staff-only document number).
+const buildComplaintStatusMessage = ({ trackingCode, status }) =>
+  `🔔 แจ้งความคืบหน้าเรื่องร้องเรียน\n\nรหัสติดตามเรื่อง: ${trackingCode}\nสถานะใหม่:\n${statusLabel(status)}` +
+  footer(trackingCode);
 
-const buildComplaintProgressMessage = ({ complaintNumber }) =>
-  `🔔 มีความคืบหน้าใหม่\n\nเลขที่เรื่อง: ${complaintNumber}\nเจ้าหน้าที่ได้อัปเดตความคืบหน้าของเรื่องท่านแล้ว` +
-  footer(complaintNumber);
+const buildComplaintProgressMessage = ({ trackingCode }) =>
+  `🔔 มีความคืบหน้าใหม่\n\nรหัสติดตามเรื่อง: ${trackingCode}\nเจ้าหน้าที่ได้อัปเดตความคืบหน้าของเรื่องท่านแล้ว` +
+  footer(trackingCode);
 
 // requestDetail = ข้อความที่เจ้าหน้าที่พิมพ์ (รายการเอกสารที่ขอ) — ส่งถึงเจ้าของเรื่องเท่านั้น
-const buildComplaintMoreInfoMessage = ({ complaintNumber, requestDetail, dueDate }) =>
-  `🔔 ศูนย์ดำรงธรรมขอข้อมูลเพิ่มเติมสำหรับเรื่อง ${complaintNumber}\n` +
+const buildComplaintMoreInfoMessage = ({ trackingCode, requestDetail, dueDate }) =>
+  `🔔 ศูนย์ดำรงธรรมขอข้อมูลเพิ่มเติมสำหรับเรื่องรหัส ${trackingCode}\n` +
   (requestDetail ? `\nรายการที่ต้องการ:\n${String(requestDetail).slice(0, 800)}\n` : '') +
   (dueDate ? `\nกรุณาส่งข้อมูลภายในวันที่ ${dueDate}\n` : '') +
   '\nกดเมนู "เพิ่มข้อมูล/เอกสาร" ในแชตนี้เพื่อส่งข้อมูลหรือเอกสารเพิ่มเติมได้ทันที' +
-  footer(complaintNumber);
+  footer(trackingCode);
 
-const buildComplaintResolvedMessage = ({ complaintNumber }) =>
-  `🔔 ดำเนินการเสร็จสิ้น\n\nเลขที่เรื่อง: ${complaintNumber}\nเรื่องของท่านได้ดำเนินการเสร็จแล้ว` +
-  footer(complaintNumber);
+const buildComplaintResolvedMessage = ({ trackingCode }) =>
+  `🔔 ดำเนินการเสร็จสิ้น\n\nรหัสติดตามเรื่อง: ${trackingCode}\nเรื่องของท่านได้ดำเนินการเสร็จแล้ว` +
+  footer(trackingCode);
 
-const buildComplaintClosedMessage = ({ complaintNumber }) =>
-  `🔔 ปิดเรื่องร้องเรียน\n\nเลขที่เรื่อง: ${complaintNumber}\nเรื่องของท่านได้รับการปิดเรียบร้อยแล้ว ขอบคุณที่ใช้บริการ` +
-  footer(complaintNumber);
+const buildComplaintClosedMessage = ({ trackingCode }) =>
+  `🔔 ปิดเรื่องร้องเรียน\n\nรหัสติดตามเรื่อง: ${trackingCode}\nเรื่องของท่านได้รับการปิดเรียบร้อยแล้ว ขอบคุณที่ใช้บริการ` +
+  footer(trackingCode);
 
 // customMessage = ข้อความที่เจ้าหน้าที่ที่มีสิทธิ์พิมพ์จากหน้าเรื่อง
 // Controller จำกัดความยาวไว้ 1,000 ตัวอักษร; slice ซ้ำเพื่อป้องกัน payload จากแหล่งอื่น
-const buildComplaintCustomMessage = ({ complaintNumber, customMessage }) =>
-  `📨 ข้อความจากศูนย์ดำรงธรรม\n\nเลขที่เรื่อง: ${complaintNumber}\n\n${String(customMessage || '').slice(0, 1000)}` +
-  footer(complaintNumber);
+const buildComplaintCustomMessage = ({ trackingCode, customMessage }) =>
+  `📨 ข้อความจากศูนย์ดำรงธรรม\n\nรหัสติดตามเรื่อง: ${trackingCode}\n\n${String(customMessage || '').slice(0, 1000)}` +
+  footer(trackingCode);
 
 // ── Staff (group) messages ────────────────────────────────────────────────────
 // Internal — may include reference/category/agency/due, but NEVER citizen PII

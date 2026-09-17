@@ -12,6 +12,11 @@ const submitLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, max: 20, keyPrefix: 'public-submit',
   message: 'ยื่นเรื่องบ่อยเกินไป กรุณาลองใหม่อีกครั้งภายหลัง',
 });
+// รหัสติดตามมีเพียง 4 ตัว — จำกัดการค้นหาเพื่อกันการสุ่มเดารหัส
+const trackLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, max: 30, keyPrefix: 'public-track',
+  message: 'ค้นหาบ่อยเกินไป กรุณาลองใหม่อีกครั้งภายหลัง',
+});
 const uploadLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, max: 60, keyPrefix: 'public-upload',
   message: 'อัปโหลดไฟล์บ่อยเกินไป กรุณาลองใหม่อีกครั้งภายหลัง',
@@ -32,6 +37,6 @@ router.post('/complaints', submitLimiter, applyCitizenComplaintDefaults, validat
 router.post('/complaints/attachments', uploadLimiter, upload.single('file'), publicController.uploadPublicAttachment);
 
 // Public complaint tracking (no auth)
-router.get('/complaints/track/:complaint_number', publicController.trackComplaint);
+router.get('/complaints/track/:tracking_code', trackLimiter, publicController.trackComplaint);
 
 module.exports = router;

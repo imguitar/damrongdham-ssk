@@ -74,7 +74,6 @@ const changeStatus = async (conn, complaintId, fromStatus, toStatus, changedBy, 
         eventType,
         citizenId: owner.citizen_id,
         complaintId,
-        complaintNumber: owner.complaint_number,
         status: toStatus,
         idempotencyKey: `complaint:${complaintId}:status:${toStatus}:log:${logResult.insertId}`,
       });

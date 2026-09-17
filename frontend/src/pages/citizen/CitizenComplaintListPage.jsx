@@ -33,7 +33,7 @@ const CitizenComplaintListPage = () => {
   useEffect(() => { load(); }, []); // eslint-disable-line
 
   const columns = [
-    { key: 'complaint_number', label: 'เลขที่', width: 160 },
+    { key: 'tracking_code', label: 'รหัสติดตาม', width: 120 },
     { key: 'title', label: 'หัวเรื่อง', render: (row) => truncate(row.title, 50) },
     { key: 'category_name', label: 'ประเภท', width: 160 },
     { key: 'status', label: 'สถานะ', width: 150, render: (row) => <StatusChip status={row.status} /> },
@@ -73,7 +73,7 @@ const CitizenComplaintListPage = () => {
           setPagination((p) => ({ ...p, limit: rpp }));
           load(1);
         }}
-        onRowClick={(row) => navigate(`/citizen/complaints/${row.complaint_number}`)}
+        onRowClick={(row) => navigate(`/citizen/complaints/${row.tracking_code}`)}
         emptyText="ยังไม่มีเรื่องร้องเรียน"
       />
     </Box>

@@ -11,7 +11,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 const PublicSuccessPage = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const complaintNumber = state?.complaint_number;
+  const trackingCode = state?.tracking_code;
 
   return (
     <Box maxWidth={600} mx="auto" mt={4}>
@@ -25,7 +25,7 @@ const PublicSuccessPage = () => {
             Sisaket E-Complaint Management System ได้รับเรื่องของท่านแล้ว
           </Typography>
 
-          {complaintNumber && (
+          {trackingCode && (
             <Box
               sx={{
                 bgcolor: 'primary.50',
@@ -36,19 +36,19 @@ const PublicSuccessPage = () => {
                 mb: 3,
               }}
             >
-              <Typography variant="caption" color="text.secondary">เลขที่เรื่องร้องเรียน</Typography>
-              <Typography variant="h4" fontWeight={700} color="primary.main" letterSpacing={2}>
-                {complaintNumber}
+              <Typography variant="caption" color="text.secondary">รหัสติดตามเรื่องร้องเรียน</Typography>
+              <Typography variant="h3" component="p" fontWeight={700} color="primary.main" letterSpacing={8}>
+                {trackingCode}
               </Typography>
               <Typography variant="body2" color="text.secondary" mt={0.5}>
-                กรุณาบันทึกเลขที่นี้ไว้เพื่อติดตามสถานะ
+                กรุณาบันทึกรหัสนี้ไว้ และไม่เปิดเผยให้ผู้อื่นทราบ
               </Typography>
             </Box>
           )}
 
           <Typography variant="body2" color="text.secondary" mb={3}>
             เจ้าหน้าที่จะดำเนินการคัดกรองและส่งต่อหน่วยงานที่เกี่ยวข้อง
-            ท่านสามารถติดตามสถานะได้ด้วยเลขที่เรื่องด้านบน
+            ท่านสามารถติดตามสถานะได้ด้วยรหัสติดตามด้านบน
           </Typography>
 
           <Box display="flex" gap={2} justifyContent="center" flexWrap="wrap">

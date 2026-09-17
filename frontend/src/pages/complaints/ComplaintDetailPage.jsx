@@ -36,6 +36,7 @@ import StatusChip from '../../components/common/StatusChip';
 import PriorityChip from '../../components/common/PriorityChip';
 import LocationMapPicker from '../../components/common/LocationMapPicker';
 import LineChannelPanel from '../../components/complaints/LineChannelPanel';
+import ComplaintReferenceBar from '../../components/complaints/ComplaintReferenceBar';
 import * as complaintApi from '../../api/complaintApi';
 import * as assignmentApi from '../../api/assignmentApi';
 import * as agencyApi from '../../api/agencyApi';
@@ -433,6 +434,11 @@ const ComplaintDetailPage = () => {
           )}
         </Box>
       </Box>
+
+      <ComplaintReferenceBar
+        complaint={complaint}
+        onUpdated={(reference_number) => setComplaint((c) => ({ ...c, reference_number }))}
+      />
 
       {/* Workflow Actions */}
       <Card sx={{ mb: 2 }}>

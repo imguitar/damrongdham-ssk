@@ -137,9 +137,12 @@ afterAll(async () => {
     complaintId = complaint.id;
 
     expect(complaint.complaint_number).toMatch(/^DC-\d{6}-\d{4}$/);
+    expect(complaint.tracking_code).toMatch(/^[A-Z2-9]{4}$/);
     expect(complaint.channel_name).toBe('LINE Official Account');
     expect(complaint.status).toBe('NEW');
-    expect(out).toContain(complaint.complaint_number);
+    // ประชาชนได้รับรหัสติดตาม — ไม่ใช่เลขเอกสารภายใน
+    expect(out).toContain(complaint.tracking_code);
+    expect(out).not.toContain(complaint.complaint_number);
     expect(out).toContain('ระบบได้รับเรื่องของท่านแล้ว');
 
     // ยินยอม privacy notice ถูกบันทึกไว้
@@ -164,11 +167,12 @@ afterAll(async () => {
 
   it('ติดตามสถานะ: เห็นเฉพาะเรื่องของบัญชี LINE ตนเอง พร้อมสถานะล่าสุด', async () => {
     const list = await send(text('ติดตามสถานะ'));
-    const [[complaint]] = await pool.query('SELECT complaint_number FROM complaints WHERE id = ?', [complaintId]);
-    expect(list).toContain(complaint.complaint_number);
+    const [[complaint]] = await pool.query('SELECT complaint_number, tracking_code FROM complaints WHERE id = ?', [complaintId]);
+    expect(list).toContain(complaint.tracking_code);
+    expect(list).not.toContain(complaint.complaint_number);
 
     const detail = await send(postback(`a=track_view&id=${complaintId}`));
-    expect(detail).toContain(complaint.complaint_number);
+    expect(detail).toContain(complaint.tracking_code);
     expect(detail).toContain('รับเรื่องเข้าระบบแล้ว');
   });
 
